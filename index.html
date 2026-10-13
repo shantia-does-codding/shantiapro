@@ -2,83 +2,82 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
     <title>Space 3D - پروژه طراحی وب</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: Tahoma, sans-serif;
-            background: #000;
-            overflow: hidden;
-        }
-        #canvas-container {
-            position: fixed;
-            top: 0; left: 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body {
             width: 100%; height: 100%;
-            z-index: 1;
+            overflow: hidden;
+            background: #000;
+            font-family: Tahoma, sans-serif;
+            touch-action: none;
         }
+        #canvas-container { position: fixed; inset: 0; z-index: 1; }
         .overlay {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
+            bottom: 24px; left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 20px 40px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 18px 32px;
             border-radius: 16px;
             text-align: center;
             color: #fff;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: calc(100% - 32px);
         }
         .overlay h1 {
-            font-size: 22px;
-            margin-bottom: 8px;
+            font-size: 20px; margin-bottom: 8px;
             background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .overlay p {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.8;
-        }
+        .overlay p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.8; }
         .hint {
-            position: fixed;
-            top: 30px;
-            right: 30px;
+            position: fixed; top: 20px; right: 20px;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px 20px;
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.7);
             font-size: 12px;
+            transition: opacity 0.5s;
         }
         .loading {
-            position: fixed;
-            top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 16px;
-            z-index: 20;
-            text-align: center;
+            color: #fff; font-size: 15px;
+            z-index: 20; text-align: center;
         }
         .loading .spinner {
-            width: 40px; height: 40px;
+            width: 38px; height: 38px;
             border: 3px solid rgba(255,255,255,0.2);
             border-top-color: #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            margin: 0 auto 14px;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .overlay { bottom: 16px; padding: 14px 22px; border-radius: 14px; }
+            .overlay h1 { font-size: 16px; }
+            .overlay p { font-size: 10px; }
+            .hint { top: 12px; right: 12px; font-size: 10px; padding: 8px 12px; }
+        }
+        @media (max-width: 360px) {
+            .overlay { padding: 12px 18px; }
+            .overlay h1 { font-size: 14px; }
+            .overlay p { font-size: 9px; }
         }
     </style>
 </head>
@@ -89,54 +88,53 @@
     </div>
 
     <div id="canvas-container"></div>
-
-    <div class="hint">🖱️ با ماوس بچرخون | 🔍 با اسکرول زوم کن</div>
+    <div class="hint" id="hint">👆 بکش تا بچرخه | 🤏 دو انگشت = زوم</div>
 
     <div class="overlay">
         <h1>🌌 فضای سه‌بعدی</h1>
-        <p>پروژه طراحی وب — ساخته شده با Three.js</p>
+        <p>پروژه طراحی وب — Three.js</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ===== Setup Scene =====
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            2000
-        );
-        camera.position.set(0, 20, 60);
+        const isMobile = window.innerWidth < 768;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+
+        let zoom = isMobile ? 90 : 60;
+        const minZoom = isMobile ? 30 : 15;
+        const maxZoom = isMobile ? 180 : 150;
+        const baseY = isMobile ? 25 : 20;
+
+        camera.position.set(0, baseY, zoom);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: !isMobile,
+            powerPreference: 'high-performance'
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // ===== Sun =====
-        const sunGeometry = new THREE.SphereGeometry(5, 64, 64);
-        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
-        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        // Sun
+        const sun = new THREE.Mesh(
+            new THREE.SphereGeometry(5, isMobile ? 32 : 64, isMobile ? 32 : 64),
+            new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+        );
         scene.add(sun);
 
-        // Sun glow
-        const glowGeometry = new THREE.SphereGeometry(6, 32, 32);
-        const glowMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffaa00,
-            transparent: true,
-            opacity: 0.2
-        });
-        const sunGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+        const sunGlow = new THREE.Mesh(
+            new THREE.SphereGeometry(6, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.2 })
+        );
         scene.add(sunGlow);
 
-        // Sun light
         const sunLight = new THREE.PointLight(0xffffff, 2, 0, 1);
-        sunLight.position.set(0, 0, 0);
         scene.add(sunLight);
         scene.add(new THREE.AmbientLight(0x404040, 1));
 
-        // ===== Planets =====
+        // Planets
         const planetsData = [
             { name: 'Mercury', color: 0xaaaaaa, size: 0.8, distance: 10, speed: 0.02 },
             { name: 'Venus',   color: 0xffcc88, size: 1.2, distance: 14, speed: 0.015 },
@@ -149,15 +147,13 @@
         ];
 
         const planets = [];
+        const segments = isMobile ? 16 : 32;
 
         planetsData.forEach(data => {
-            const geometry = new THREE.SphereGeometry(data.size, 32, 32);
-            const material = new THREE.MeshStandardMaterial({
-                color: data.color,
-                roughness: 0.7,
-                metalness: 0.3
-            });
-            const planet = new THREE.Mesh(geometry, material);
+            const planet = new THREE.Mesh(
+                new THREE.SphereGeometry(data.size, segments, segments),
+                new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.7, metalness: 0.3 })
+            );
             planet.userData = {
                 distance: data.distance,
                 speed: data.speed,
@@ -166,40 +162,32 @@
             scene.add(planet);
             planets.push(planet);
 
-            // Orbit ring
-            const ringGeometry = new THREE.RingGeometry(
-                data.distance - 0.05, data.distance + 0.05, 128
+            const ring = new THREE.Mesh(
+                new THREE.RingGeometry(data.distance - 0.05, data.distance + 0.05, 128),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffffff, side: THREE.DoubleSide,
+                    transparent: true, opacity: 0.08
+                })
             );
-            const ringMaterial = new THREE.MeshBasicMaterial({
-                color: 0xffffff,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.08
-            });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
             ring.rotation.x = Math.PI / 2;
             scene.add(ring);
 
-            // Saturn's special ring
             if (data.name === 'Saturn') {
-                const saturnRingGeo = new THREE.RingGeometry(
-                    data.size + 0.5, data.size + 1.5, 64
+                const saturnRing = new THREE.Mesh(
+                    new THREE.RingGeometry(data.size + 0.5, data.size + 1.5, 64),
+                    new THREE.MeshBasicMaterial({
+                        color: 0xeedd99, side: THREE.DoubleSide,
+                        transparent: true, opacity: 0.6
+                    })
                 );
-                const saturnRingMat = new THREE.MeshBasicMaterial({
-                    color: 0xeedd99,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const saturnRing = new THREE.Mesh(saturnRingGeo, saturnRingMat);
                 saturnRing.rotation.x = Math.PI / 2.2;
                 planet.add(saturnRing);
             }
         });
 
-        // ===== Stars =====
+        // Stars
+        const starsCount = isMobile ? 2000 : 5000;
         const starsGeometry = new THREE.BufferGeometry();
-        const starsCount = 5000;
         const starsPositions = new Float32Array(starsCount * 3);
         const starsColors = new Float32Array(starsCount * 3);
 
@@ -207,100 +195,138 @@
             const radius = 200 + Math.random() * 600;
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos((Math.random() * 2) - 1);
-
             starsPositions[i]     = radius * Math.sin(phi) * Math.cos(theta);
             starsPositions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
             starsPositions[i + 2] = radius * Math.cos(phi);
 
-            // Star color variation
-            const colorChoice = Math.random();
-            if (colorChoice < 0.7) {
-                starsColors[i] = 1; starsColors[i+1] = 1; starsColors[i+2] = 1;
-            } else if (colorChoice < 0.85) {
-                starsColors[i] = 0.7; starsColors[i+1] = 0.8; starsColors[i+2] = 1;
-            } else {
-                starsColors[i] = 1; starsColors[i+1] = 0.9; starsColors[i+2] = 0.7;
-            }
+            const c = Math.random();
+            if (c < 0.7) { starsColors[i]=1; starsColors[i+1]=1; starsColors[i+2]=1; }
+            else if (c < 0.85) { starsColors[i]=0.7; starsColors[i+1]=0.8; starsColors[i+2]=1; }
+            else { starsColors[i]=1; starsColors[i+1]=0.9; starsColors[i+2]=0.7; }
         }
 
         starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
         starsGeometry.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
-
-        const starsMaterial = new THREE.PointsMaterial({
-            size: 1.5,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.9,
-            sizeAttenuation: true
-        });
-
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({
+            size: isMobile ? 1.2 : 1.5, vertexColors: true,
+            transparent: true, opacity: 0.9, sizeAttenuation: true
+        }));
         scene.add(stars);
 
-        // ===== Mouse controls =====
+        // ===== کنترل‌ها: ماوس + لمس =====
         let mouseX = 0, mouseY = 0;
         let targetX = 0, targetY = 0;
+        let isDragging = false;
+        let lastX = 0, lastY = 0;
+        let manualRotX = 0, manualRotY = 0;
+        let targetRotX = 0, targetRotY = 0;
 
+        // ماوس
         document.addEventListener('mousemove', (e) => {
+            if (isDragging) return;
             mouseX = (e.clientX / window.innerWidth) * 2 - 1;
             mouseY = (e.clientY / window.innerHeight) * 2 - 1;
         });
-
-        // Scroll zoom
-        let zoom = 60;
         document.addEventListener('wheel', (e) => {
             zoom += e.deltaY * 0.05;
-            zoom = Math.max(15, Math.min(150, zoom));
-        });
+            zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
+        }, { passive: true });
+
+        // لمس
+        const canvas = renderer.domElement;
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                const dx = e.touches[0].clientX - lastX;
+                const dy = e.touches[0].clientY - lastY;
+                targetRotY += dx * 0.005;
+                targetRotX += dy * 0.005;
+                targetRotX = Math.max(-1, Math.min(1, targetRotX));
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+                const hint = document.getElementById('hint');
+                if (hint) hint.style.opacity = '0';
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
+
+        // Pinch zoom
+        let initialDist = 0, initialZoom = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialZoom = zoom;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                const d = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                zoom = Math.max(minZoom, Math.min(maxZoom, initialZoom * (initialDist / d)));
+            }
+        }, { passive: true });
+
+        // جلوگیری از زوم دوبار لمس iOS
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         // ===== Animation =====
         const clock = new THREE.Clock();
-
         function animate() {
             requestAnimationFrame(animate);
+            const t = clock.getElapsedTime();
 
-            const time = clock.getElapsedTime();
-
-            // Rotate stars slowly
             stars.rotation.y += 0.0001;
             stars.rotation.x += 0.00005;
 
-            // Sun pulsing
-            const pulse = 1 + Math.sin(time * 2) * 0.03;
+            const pulse = 1 + Math.sin(t * 2) * 0.03;
             sun.scale.set(pulse, pulse, pulse);
             sunGlow.scale.set(pulse, pulse, pulse);
-
-            // Sun rotation
             sun.rotation.y += 0.002;
 
-            // Planets orbit
-            planets.forEach(planet => {
-                planet.userData.angle += planet.userData.speed * 0.01;
-                planet.position.x = Math.cos(planet.userData.angle) * planet.userData.distance;
-                planet.position.z = Math.sin(planet.userData.angle) * planet.userData.distance;
-                planet.rotation.y += 0.02;
+            planets.forEach(p => {
+                p.userData.angle += p.userData.speed * 0.01;
+                p.position.x = Math.cos(p.userData.angle) * p.userData.distance;
+                p.position.z = Math.sin(p.userData.angle) * p.userData.distance;
+                p.rotation.y += 0.02;
             });
 
-            // Camera smooth follow mouse
-            targetX += (mouseX * 8 - targetX) * 0.05;
-            targetY += (-mouseY * 8 - targetY) * 0.05;
+            manualRotX += (targetRotX - manualRotX) * 0.08;
+            manualRotY += (targetRotY - manualRotY) * 0.08;
+
+            const finalX = mouseX * 8 + manualRotX * 20;
+            const finalY = -mouseY * 8 + manualRotY * 20;
+
+            targetX += (finalX - targetX) * 0.05;
+            targetY += (finalY - targetY) * 0.05;
 
             camera.position.x = targetX;
-            camera.position.y = 20 + targetY;
+            camera.position.y = baseY + targetY;
             camera.position.z = zoom;
             camera.lookAt(0, 0, 0);
 
             renderer.render(scene, camera);
         }
 
-        // ===== Resize =====
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // ===== Hide loading =====
         setTimeout(() => {
             document.getElementById('loading').style.display = 'none';
         }, 800);
@@ -308,4 +334,4 @@
         animate();
     </script>
 </body>
-</html>س
+</html>
