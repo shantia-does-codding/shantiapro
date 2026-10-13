@@ -13,6 +13,8 @@
     -webkit-user-select:none; user-select:none;
     color:#cfe3ff;
     direction:rtl;
+    touch-action:none;
+    -webkit-tap-highlight-color:transparent;
   }
   canvas { display:block; }
 
@@ -36,10 +38,20 @@
 
   #loading {
     position:fixed; inset:0; z-index:20;
-    display:flex; align-items:center; justify-content:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
     background:#000; color:#7fa8d8;
-    font-size:13px;
+    font-size:13px; gap:14px;
     transition:opacity .9s ease;
+  }
+  #loading .bar {
+    width:180px; height:2px;
+    background:rgba(90,150,255,.15);
+    border-radius:1px; overflow:hidden;
+  }
+  #loading .bar i {
+    display:block; height:100%; width:0%;
+    background:linear-gradient(90deg,#4a7ac8,#8fb8ff);
+    transition:width .3s ease;
   }
   #loading.hide { opacity:0; pointer-events:none; }
 
@@ -53,6 +65,11 @@
     direction:rtl;
   }
   #status b { color:#cfe4ff; font-weight:600; }
+  #status .tier {
+    display:inline-block; padding:1px 7px; border-radius:8px;
+    background:rgba(90,150,255,.15); color:#8fb8ff;
+    font-size:9.5px; margin-right:4px;
+  }
 
   #timebar {
     position:fixed; top:18px; left:50%; z-index:6;
@@ -77,6 +94,7 @@
     background:rgba(20,32,52,.5);
     border:1px solid rgba(90,150,255,.20);
     font-size:11px; font-weight:600;
+    -webkit-user-select:none; user-select:none;
   }
   #timebar .btn:hover {
     color:#e0ecff; border-color:rgba(160,200,255,.7);
@@ -105,6 +123,7 @@
     color:#c4d6ee;
     box-shadow:24px 0 60px rgba(0,0,0,.55);
     direction:rtl;
+    -webkit-overflow-scrolling:touch;
   }
   #info.open { transform:translateX(0); }
   #info::-webkit-scrollbar { width:6px; }
@@ -143,9 +162,7 @@
     padding:9px 0; border-bottom:1px solid rgba(90,150,255,.07); gap:14px;
   }
   #info .stat:last-child { border-bottom:none; }
-  #info .stat .k {
-    font-size:11.5px; color:#7a97be; flex-shrink:0;
-  }
+  #info .stat .k { font-size:11.5px; color:#7a97be; flex-shrink:0; }
   #info .stat .v {
     font-size:13px; color:#dae6f8; text-align:left;
     font-variant-numeric:tabular-nums; direction:ltr;
@@ -217,15 +234,16 @@
     -webkit-appearance:none; appearance:none;
     background:rgba(90,150,255,.20);
     border-radius:2px; outline:none; direction:ltr;
+    touch-action:manipulation;
   }
   #edit input[type=range]::-webkit-slider-thumb {
     -webkit-appearance:none; appearance:none;
-    width:12px; height:12px; border-radius:50%;
+    width:16px; height:16px; border-radius:50%;
     background:#8fb8ff; cursor:pointer;
     box-shadow:0 0 8px rgba(120,170,255,.6);
   }
   #edit input[type=range]::-moz-range-thumb {
-    width:12px; height:12px; border-radius:50%;
+    width:16px; height:16px; border-radius:50%;
     background:#8fb8ff; cursor:pointer; border:none;
     box-shadow:0 0 8px rgba(120,170,255,.6);
   }
@@ -236,6 +254,7 @@
     border:1px solid rgba(90,150,255,.25);
     border-radius:14px; cursor:pointer; transition:all .2s;
     font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
   }
   #edit .btn-row .action:hover {
     color:#eaf2ff; border-color:rgba(160,200,255,.8);
@@ -263,6 +282,8 @@
     backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px);
     font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
   }
   #bodies .chip:hover { color:#d8e8ff; border-color:rgba(140,190,255,.55); background:rgba(16,30,54,.85); }
   #bodies .chip.active { color:#eaf2ff; border-color:rgba(160,200,255,.85); background:rgba(30,56,96,.9); box-shadow:0 0 16px rgba(90,150,255,.35); }
@@ -288,6 +309,7 @@
     border:1px solid rgba(90,150,255,.20);
     border-radius:10px; cursor:pointer; transition:all .2s;
     font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
   }
   #spawn .preset:hover {
     color:#eaf2ff; border-color:rgba(160,200,255,.7);
@@ -304,27 +326,70 @@
     backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px);
     font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
   }
   #spawnToggle:hover { color:#eaf2ff; border-color:rgba(160,200,255,.7); background:rgba(20,40,70,.85); }
 
+  #qualityToggle {
+    position:fixed; right:20px; top:56px; z-index:7;
+    padding:6px 12px; font-size:10px;
+    color:#7a97be; background:rgba(8,16,30,.72);
+    border:1px solid rgba(90,150,255,.15);
+    border-radius:12px; cursor:pointer; transition:all .2s;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
+  }
+  #qualityToggle:hover { color:#cfe4ff; border-color:rgba(140,190,255,.5); }
+
+  /* تبلت / موبایل متوسط */
+  @media (max-width:1024px) {
+    #info { width:380px; padding:28px 22px 36px; }
+  }
   @media (max-width:820px) {
     #info { width:100vw; padding:28px 22px 36px; }
     #bodies { bottom:14px; right:14px; gap:4px; max-width:70vw; }
-    #bodies .chip { padding:6px 10px; font-size:10px; }
+    #bodies .chip { padding:7px 11px; font-size:10px; }
     #title { font-size:12px; }
-    #timebar { top:auto; bottom:76px; font-size:10px; padding:6px 12px; }
+    #timebar { top:auto; bottom:76px; font-size:10px; padding:6px 12px; gap:8px; }
+    #timebar .btn { width:30px; height:30px; font-size:12px; }
     #spawnToggle { display:none; }
-    #spawn { top:60px; right:12px; width:230px; }
-    #status { font-size:10px; }
+    #qualityToggle { top:56px; right:14px; }
+    #spawn { top:60px; right:12px; width:240px; }
+    #status { font-size:10px; top:14px; left:14px; }
+    #hud { font-size:10px; left:14px; bottom:14px; max-width:60vw; }
+    #title { top:14px; right:14px; }
+  }
+  @media (max-width:480px) {
+    #hud { display:none; }
+    #status { font-size:9.5px; }
+    #timebar .readout { min-width:80px; font-size:9.5px; }
+    #bodies .chip { padding:6px 9px; font-size:9.5px; }
+    #info h2 { font-size:22px; }
+    #info .desc { font-size:12px; line-height:1.9; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<div id="loading">در حال ساخت جهان‌ها…</div>
+<div id="loading">
+  <div>در حال ساخت جهان‌ها…</div>
+  <div class="bar"><i id="loadBar"></i></div>
+</div>
 <div id="title">منظومه شمسی — شبیه‌سازی N-Body</div>
 
 <div id="spawnToggle">+ افزودن جرم</div>
+<div id="qualityToggle">کیفیت: خودکار</div>
 
 <div id="status"></div>
 
@@ -370,6 +435,83 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+/* ═══════════════════════════════════════════════════════════
+   DEVICE PROFILE — drives every quality decision below
+   ═══════════════════════════════════════════════════════════ */
+const UA = navigator.userAgent;
+const isIOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/.test(UA);
+const isMobileUA = isIOS || isAndroid || /Mobi/.test(UA);
+const cores = navigator.hardwareConcurrency || 2;
+const memGB = navigator.deviceMemory || (isMobileUA ? 3 : 8);
+const dpr = window.devicePixelRatio || 1;
+const screenArea = window.innerWidth * window.innerHeight;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const saveData = navigator.connection && navigator.connection.saveData;
+
+// WebGL capability probe
+function probeGPU() {
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl2') || c.getContext('webgl');
+    if (!gl) return { ok:false, maxTex:0 };
+    const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const maxAniso = gl.getExtension('EXT_texture_filter_anisotropic')
+      ? gl.getParameter(gl.getExtension('EXT_texture_filter_anisotropic').MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+      : 1;
+    const lose = gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return { ok:true, maxTex, maxAniso };
+  } catch { return { ok:false, maxTex:0 }; }
+}
+const GPU = probeGPU();
+
+/* Score 0..100 → tier. Weighted so weak phones fall fast, strong desktops top out. */
+function computeTier() {
+  let score = 0;
+  score += Math.min(cores, 16) * 3.5;                 // 0..56
+  score += Math.min(memGB, 16) * 1.5;                  // 0..24
+  score += isMobileUA ? 0 : 14;
+  score += Math.min(dpr, 3) * 3;                       // 0..9
+  score += GPU.maxTex >= 8192 ? 8 : GPU.maxTex >= 4096 ? 4 : 0;
+  score += GPU.maxAniso >= 8 ? 4 : GPU.maxAniso >= 4 ? 2 : 0;
+  if (saveData) score -= 25;
+  if (reducedMotion) score -= 5;
+  return Math.max(0, Math.min(100, score));
+}
+const SCORE = computeTier();
+
+let TIER = 'high';
+if (SCORE < 30) TIER = 'minimal';
+else if (SCORE < 55) TIER = 'low';
+else if (SCORE < 78) TIER = 'medium';
+
+const PRESET = {
+  minimal: { texSize:256, segPlanet:24, segSun:32, stars:800,  starFar:false, aniso:1, shadow:false, bloom:false, bloomRes:0,   trails:180, substeps:4, dpr:1.0, cloudTex:0,   ringRes:256,  showAtmosphere:false },
+  low:     { texSize:512, segPlanet:32, segSun:48, stars:2200, starFar:true,  aniso:2, shadow:false, bloom:false, bloomRes:0,   trails:300, substeps:5, dpr:1.0, cloudTex:256, ringRes:512,  showAtmosphere:true  },
+  medium:  { texSize:768, segPlanet:48, segSun:64, stars:5000, starFar:true,  aniso:4, shadow:false, bloom:true,  bloomRes:0.6, trails:420, substeps:6, dpr:1.5, cloudTex:512, ringRes:1024, showAtmosphere:true  },
+  high:    { texSize:1024,segPlanet:72, segSun:96, stars:10000,starFar:true,  aniso:8, shadow:false, bloom:true,  bloomRes:1.0, trails:512, substeps:8, dpr:2.0, cloudTex:1024,ringRes:2048, showAtmosphere:true  },
+};
+
+let Q = PRESET[TIER];
+let qualityOverride = null;
+
+function applyQualityPreset(name) {
+  Q = PRESET[name];
+  qualityOverride = name;
+  // soft toggles only — full rebuild happens on reload for heavy items
+  renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer && composer.setSize(window.innerWidth, window.innerHeight);
+  if (bloomPass) bloomPass.enabled = Q.bloom;
+  bloom && bloomPass && (bloomPass.strength = bloom);
+  document.getElementById('qualityToggle').textContent = `کیفیت: ${name}`;
+}
+
+const tierLabel = { minimal:'حداقلی', low:'پایین', medium:'متوسط', high:'بالا' };
+
+/* ═══════════════════════════════════════════════════════════ */
 
 const G = 2.959122082855911e-4;
 const MASS_SUN = 1.0;
@@ -704,8 +846,8 @@ function normalMapFromHeight(heightTex, strength) {
   return tex;
 }
 
-function makeRingTexture(kind) {
-  const W = 2048, H = 8;
+function makeRingTexture(kind, W) {
+  const H = 8;
   const cv = createCanvas(W, H);
   const ctx = cv.getContext('2d');
   const img = ctx.createImageData(W, H);
@@ -778,6 +920,10 @@ function makeStarTexture() {
   return tex;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   داده‌ها
+   ═══════════════════════════════════════════════════════════ */
+
 const SYSTEM_OVERVIEW = {
   tag: 'نمای کلی منظومه',
   subtitle: 'مشخصات کلی و موقعیت کهکشانی',
@@ -817,10 +963,6 @@ const CONSTANTS_INFO = {
   ],
   fact: 'یک واحد نجومی، میانگین فاصله زمین تا خورشید است. نور خورشید ۸ دقیقه و ۲۰ ثانیه طول می‌کشد تا این فاصله را بپیماید.'
 };
-
-/* ═══════════════════════════════════════════════════════════
-   فضای بیرونی — داده‌های ویکی‌پدیا
-   ═══════════════════════════════════════════════════════════ */
 
 const OUTER_SPACE_INFO = {
   tag: 'فضای بیرونی',
@@ -1207,7 +1349,7 @@ const BODY_INFO = {
       ['شیب محوری','۲۸.۳۲','درجه'],
       ['قمرها','۱۶','تأیید شده'],
       ['سرعت باد','۲۱۰۰','کیلومتر بر ساعت'],
-      ['گرانش','۱۱.۱۵','متر بر مربع ثانیه']
+      ['گرانش','۱۱.۱۵','متر بر ثانیه مربع']
     ],
     bars: [['اندازه نسبی', 35], ['دمای سطح', 1], ['گرانش', 114], ['سرعت باد', 100]],
     fact: 'نپتون ۲.۶ برابر انرژی بیشتری از آنچه از خورشید دریافت می‌کند، تابش می‌کند. این گرمای داخلی همان چیزی است که سریع‌ترین بادهای منظومه شمسی را به راه می‌اندازد.'
@@ -1217,7 +1359,7 @@ const BODY_INFO = {
 const DWARF_PLANETS = {
   Ceres: { nameFa: 'سِرِس', location: 'کمربند سیارک‌ها', diameter: '۹۳۹ کیلومتر', period: '۴.۶۰ سال' },
   Pluto: { nameFa: 'پلوتو', location: 'کمربند کویپر', diameter: '۲٬۳۷۷ کیلومتر', period: '۲۴۸ سال' },
-  Haumea: { nameFa: 'هاومیا', location: 'کمربند کویپر', diameter: '۱٬۶۳۲ کیلومتر', period: '۲۸۵ سال' },
+  Haumea: { nameFa: 'هائومیا', location: 'کمربند کویپر', diameter: '۱٬۶۳۲ کیلومتر', period: '۲۸۵ سال' },
   Makemake: { nameFa: 'ماکی‌ماکی', location: 'کمربند کویپر', diameter: '۱٬۴۳۰ کیلومتر', period: '۳۰۹ سال' },
   Eris: { nameFa: 'اریس', location: 'قرص پراکنده', diameter: '۲٬۳۲۶ کیلومتر', period: '۵۵۸ سال' }
 };
@@ -1238,20 +1380,36 @@ const BODY_NAME_FA = {
   __outerspace: 'فضای بیرونی'
 };
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', logarithmicDepthBuffer: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+/* ═══════════════════════════════════════════════════════════
+   RENDERER
+   ═══════════════════════════════════════════════════════════ */
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: SCORE > 55,
+  powerPreference: 'high-performance',
+  logarithmicDepthBuffer: true,
+  alpha: false,
+  stencil: false,
+  depth: true
+});
+renderer.setPixelRatio(Math.min(dpr, Q.dpr));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 document.body.appendChild(renderer.domElement);
-maxAniso = renderer.capabilities.getMaxAnisotropy();
+maxAniso = Math.min(GPU.maxAniso, Q.aniso);
 
 const scene = new THREE.Scene();
 const sceneRoot = new THREE.Group();
 scene.add(sceneRoot);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.001, 40000);
+const camera = new THREE.PerspectiveCamera(
+  55,
+  window.innerWidth / window.innerHeight,
+  0.001,
+  40000
+);
 camera.position.set(0, 42, 96);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -1264,14 +1422,27 @@ controls.minDistance     = 0.05;
 controls.maxDistance     = 1400;
 controls.screenSpacePanning = true;
 controls.target.set(0, 0, 0);
+controls.touches = {
+  ONE: THREE.TOUCH.ROTATE,
+  TWO: THREE.TOUCH.DOLLY_PAN
+};
 
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  0.62, 0.55, 0.22
-);
-composer.addPass(bloom);
+let composer = null;
+let bloomPass = null;
+let bloom = 0.62;
+
+if (Q.bloom) {
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(
+      Math.max(64, window.innerWidth * Q.bloomRes),
+      Math.max(64, window.innerHeight * Q.bloomRes)
+    ),
+    bloom, 0.55, 0.22
+  );
+  composer.addPass(bloomPass);
+}
 
 const sunLight = new THREE.PointLight(0xfff4e4, 4.2, 0, 0);
 scene.add(sunLight);
@@ -1317,29 +1488,63 @@ function makeStars(count, radiusMin, radiusMax, size, opacity) {
   return pts;
 }
 
-makeStars(9000, 8000, 12000, 2.6, 0.92);
-makeStars(1200, 7000, 11000, 5.5, 1.0);
+const nearStars = makeStars(Math.max(400, Q.stars * 0.9), 8000, 12000, 2.6, 0.92);
+const farStars = Q.starFar
+  ? makeStars(Math.max(200, Q.stars * 0.15), 7000, 11000, 5.5, 1.0)
+  : null;
 
-const TEX = {
-  mercury: buildTexture(1024, 512, SAMPLERS.mercury),
-  venus:   buildTexture(1024, 512, SAMPLERS.venus),
-  earth:   buildTexture(1024, 512, SAMPLERS.earth),
-  clouds:  buildTexture(1024, 512, SAMPLERS.clouds),
-  mars:    buildTexture(1024, 512, SAMPLERS.mars),
-  jupiter: buildTexture(1024, 512, SAMPLERS.jupiter),
-  saturn:  buildTexture(1024, 512, SAMPLERS.saturn),
-  uranus:  buildTexture(1024, 512, SAMPLERS.uranus),
-  neptune: buildTexture(1024, 512, SAMPLERS.neptune),
-  moon:    buildTexture(512, 256, SAMPLERS.moon),
-  sun:     buildTexture(1024, 512, SAMPLERS.sun)
+const setLoad = (p) => {
+  const bar = document.getElementById('loadBar');
+  if (bar) bar.style.width = p + '%';
 };
 
-const earthHeight = buildHeightMap(1024, 512, SAMPLERS.earthBump);
-const NORMALS = { earth: normalMapFromHeight(earthHeight, 3.2) };
+let TEX = {};
+let NORMALS = {};
+let earthHeight = null;
+let ringTexMain = null;
+let ringTexThin = null;
+let glowTex = null;
 
-const ringTexMain = makeRingTexture('main');
-const ringTexThin = makeRingTexture('thin');
-const glowTex = makeGlowTexture(512);
+async function buildAssetsAsync() {
+  setLoad(5);
+  await new Promise(r => requestAnimationFrame(r));
+
+  const SZ = Q.texSize;
+  const YSZ = Math.round(SZ / 2);
+
+  const order = [
+    'mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','sun','moon'
+  ];
+
+  for (let i = 0; i < order.length; i++) {
+    const key = order[i];
+    const w = key === 'moon' ? Math.round(SZ / 2) : SZ;
+    const h = key === 'moon' ? Math.round(YSZ / 2) : YSZ;
+    TEX[key] = buildTexture(w, h, SAMPLERS[key]);
+    setLoad(5 + (i + 1) / (order.length + 3) * 85);
+    await new Promise(r => requestAnimationFrame(r));
+  }
+
+  if (Q.cloudTex > 0) {
+    TEX.clouds = buildTexture(Q.cloudTex, Q.cloudTex / 2, SAMPLERS.clouds);
+  }
+  setLoad(91);
+  await new Promise(r => requestAnimationFrame(r));
+
+  earthHeight = buildHeightMap(
+    Math.min(SZ, 768),
+    Math.min(YSZ, 384),
+    SAMPLERS.earthBump
+  );
+  NORMALS.earth = normalMapFromHeight(earthHeight, 3.2);
+  setLoad(95);
+  await new Promise(r => requestAnimationFrame(r));
+
+  ringTexMain = makeRingTexture('main', Q.ringRes);
+  ringTexThin = makeRingTexture('thin', Math.round(Q.ringRes / 2));
+  glowTex     = makeGlowTexture(SCORE > 55 ? 512 : 256);
+  setLoad(100);
+}
 
 const bodies = [];
 const bodyByName = Object.create(null);
@@ -1372,7 +1577,7 @@ class Body {
 
     if (this.isSun) {
       this.mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(r, 96, 64),
+        new THREE.SphereGeometry(r, Q.segSun, Math.round(Q.segSun * 0.66)),
         new THREE.MeshBasicMaterial({ map: TEX.sun })
       );
       this.group.add(this.mesh);
@@ -1407,14 +1612,22 @@ class Body {
       matOpts.roughness = 0.78;
     }
 
-    const seg = r > 2 ? 96 : 72;
-    this.mesh = new THREE.Mesh(new THREE.SphereGeometry(r, seg, seg / 1.5), new THREE.MeshStandardMaterial(matOpts));
+    const seg = Math.round(
+      r > 2 ? Q.segPlanet :
+      r > 1 ? Q.segPlanet :
+      Math.max(16, Math.round(Q.segPlanet * 0.7))
+    );
+
+    this.mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(r, seg, Math.round(seg / 1.5)),
+      new THREE.MeshStandardMaterial(matOpts)
+    );
     this.mesh.userData.body = this;
     tiltGroup.add(this.mesh);
 
-    if (this.hasClouds) {
+    if (this.hasClouds && TEX.clouds) {
       this.cloudMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(r * 1.020, 72, 48),
+        new THREE.SphereGeometry(r * 1.020, seg, Math.round(seg / 1.5)),
         new THREE.MeshStandardMaterial({
           map: TEX.clouds, transparent: true, depthWrite: false,
           roughness: 1.0, metalness: 0.0
@@ -1423,11 +1636,12 @@ class Body {
       tiltGroup.add(this.cloudMesh);
     }
 
-    if (this.hasRings) {
+    if (this.hasRings && ringTexMain) {
       const isMain = this.hasRings === 'main';
       const inner = isMain ? r * 1.30 : r * 1.55;
       const outer = isMain ? r * 2.35 : r * 1.92;
-      const geo = new THREE.RingGeometry(inner, outer, 256, 1);
+      const ringSegs = SCORE > 55 ? 256 : 128;
+      const geo = new THREE.RingGeometry(inner, outer, ringSegs, 1);
       const pos = geo.attributes.position;
       const uv  = geo.attributes.uv;
       const v   = new THREE.Vector3();
@@ -1539,22 +1753,21 @@ function initBodies() {
   bodyByName['Moon'] = moon;
 }
 
-initBodies();
-for (const b of bodies) b.setScenePosition();
-
 const orbitTrails = new Map();
-for (const b of bodies) {
-  if (b.isSun) continue;
-  if (b.name === 'Moon') continue;
-  const geo = new THREE.BufferGeometry();
-  const positions = new Float32Array(512 * 3);
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geo.setDrawRange(0, 0);
-  const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
-    color: 0x3a6a9a, transparent: true, opacity: 0.28
-  }));
-  sceneRoot.add(line);
-  orbitTrails.set(b, { line, positions, count: 0, head: 0, maxPoints: 512 });
+function buildTrails() {
+  for (const b of bodies) {
+    if (b.isSun) continue;
+    if (b.name === 'Moon') continue;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(Q.trails * 3);
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setDrawRange(0, 0);
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+      color: 0x3a6a9a, transparent: true, opacity: 0.28
+    }));
+    sceneRoot.add(line);
+    orbitTrails.set(b, { line, positions, count: 0, head: 0, maxPoints: Q.trails });
+  }
 }
 
 const _acc = [];
@@ -1584,12 +1797,13 @@ function computeAccelerations() {
 }
 
 const _oldAcc = [];
+let adaptiveSubsteps = Q.substeps;
 
 function stepPhysics(dtDays) {
   const n = bodies.length;
   while (_oldAcc.length < n) _oldAcc.push(new THREE.Vector3());
 
-  const substeps = 8;
+  const substeps = adaptiveSubsteps;
   const h = dtDays / substeps;
 
   for (let s = 0; s < substeps; s++) {
@@ -1668,13 +1882,13 @@ const btnFaster = document.getElementById('btnFaster');
 const spawnPanel = document.getElementById('spawn');
 const spawnToggle = document.getElementById('spawnToggle');
 const presetRow = document.getElementById('presetRow');
+const qualityToggle = document.getElementById('qualityToggle');
 
 const BODY_ORDER = ['Sun', 'Mercury', 'Venus', 'Earth', 'Moon', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
 
 function buildChips() {
   bodiesEl.innerHTML = '';
 
-  /* فضای بیرونی — اولین چیپ */
   const outerspaceChip = document.createElement('div');
   outerspaceChip.className = 'chip';
   outerspaceChip.dataset.body = '__outerspace';
@@ -1730,7 +1944,6 @@ function buildChips() {
     bodiesEl.appendChild(chip);
   }
 }
-buildChips();
 
 function formatNumber(n, digits = 3) {
   if (!isFinite(n)) return '—';
@@ -2132,14 +2345,14 @@ function spawnBody(preset) {
   bodyByName[name] = body;
 
   const geo = new THREE.BufferGeometry();
-  const positions = new Float32Array(512 * 3);
+  const positions = new Float32Array(Q.trails * 3);
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geo.setDrawRange(0, 0);
   const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
     color: 0x5a90c8, transparent: true, opacity: 0.35
   }));
   sceneRoot.add(line);
-  orbitTrails.set(body, { line, positions, count: 0, head: 0, maxPoints: 512 });
+  orbitTrails.set(body, { line, positions, count: 0, head: 0, maxPoints: Q.trails });
 
   buildChips();
   selectBody(name);
@@ -2154,13 +2367,15 @@ const SPAWN_PRESETS = [
   { name: 'غول یخی', radiusScene: 1.3, mass: 4e-5, texKey: 'uranus',  label: 'غول یخی', hasRings: 'thin' }
 ];
 
-SPAWN_PRESETS.forEach(p => {
-  const btn = document.createElement('div');
-  btn.className = 'preset';
-  btn.textContent = p.label;
-  btn.addEventListener('click', () => spawnBody(p));
-  presetRow.appendChild(btn);
-});
+function buildSpawnPresets() {
+  SPAWN_PRESETS.forEach(p => {
+    const btn = document.createElement('div');
+    btn.className = 'preset';
+    btn.textContent = p.label;
+    btn.addEventListener('click', () => spawnBody(p));
+    presetRow.appendChild(btn);
+  });
+}
 
 spawnToggle.addEventListener('click', () => {
   spawnPanel.classList.toggle('open');
@@ -2291,14 +2506,17 @@ function updateFollow(dt) {
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let downXY = { x: 0, y: 0 };
+let multiTouch = false;
 
 renderer.domElement.addEventListener('pointerdown', (e) => {
   downXY.x = e.clientX;
   downXY.y = e.clientY;
   zoomTween = null;
+  multiTouch = false;
 });
 
 renderer.domElement.addEventListener('pointerup', (e) => {
+  if (multiTouch) return;
   if (Math.hypot(e.clientX - downXY.x, e.clientY - downXY.y) > 6) return;
 
   const rect = renderer.domElement.getBoundingClientRect();
@@ -2320,14 +2538,70 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   deselect();
 });
 
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 1) multiTouch = true;
+}, { passive: true });
+
 renderer.domElement.addEventListener('wheel', () => { zoomTween = null; }, { passive: true });
+
+/* ─── adaptive quality controller ─── */
+let frameTimes = [];
+let qualityAutoDisabled = false;
+let currentAutoLevel = 0;
+
+function adaptQuality() {
+  if (qualityOverride || qualityAutoDisabled) return;
+  const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+  const fps = 1000 / avg;
+
+  if (fps < 24 && currentAutoLevel > -2) {
+    currentAutoLevel--;
+    if (currentAutoLevel === -1) {
+      // drop shadow/probe first: turn off bloom if on
+      if (bloomPass) bloomPass.enabled = false;
+      renderer.setPixelRatio(Math.min(dpr, Math.max(0.75, Q.dpr - 0.25)));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    } else if (currentAutoLevel === -2) {
+      // physics substeps
+      adaptiveSubsteps = Math.max(3, Q.substeps - 2);
+      renderer.setPixelRatio(Math.min(dpr, Math.max(0.65, Q.dpr - 0.5)));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    frameTimes = [];
+  } else if (fps > 55 && currentAutoLevel < 0) {
+    currentAutoLevel++;
+    if (currentAutoLevel === -1) {
+      adaptiveSubsteps = Q.substeps;
+    } else if (currentAutoLevel === 0) {
+      renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+      if (bloomPass) bloomPass.enabled = Q.bloom;
+    }
+    frameTimes = [];
+  }
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(dpr, Q.dpr));
   renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
+  if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+  if (bloomPass) bloomPass.resolution.set(
+    Math.max(64, window.innerWidth * Q.bloomRes),
+    Math.max(64, window.innerHeight * Q.bloomRes)
+  );
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    paused = true;
+    btnPause.classList.add('paused');
+    updateTimeReadout();
+  }
 });
 
 let frameCounter = 0;
@@ -2354,7 +2628,9 @@ function updateStatus(dt) {
     }
   }
 
+  const tierClass = TIER;
   statusEl.innerHTML =
+    `<span class="tier">${tierLabel[tierClass]}</span><br>` +
     `<b>${toFa(bodies.length)}</b> جسم<br>` +
     `<b>${toFa(fpsDisplay.toFixed(0))}</b> فریم بر ثانیه<br>` +
     `انرژی <b>${toFa(energy.toExponential(3))}</b>`;
@@ -2389,6 +2665,12 @@ function animate() {
   requestAnimationFrame(animate);
 
   const dt = Math.min(clock.getDelta(), 0.05);
+  const dtMs = dt * 1000;
+
+  frameTimes.push(dtMs);
+  if (frameTimes.length > 45) frameTimes.shift();
+  if (frameTimes.length === 45) adaptQuality();
+
   const dtDays = paused ? 0 : dt * timeScale * DAYS_PER_SECOND_AT_1X;
 
   if (dtDays > 0) {
@@ -2408,7 +2690,9 @@ function animate() {
   if (dtDays > 0) updateTrails();
 
   updateStatus(dt);
-  composer.render();
+
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
 
   if (firstFrame) {
     firstFrame = false;
@@ -2420,7 +2704,36 @@ function animate() {
   }
 }
 
-animate();
+/* ─── boot ─── */
+buildAssetsAsync().then(() => {
+  initBodies();
+  for (const b of bodies) b.setScenePosition();
+  buildTrails();
+  buildChips();
+  buildSpawnPresets();
+
+  qualityToggle.textContent = qualityOverride
+    ? `کیفیت: ${qualityOverride}`
+    : `کیفیت: خودکار · ${tierLabel[TIER]}`;
+
+  qualityToggle.addEventListener('click', () => {
+    const cycle = ['minimal', 'low', 'medium', 'high'];
+    const cur = qualityOverride || TIER;
+    const idx = cycle.indexOf(cur);
+    const next = cycle[(idx + 1) % cycle.length];
+    if (next === TIER) {
+      qualityOverride = null;
+      qualityAutoDisabled = false;
+      document.getElementById('qualityToggle').textContent = `کیفیت: خودکار · ${tierLabel[TIER]}`;
+      applyQualityPreset(TIER);
+    } else {
+      applyQualityPreset(next);
+      qualityAutoDisabled = true;
+    }
+  });
+
+  animate();
+});
 </script>
 </body>
 </html>
