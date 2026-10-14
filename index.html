@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>لیونل مسی — بزغاله</title>
-<meta name="description" content="لیونل آندرس مسی — ۸ توپ طلا، جام جهانی ۲۰۲۲، ۴۷ جام. سایت هواداری نهایی.">
+<meta name="description" content="لیونل آندرس مسی — ۸ توپ طلا، جام جهانی ۲۰۲۲، ۴۷ جام.">
 <meta name="theme-color" content="#050810">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,6 @@
   :root {
     --bg:        #050810;
     --bg-2:      #0a1020;
-    --panel:     rgba(14, 22, 40, 0.6);
     --line:      rgba(120, 160, 255, 0.14);
     --line-hi:   rgba(120, 160, 255, 0.45);
     --text:      #e8eefc;
@@ -42,7 +41,6 @@
     overflow-x: hidden;
     direction: rtl;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
   body.menu-open { overflow: hidden; }
   img { max-width:100%; height:auto; display:block; }
@@ -52,7 +50,6 @@
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: #0a1020; }
   ::-webkit-scrollbar-thumb { background: rgba(120,160,255,0.28); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(120,160,255,0.5); }
 
   .aura {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -62,7 +59,6 @@
       radial-gradient(ellipse 900px 700px at 50% 100%, rgba(165, 0, 68, 0.06), transparent 60%);
   }
 
-  /* ───── Nav ───── */
   nav.top {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     padding: 14px 28px;
@@ -76,7 +72,7 @@
   nav.top.scrolled { background: rgba(5, 8, 16, 0.94); }
   .brand {
     display: flex; align-items: center; gap: 12px;
-    font-weight: 800; font-size: 14px; letter-spacing: 0.5px;
+    font-weight: 800; font-size: 14px;
   }
   .brand .mark {
     width: 34px; height: 34px; border-radius: 50%;
@@ -94,14 +90,8 @@
     display: flex; gap: 22px; align-items: center;
     font-size: 13px; color: var(--text-dim); font-weight: 500;
   }
-  .nav-links a { transition: color .2s; position: relative; }
-  .nav-links a::after {
-    content: ''; position: absolute; bottom: -5px; right: 0; left: 0;
-    height: 1px; background: var(--gold);
-    transform: scaleX(0); transform-origin: right; transition: transform .3s;
-  }
+  .nav-links a { transition: color .2s; }
   .nav-links a:hover { color: var(--text); }
-  .nav-links a:hover::after { transform: scaleX(1); }
 
   .menu-btn {
     display: none; width: 40px; height: 40px;
@@ -111,7 +101,6 @@
   }
   .menu-btn svg { width: 20px; height: 20px; }
 
-  /* ───── Hero ───── */
   .hero {
     position: relative; min-height: 100vh;
     display: flex; align-items: center;
@@ -123,13 +112,6 @@
     background:
       radial-gradient(ellipse 900px 700px at 30% 40%, rgba(117, 199, 245, 0.18), transparent 65%),
       radial-gradient(ellipse 700px 600px at 85% 80%, rgba(245, 197, 24, 0.10), transparent 60%);
-  }
-  .hero-stripes {
-    position: absolute; inset: 0; z-index: 0; opacity: 0.05; pointer-events: none;
-    background: repeating-linear-gradient(
-      115deg, transparent 0, transparent 44px,
-      var(--argentina) 44px, var(--argentina) 46px
-    );
   }
   .hero-grid {
     position: relative; z-index: 2;
@@ -150,21 +132,11 @@
     color: var(--sky-2); font-size: 12px; font-weight: 600;
     margin-bottom: 28px;
   }
-  .eyebrow::before {
-    content: ''; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); box-shadow: 0 0 12px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: .5; transform: scale(1.3); }
-  }
   .hero-title {
     font-family: var(--font-display);
     font-weight: 400;
     font-size: clamp(64px, 11vw, 156px);
     line-height: 0.92;
-    letter-spacing: -0.01em;
     margin-bottom: 8px;
     background: linear-gradient(180deg, #ffffff 0%, #a8c8ff 60%, #75a9f5 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -182,7 +154,7 @@
     display: inline-flex; align-items: center; gap: 10px;
     padding: 14px 26px; border-radius: 999px;
     font-size: 13.5px; font-weight: 600;
-    transition: all .25s cubic-bezier(.2,.8,.2,1);
+    transition: all .25s;
     border: 1px solid transparent;
     font-family: var(--font);
   }
@@ -191,10 +163,6 @@
     color: #050810;
     box-shadow: 0 12px 32px rgba(117, 199, 245, 0.35);
   }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 44px rgba(117, 199, 245, 0.5);
-  }
   .btn-ghost {
     border-color: var(--line-hi);
     color: var(--text);
@@ -202,7 +170,6 @@
   .btn-ghost:hover {
     border-color: var(--gold);
     color: var(--gold-2);
-    background: rgba(245, 197, 24, 0.05);
   }
 
   .hero-portrait {
@@ -210,14 +177,12 @@
     aspect-ratio: 3 / 4;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.6),
-                0 0 0 1px rgba(255,255,255,0.05) inset;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
     animation: rise 1.2s cubic-bezier(.2,.8,.2,1) .15s both;
     background: #0a1020;
   }
   .hero-portrait img {
     width: 100%; height: 100%; object-fit: cover;
-    filter: contrast(1.08) saturate(1.05);
   }
   .hero-portrait::before {
     content: ''; position: absolute; inset: 0; z-index: 1;
@@ -231,7 +196,7 @@
   }
   .hero-badge .num {
     font-family: var(--font-display);
-    font-size: 72px; font-weight: 400; line-height: 1;
+    font-size: 72px; line-height: 1;
     color: var(--gold-2);
     text-shadow: 0 4px 30px rgba(245,197,24,0.6);
   }
@@ -241,14 +206,11 @@
     color: var(--sky-2); font-weight: 600;
   }
 
-  /* ───── Ticker ───── */
   .ticker {
     position: relative; z-index: 2;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     background: rgba(10, 16, 30, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     overflow: hidden;
   }
   .ticker-track {
@@ -257,15 +219,13 @@
     animation: scroll 40s linear infinite;
     white-space: nowrap;
   }
-  .ticker-track:hover { animation-play-state: paused; }
   @keyframes scroll {
     from { transform: translateX(0); }
     to   { transform: translateX(50%); }
   }
   .ticker-item {
     display: inline-flex; align-items: center; gap: 12px;
-    font-size: 14px; font-weight: 500;
-    color: var(--text-dim);
+    font-size: 14px; color: var(--text-dim);
     flex-shrink: 0;
   }
   .ticker-item .dot {
@@ -274,7 +234,6 @@
   }
   .ticker-item strong { color: var(--text); font-weight: 700; font-size: 17px; }
 
-  /* ───── Sections ───── */
   section { position: relative; z-index: 2; padding: 110px 32px; }
   .wrap { max-width: 1400px; margin: 0 auto; }
   .section-eyebrow {
@@ -295,7 +254,6 @@
     margin-bottom: 60px;
   }
 
-  /* ───── Numbers ───── */
   .numbers {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -308,14 +266,11 @@
   .num-card {
     background: var(--bg-2);
     padding: 40px 28px;
-    position: relative;
-    transition: background .3s;
   }
-  .num-card:hover { background: rgba(20, 30, 55, 0.8); }
   .num-card .value {
     font-family: var(--font-display);
     font-size: clamp(52px, 6vw, 78px);
-    font-weight: 400; line-height: 1;
+    line-height: 1;
     background: linear-gradient(180deg, #fff 0%, var(--gold) 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     margin-bottom: 12px;
@@ -333,11 +288,7 @@
     text-align: right;
   }
 
-  /* ───── Timeline ───── */
-  .timeline {
-    position: relative;
-    padding-right: 40px;
-  }
+  .timeline { position: relative; padding-right: 40px; }
   .timeline::before {
     content: ''; position: absolute;
     top: 20px; bottom: 20px; right: 14px;
@@ -362,10 +313,10 @@
     box-shadow: 0 0 20px var(--sky);
     z-index: 2;
   }
-  .tl-item[data-era="barca"]::before { border-color: var(--barca); box-shadow: 0 0 20px var(--barca); }
-  .tl-item[data-era="psg"]::before   { border-color: var(--psg);   box-shadow: 0 0 20px var(--psg); }
-  .tl-item[data-era="miami"]::before { border-color: var(--miami); box-shadow: 0 0 20px var(--miami); }
-  .tl-item[data-era="arg"]::before   { border-color: var(--argentina); box-shadow: 0 0 20px var(--argentina); }
+  .tl-item[data-era="barca"]::before { border-color: var(--barca); }
+  .tl-item[data-era="psg"]::before   { border-color: var(--psg); }
+  .tl-item[data-era="miami"]::before { border-color: var(--miami); }
+  .tl-item[data-era="arg"]::before   { border-color: var(--argentina); }
 
   .tl-media {
     position: relative; aspect-ratio: 4 / 3;
@@ -375,19 +326,14 @@
   }
   .tl-media img {
     width: 100%; height: 100%; object-fit: cover;
-    transition: transform .6s cubic-bezier(.2,.8,.2,1);
+    transition: transform .6s;
   }
   .tl-item:hover .tl-media img { transform: scale(1.05); }
-  .tl-media::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(5,8,16,0.7));
-    pointer-events: none;
-  }
 
   .tl-year {
     display: inline-block;
     font-family: var(--font-display);
-    font-size: 15px; font-weight: 400;
+    font-size: 15px;
     padding: 6px 16px;
     border-radius: 999px;
     border: 1px solid var(--line-hi);
@@ -403,7 +349,7 @@
   .tl-title {
     font-family: var(--font-display);
     font-size: clamp(30px, 3.6vw, 48px);
-    font-weight: 400; line-height: 1.15;
+    line-height: 1.15;
     margin-bottom: 16px;
   }
   .tl-desc {
@@ -421,32 +367,27 @@
     color: var(--sky-2);
   }
 
-  /* ───── Trophies ───── */
   .trophies {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
   }
   .trophy {
-    position: relative;
     padding: 32px 24px;
     border-radius: 18px;
     background: linear-gradient(145deg, rgba(245,197,24,0.06) 0%, rgba(14,22,40,0.8) 100%);
     border: 1px solid rgba(245, 197, 24, 0.15);
-    transition: all .35s cubic-bezier(.2,.8,.2,1);
-    overflow: hidden;
+    transition: all .35s;
   }
   .trophy:hover {
     transform: translateY(-4px);
     border-color: var(--gold);
-    box-shadow: 0 20px 50px rgba(245, 197, 24, 0.15);
   }
   .trophy .count {
     font-family: var(--font-display);
-    font-size: 62px; font-weight: 400; line-height: 1;
+    font-size: 62px; line-height: 1;
     color: var(--gold-2);
     margin-bottom: 6px;
-    position: relative;
     direction: ltr;
     text-align: right;
   }
@@ -454,17 +395,14 @@
     font-size: 15px; font-weight: 700;
     color: var(--text);
     margin-bottom: 6px;
-    position: relative;
   }
   .trophy .years {
     font-size: 12px; color: var(--text-mute);
     line-height: 1.7;
-    position: relative;
     direction: ltr;
     text-align: right;
   }
 
-  /* ───── World Cup ───── */
   .wc {
     position: relative;
     border-radius: 28px;
@@ -482,11 +420,6 @@
     background: #0a1020;
   }
   .wc-media img { width: 100%; height: 100%; object-fit: cover; }
-  .wc-media::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(270deg, transparent 40%, rgba(5,8,16,0.9) 100%);
-    pointer-events: none;
-  }
   .wc-content { padding: 60px 20px 60px 60px; }
   .wc-content .wc-label {
     font-size: 12px; color: var(--gold); font-weight: 700; margin-bottom: 20px;
@@ -494,7 +427,7 @@
   .wc-content h3 {
     font-family: var(--font-display);
     font-size: clamp(34px, 4.5vw, 60px);
-    font-weight: 400; line-height: 1.1;
+    line-height: 1.1;
     margin-bottom: 24px;
     direction: ltr;
     text-align: right;
@@ -515,7 +448,7 @@
   }
   .wc-stat .v {
     font-family: var(--font-display);
-    font-size: 36px; font-weight: 400;
+    font-size: 36px;
     color: var(--gold-2); line-height: 1;
   }
   .wc-stat .k {
@@ -523,24 +456,21 @@
     margin-top: 6px;
   }
 
-  /* ───── Rivalry ───── */
   .rivalry {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 24px;
   }
   .rival-card {
-    position: relative;
     padding: 40px 32px;
     border-radius: 20px;
     background: rgba(14, 22, 40, 0.6);
     border: 1px solid var(--line);
-    overflow: hidden;
   }
   .rival-card.messi { border-color: rgba(117, 199, 245, 0.4); }
   .rival-card.ronaldo { border-color: rgba(165, 0, 68, 0.4); }
   .rival-card .name {
     font-family: var(--font-display);
-    font-size: 40px; font-weight: 400;
+    font-size: 40px;
     margin-bottom: 4px;
   }
   .rival-card.messi .name { color: var(--sky-2); }
@@ -561,13 +491,12 @@
   .rival-stat .k { font-size: 13px; color: var(--text-dim); }
   .rival-stat .v {
     font-family: var(--font-display);
-    font-size: 24px; font-weight: 400;
+    font-size: 24px;
     direction: ltr;
   }
   .rival-card.messi .v { color: var(--sky-2); }
   .rival-card.ronaldo .v { color: #ff86aa; }
 
-  /* ───── Quotes ───── */
   .quotes-wrap {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 20px;
@@ -578,11 +507,6 @@
     background: rgba(14, 22, 40, 0.5);
     border: 1px solid var(--line);
     position: relative;
-    transition: border-color .3s, transform .3s;
-  }
-  .quote:hover {
-    border-color: var(--gold);
-    transform: translateY(-3px);
   }
   .quote::before {
     content: '”';
@@ -596,13 +520,6 @@
     color: var(--text); margin-bottom: 22px;
     position: relative;
   }
-  .quote-attr {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .quote-attr::before {
-    content: ''; width: 24px; height: 1px;
-    background: var(--gold);
-  }
   .quote-author {
     font-size: 13px; font-weight: 700;
     color: var(--gold-2);
@@ -611,7 +528,24 @@
     font-size: 11.5px; color: var(--text-mute);
   }
 
-  /* ───── Fan zone ───── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .gallery .g-item {
+    aspect-ratio: 3/4;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #0a1020;
+  }
+  .gallery .g-item img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .6s;
+  }
+  .gallery .g-item:hover img { transform: scale(1.06); }
+
   .fan-zone {
     position: relative;
     border-radius: 24px; overflow: hidden;
@@ -622,10 +556,9 @@
   .fan-zone img {
     position: absolute; inset: 0;
     width: 100%; height: 100%; object-fit: cover;
-    z-index: 0;
   }
   .fan-zone::after {
-    content: ''; position: absolute; inset: 0; z-index: 1;
+    content: ''; position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(5,8,16,0.4) 0%, rgba(5,8,16,0.95) 90%);
     pointer-events: none;
   }
@@ -637,14 +570,13 @@
   .fan-content h3 {
     font-family: var(--font-display);
     font-size: clamp(32px, 4vw, 56px);
-    font-weight: 400; line-height: 1.15;
+    line-height: 1.15;
     margin-bottom: 20px;
   }
   .fan-content p {
     font-size: 15px; color: var(--text-dim); line-height: 2;
   }
 
-  /* ───── Footer ───── */
   footer {
     position: relative; z-index: 2;
     padding: 60px 32px 40px;
@@ -658,7 +590,7 @@
   }
   .footer-brand {
     font-family: var(--font-display);
-    font-size: 36px; font-weight: 400;
+    font-size: 36px;
     margin-bottom: 12px;
     background: linear-gradient(90deg, var(--argentina), var(--gold-2));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -667,25 +599,18 @@
     font-size: 12.5px; color: var(--text-mute);
     line-height: 2;
   }
-  .footer-meta a { color: var(--sky); }
-  .footer-meta a:hover { color: var(--sky-2); }
 
-  /* ───── Reveal ───── */
   .reveal {
     opacity: 0; transform: translateY(30px);
-    transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1);
+    transition: opacity .8s, transform .8s;
   }
   .reveal.in { opacity: 1; transform: translateY(0); }
 
-  /* ───── Responsive ───── */
   @media (max-width: 1024px) {
     .hero-grid { grid-template-columns: 1fr; gap: 50px; }
     .hero-portrait { max-width: 460px; margin: 0 auto; }
     .wc-grid { grid-template-columns: 1fr; }
     .wc-media { aspect-ratio: 16/10; }
-    .wc-media::after {
-      background: linear-gradient(180deg, transparent 40%, rgba(5,8,16,0.95) 100%);
-    }
     .wc-content { padding: 40px 32px; }
     .rivalry { grid-template-columns: 1fr; }
   }
@@ -696,21 +621,16 @@
     .hero { padding: 110px 20px 60px; }
     .tl-item { grid-template-columns: 1fr; gap: 24px; padding: 36px 0; }
     .tl-item:nth-child(even) .tl-media { order: 0; }
-    .tl-item::before { top: 40px; right: -33px; }
-    .timeline { padding-right: 32px; }
-    .timeline::before { right: 14px; }
+    .tl-item::before { top: 40px; }
     .fan-content { padding: 40px 24px; }
-    .fan-zone { min-height: 400px; }
     .footer-wrap { gap: 24px; }
   }
   @media (max-width: 480px) {
     nav.top { padding: 12px 16px; }
-    .brand { font-size: 13px; }
     .hero { padding: 100px 16px 50px; }
     .hero-title { font-size: clamp(56px, 15vw, 84px); }
-    .hero-sub { font-size: 15px; line-height: 1.95; }
+    .hero-sub { font-size: 15px; }
     section { padding: 70px 16px; }
-    .section-lede { font-size: 14px; margin-bottom: 40px; }
     .num-card { padding: 28px 20px; }
     .trophy { padding: 24px 20px; }
     .trophy .count { font-size: 48px; }
@@ -721,21 +641,9 @@
     .footer-brand { font-size: 26px; }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: .01ms !important;
-      transition-duration: .01ms !important;
-      scroll-behavior: auto !important;
-    }
-    .ticker-track { animation: none; }
-  }
-
-  /* ───── Mobile menu ───── */
   .mobile-menu {
     position: fixed; inset: 0; z-index: 99;
     background: rgba(5, 8, 16, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 26px;
@@ -745,11 +653,9 @@
   .mobile-menu.open { opacity: 1; visibility: visible; }
   .mobile-menu a {
     font-family: var(--font-display);
-    font-size: 34px; font-weight: 400;
+    font-size: 34px;
     color: var(--text);
-    transition: color .2s;
   }
-  .mobile-menu a:hover { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -767,7 +673,7 @@
     <a href="#worldcup">جام جهانی</a>
     <a href="#rivalry">رقابت</a>
     <a href="#records">رکوردها</a>
-    <a href="#quotes">حرف‌ها</a>
+    <a href="#gallery">گالری</a>
   </div>
   <button class="menu-btn" id="menuBtn" aria-label="منو">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -784,35 +690,27 @@
   <a href="#worldcup">جام جهانی</a>
   <a href="#rivalry">رقابت</a>
   <a href="#records">رکوردها</a>
-  <a href="#quotes">حرف‌ها</a>
+  <a href="#gallery">گالری</a>
 </div>
 
 <header class="hero">
   <div class="hero-bg"></div>
-  <div class="hero-stripes"></div>
   <div class="hero-grid">
     <div class="hero-copy">
       <div class="eyebrow">روساریو · بارسلونا · پاریس · میامی</div>
-      <h1 class="hero-title">لیونل<br><span class="gold">مسی. شنتیا عاشق مسی سووووو</span></h1>
+      <h1 class="hero-title">لیونل<br><span class="gold">مسی.</span></h1>
       <p class="hero-sub">
         هشت توپ طلا. چهل و هفت جام. یک جام جهانی که در لوسیل بالای سرش رفت.
         پرافتخارترین بازیکن تاریخ فوتبال — همان شماره دهی که همه‌چیز را
         طوری رقم زد که انگار از قبل نوشته شده بود.
       </p>
       <div class="hero-cta">
-        <a href="#timeline" class="btn btn-primary">
-          از کجا شروع شد
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 5 5 12 12 19"></polyline>
-          </svg>
-        </a>
+        <a href="#timeline" class="btn btn-primary">از کجا شروع شد</a>
         <a href="#worldcup" class="btn btn-ghost">جام جهانی ۲۰۲۲</a>
       </div>
     </div>
     <div class="hero-portrait">
-      <img src="./images/messi-hero.jpg" alt="لیونل مسی با پیراهن شماره ۱۰ آرژانتین"
-           onerror="this.parentNode.insertBefore(Object.assign(document.createElement('div'),{className:'img-fallback',textContent:'messi-hero.jpg'}), this); this.remove();">
+      <img src="./images/images.webp" alt="لیونل مسی">
       <div class="hero-badge">
         <div class="num">۱۰</div>
         <div class="label">کاپیتان آرژانتین<br>قهرمان جهان</div>
@@ -842,8 +740,7 @@
     <span class="section-eyebrow reveal">جاده</span>
     <h2 class="section-title reveal">از <span class="em">روساریو</span> تا دنیا.</h2>
     <p class="section-lede reveal">
-      شش تکه از زندگی‌ای که شماره ده را ساخت. یک تشخیص کمبود هورمون رشد در ده سالگی،
-      یک قرارداد روی دستمال کاغذی در سیزده سالگی، و یک جام جهانی در سی و پنج سالگی.
+      شش تکه از زندگی‌ای که شماره ده را ساخت.
     </p>
     <div class="timeline" id="timelineEl"></div>
   </div>
@@ -854,8 +751,7 @@
     <span class="section-eyebrow reveal">قفسه</span>
     <h2 class="section-title reveal">چهل و هفت <span class="em">جام.</span></h2>
     <p class="section-lede reveal">
-      باشگاهی و ملی. ده لالیگا، چهار لیگ قهرمانان، یک طلای المپیک،
-      دو کوپا آمه‌ریکا، و آن یکی که سی و شش سال منتظرش بودند.
+      باشگاهی و ملی. ده لالیگا، چهار لیگ قهرمانان، یک طلای المپیک، دو کوپا آمه‌ریکا.
     </p>
     <div class="trophies reveal" id="trophyGrid"></div>
   </div>
@@ -868,8 +764,7 @@
     <div class="wc reveal">
       <div class="wc-grid">
         <div class="wc-media">
-          <img src="./images/messi-celebration.jpg" alt="خوشحالی مسی با پیراهن آرژانتین"
-               onerror="this.parentNode.insertBefore(Object.assign(document.createElement('div'),{className:'img-fallback',textContent:'messi-celebration.jpg'}), this); this.remove();">
+          <img src="./images/images%20(1).webp" alt="خوشحالی مسی">
         </div>
         <div class="wc-content">
           <div class="wc-label">۱۸ دسامبر ۲۰۲۲ · ورزشگاه لوسیل</div>
@@ -878,7 +773,6 @@
             مسی در آن فینال دو گل زد — یکی از روی نقطه پنالتی، یکی در وقت‌های اضافه —
             و پنالتی‌اش را در ضربات پنالتی هم گل کرد. در کل تورنمنت هفت گل زد و سه پاس گل داد.
             توپ طلای جام را برای بار دوم برد؛ اولین کسی که این جایزه را دو بار گرفته.
-            یک سال بعد هم توپ طلای هشتم را بالای سر برد.
           </p>
           <div class="wc-stats">
             <div class="wc-stat"><div class="v">۷</div><div class="k">گل</div></div>
@@ -911,7 +805,7 @@
       </div>
       <div class="rival-card ronaldo">
         <div class="name">کریستیانو رونالدو</div>
-        <div class="role">پرتغال · اسپورتینگ · منچستر یونایتد · رئال مادرید · یوونتوس · النصر</div>
+        <div class="role">پرتغال · رئال مادرید · منچستر یونایتد · یوونتوس · النصر</div>
         <div class="rival-stat"><span class="k">توپ طلا</span><span class="v">۵</span></div>
         <div class="rival-stat"><span class="k">جام جهانی</span><span class="v">۰</span></div>
         <div class="rival-stat"><span class="k">لیگ قهرمانان</span><span class="v">۵</span></div>
@@ -934,6 +828,17 @@
   </div>
 </section>
 
+<section id="gallery">
+  <div class="wrap">
+    <span class="section-eyebrow reveal">آلبوم</span>
+    <h2 class="section-title reveal">قاب‌های <span class="em">ماندگار.</span></h2>
+    <p class="section-lede reveal">
+      نُه قاب از مسیری که هنوز تمام نشده.
+    </p>
+    <div class="gallery reveal" id="galleryGrid"></div>
+  </div>
+</section>
+
 <section id="quotes">
   <div class="wrap">
     <span class="section-eyebrow reveal">حکم</span>
@@ -950,15 +855,13 @@
     <span class="section-eyebrow reveal">دنیا تماشا می‌کند</span>
     <h2 class="section-title reveal">بیشتر از یک <span class="em">فوتبالیست.</span></h2>
     <div class="fan-zone reveal">
-      <img src="./images/messi-fans.jpg" alt="هواداران آرژانتین در حال جشن گرفتن"
-           onerror="this.parentNode.insertBefore(Object.assign(document.createElement('div'),{className:'img-fallback',style:'position:absolute;inset:0;z-index:0;',textContent:'messi-fans.jpg'}), this); this.remove();">
+      <img src="./images/images%20(7).webp" alt="هواداران آرژانتین">
       <div class="fan-content">
         <h3>از روساریو تا هر گوشه‌ی زمین.</h3>
         <p>
           وقتی اینتر میامی خبر پیوستنش را داد، اینستاگرام باشگاه در یک روز پنج میلیون
           فالوور گرفت. پیراهنش پرفروش‌ترین پیراهن دنیا شد. یک کشور سه میلیون نفری
           تقویم فوتبالش را عوض کرد. هر ورزشگاهی که واردش می‌شود پر می‌شود.
-          هر لمس توپ، یک تیتر خبر است.
         </p>
       </div>
     </div>
@@ -970,24 +873,17 @@
     <div>
       <div class="footer-brand">مسی · ۱۰</div>
       <div class="footer-meta">
-        یک سایت هواداری غیررسمی. آمار و نقل‌قول‌ها از ویکی‌پدیا، messi.com،
-        ESPN و MLSsoccer.com جمع‌آوری شده.
+        یک سایت هواداری غیررسمی. آمار و نقل‌قول‌ها از ویکی‌پدیا، messi.com، ESPN و MLSsoccer.com.
       </div>
     </div>
     <div class="footer-meta" style="text-align:left;">
       <div>یک صفحه‌ی استاتیک تک‌فایلی.</div>
-      <div>بدون ردیاب، بدون آنالیتیکس، بدون مرحله‌ی بیلد.</div>
-      <div style="margin-top:8px; color:var(--text-mute);">
-        © پروژه‌ی هواداری. تمام نشان‌های تجاری متعلق به صاحبانشان است.
-      </div>
+      <div>© پروژه‌ی هواداری.</div>
     </div>
   </div>
 </footer>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   DATA
-   ═══════════════════════════════════════════════════════════ */
 const FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
 const toFa = (s) => String(s).replace(/[0-9]/g, d => FA[+d]);
 
@@ -1013,39 +909,39 @@ const NUMBERS = [
 const TIMELINE = [
   {
     era: 'arg', years: '۱۹۸۷ — ۲۰۰۰', title: 'روساریو و نیولز اولد بویز',
-    desc: 'بیست و چهارم ژوئن ۱۹۸۷ در روساریو به دنیا آمد. چهار سالگی به گرندولی رفت، هفت سالگی به نیولز اولد بویز. در شش سال، نزدیک پانصد گل در رده‌های پایه زد. ده سالگی، تشخیص کمبود هورمون رشد؛ هزینه‌ی درمان ماهی هزار پزو بود و نیولز از قولش برگشت. ریور پلیت خواست او را بگیرد ولی کارت بازیکنش آزاد نشد. بارسلونا یک استعدادیاب فرستاد.',
-    tags: ['روساریو', 'نیولز', 'ماشین ۸۷', 'درمان هورمون رشد'],
-    img: 'messi-timeline-barca.jpg'
+    desc: 'بیست و چهارم ژوئن ۱۹۸۷ در روساریو به دنیا آمد. چهار سالگی به گرندولی رفت، هفت سالگی به نیولز اولد بویز. ده سالگی، تشخیص کمبود هورمون رشد. بارسلونا یک استعدادیاب فرستاد.',
+    tags: ['روساریو', 'نیولز', 'درمان هورمون رشد'],
+    img: 'images%20(2).webp'
   },
   {
     era: 'barca', years: '۲۰۰۰ — ۲۰۰۴', title: 'قرارداد روی دستمال کاغذی',
-    desc: 'سپتامبر ۲۰۰۰، سیزده سالگی، تست در بارسلونا. کارلس رکساچ، مدیر تیم اول، همان لحظه خواستش. چهاردهم دسامبر، کاغذی نبود و رکساچ قرارداد را روی دستمال کاغذی نوشت. فوریه ۲۰۰۱، خانواده به کاتالونیا کوچ کرد. دو سال سخت: کاغذبازی مهاجرت ماه‌ها بیرونش نگه داشت، و آن‌قدر ساکت بود که هم‌تیمی‌ها فکر می‌کردند لال است. بعد لاماسیا، «تیم رؤیایی نوزادان»، و سی و شش گل در سی بازی.',
-    tags: ['لاماسیا', 'قرارداد دستمالی', 'تیم رؤیایی نوزادان', '۳۶ گل در ۳۰ بازی'],
-    img: 'messi-timeline-barca.jpg'
+    desc: 'سپتامبر ۲۰۰۰، سیزده سالگی، تست در بارسلونا. کارلس رکساچ قرارداد را روی دستمال کاغذی نوشت. فوریه ۲۰۰۱، خانواده به کاتالونیا کوچ کرد. بعد لاماسیا و سی و شش گل در سی بازی.',
+    tags: ['لاماسیا', 'قرارداد دستمالی', '۳۶ گل در ۳۰ بازی'],
+    img: 'images%20(3).webp'
   },
   {
     era: 'barca', years: '۲۰۰۴ — ۲۰۲۱', title: 'بارسلونا — هفده سال، سی و چهار جام',
-    desc: 'شانزدهم اکتبر ۲۰۰۴، هفده سالگی، اولین بازی در لالیگا. اولین گل بزرگسالی اول ماه مه ۲۰۰۵. زیر دست پپ گواردیولا شد نقطه‌ی ثقل تاکتیکی بهترین تیم باشگاهی تاریخ — سه‌گانه‌ی ۲۰۰۸-۰۹، شش‌گانه، و چهار توپ طلای پشت سر هم. ششصد و هفتاد و دو گل برای بارسلونا، بیشترین گلی که کسی برای یک باشگاه زده. اوت ۲۰۲۱، اشک در نیوکمپ، و خداحافظی‌ای که کسی باورش نمی‌شد.',
-    tags: ['۴ لیگ قهرمانان', '۱۰ لالیگا', '۳۴ جام با بارسا', '۶۷۲ گل برای یک باشگاه'],
-    img: 'messi-timeline-barca.jpg'
+    desc: 'شانزدهم اکتبر ۲۰۰۴، هفده سالگی، اولین بازی. زیر دست پپ گواردیولا شد نقطه‌ی ثقل بهترین تیم باشگاهی تاریخ. ششصد و هفتاد و دو گل، بیشترین گلی که کسی برای یک باشگاه زده. اوت ۲۰۲۱، اشک در نیوکمپ.',
+    tags: ['۴ لیگ قهرمانان', '۱۰ لالیگا', '۶۷۲ گل'],
+    img: 'images%20(4).webp'
   },
   {
     era: 'psg', years: '۲۰۲۱ — ۲۰۲۳', title: 'پاری سن ژرمن',
-    desc: 'دو روز بعد از خداحافظی نیوکمپ، به پی‌اس‌جی پیوست. پیراهن سی را برداشت — همان شماره‌ای که اولین بازی بارسلونا را با آن کرده بود. دو لالیگ فرانسه. فصل ۲۰۲۲-۲۳ شانزده گل و شانزده پاس گل داد، برترین گلزن تاریخ باشگاهی اروپا شد (۷۰۲ گل)، به هزار سهم گل در دوران باشگاهی رسید. بهترین بازیکن خارجی لیگ فرانسه شد. ژوئن ۲۰۲۳ رفت.',
-    tags: ['۲ لالیگ فرانسه', '۷۰۲ گل باشگاهی اروپا', 'هزار سهم گل'],
-    img: 'messi-timeline-psg.jpg'
+    desc: 'دو روز بعد از خداحافظی نیوکمپ، به پی‌اس‌جی پیوست. دو لالیگ فرانسه. فصل ۲۰۲۲-۲۳ شانزده گل و شانزده پاس گل داد، برترین گلزن تاریخ باشگاهی اروپا شد.',
+    tags: ['۲ لالیگ فرانسه', '۷۰۲ گل باشگاهی اروپا'],
+    img: 'images%20(5).webp'
   },
   {
     era: 'arg', years: '۲۰۲۱ — ۲۰۲۴', title: 'کوپا آمه‌ریکا، جام جهانی، کوپا آمه‌ریکا',
-    desc: 'خشکسالی تمام شد. برزیل در فینال کوپا آمه‌ریکا ۲۰۲۱ در ماراکانا یک-صفر باخته شد — مسی بهترین بازیکن تورنمنت شد، با نه گل یا پاس گل از دوازده گل آرژانتین. بعد فینالیسیما، بعد قطر. در جام جهانی ۲۰۲۲ هفت گل و سه پاس داد، برای دومین بار توپ طلای جام را گرفت، و در لوسیل جام را بالا برد. سال ۲۰۲۴ آرژانتین دوباره کوپا آمه‌ریکا را برد.',
-    tags: ['کوپا آمه‌ریکا ۲۰۲۱', 'فینالیسیما ۲۰۲۲', 'جام جهانی ۲۰۲۲', 'کوپا آمه‌ریکا ۲۰۲۴'],
-    img: 'messi-timeline-arg.jpg'
+    desc: 'خشکسالی تمام شد. برزیل در فینال کوپا آمه‌ریکا ۲۰۲۱ در ماراکانا باخته شد. بعد فینالیسیما، بعد قطر. هفت گل و سه پاس در جام جهانی ۲۰۲۲، و جام در لوسیل بالا رفت. سال ۲۰۲۴ آرژانتین دوباره کوپا آمه‌ریکا را برد.',
+    tags: ['کوپا آمه‌ریکا ۲۰۲۱', 'جام جهانی ۲۰۲۲'],
+    img: 'images%20(6).webp'
   },
   {
     era: 'miami', years: '۲۰۲۳ — تا امروز', title: 'اینتر میامی و توپ طلای هشتم',
-    desc: 'پانزدهم ژوئیه ۲۰۲۳، مسی به اینتر میامی پیوست. نه گل در شش بازی اول. اولین جام — لیگ کاپ — در شش هفته. توپ طلای هشتم در اکتبر همان سال. فصل ۲۰۲۴ رکورد پاس گل در یک بازی ام‌ال‌اس را شکست (پنج پاس)، بعد ساپورترز شیلد و جایزه‌ی ام‌وی‌پی لیگ. سال ۲۰۲۵ میامی را به اولین جام ام‌ال‌اس رساند، دومین ام‌وی‌پی پشت سر هم را گرفت، و قراردادش را تا ۲۰۲۸ تمدید کرد.',
-    tags: ['جام ام‌ال‌اس ۲۰۲۵', 'دو بار ام‌وی‌پی', 'توپ طلای هشتم', 'لیگ کاپ ۲۰۲۳'],
-    img: 'messi-timeline-miami.jpg'
+    desc: 'پانزدهم ژوئیه ۲۰۲۳، مسی به اینتر میامی پیوست. توپ طلای هشتم در اکتبر. سال ۲۰۲۵ میامی را به اولین جام ام‌ال‌اس رساند، دومین ام‌وی‌پی پشت سر هم را گرفت.',
+    tags: ['جام ام‌ال‌اس ۲۰۲۵', 'دو بار ام‌وی‌پی'],
+    img: 'download.webp'
   }
 ];
 
@@ -1069,72 +965,43 @@ const TROPHIES = [
 
 const RECORDS = [
   { count: '۸',  name: 'توپ طلا', years: 'بیشترین در تاریخ' },
-  { count: '۲',  name: 'توپ طلای جام جهانی', years: 'اولین کسی که دو بار برد (۲۰۱۴، ۲۰۲۲)' },
+  { count: '۲',  name: 'توپ طلای جام جهانی', years: 'اولین کسی که دو بار برد' },
   { count: '۶',  name: 'کفش طلای اروپا', years: 'بیشترین در تاریخ' },
   { count: '۶۷۲', name: 'گل برای یک باشگاه', years: 'بارسلونا' },
   { count: '۴۷۴', name: 'گل در لالیگا', years: 'بیشترین در تاریخ' },
   { count: '۱۲۶', name: 'گل ملی', years: 'رکورد آرژانتین' },
   { count: '۲۰۸', name: 'بازی ملی', years: 'رکورد آرژانتین' },
   { count: '+۴۲۰', name: 'پاس گل', years: 'رکورد تمام دوران‌ها' },
-  { count: '۱۲', name: 'پاس گل در جام جهانی', years: 'از زمان ثبت رکوردها (۱۹۶۶)' },
+  { count: '۱۲', name: 'پاس گل در جام جهانی', years: 'از ۱۹۶۶' },
   { count: '۹۱', name: 'گل در یک سال میلادی', years: '۲۰۱۲' },
   { count: '۷۳', name: 'گل در یک فصل', years: '۲۰۱۱-۱۲' },
   { count: '۵',  name: 'پاس گل در یک بازی ام‌ال‌اس', years: '۲۰۲۴' }
 ];
 
-const QUOTES = [
-  {
-    text: 'مسی تنها بازیکنی است که با توپ سریع‌تر از بدون توپ می‌دود.',
-    author: 'پپ گواردیولا',
-    role: 'سرمربی سابق بارسلونا و منچستر سیتی'
-  },
-  {
-    text: 'توپ به پایش چسبیده. من کسی با این کنترل توپ ندیده‌ام.',
-    author: 'دیه‌گو مارادونا',
-    role: 'قهرمان جام جهانی ۱۹۸۶'
-  },
-  {
-    text: 'همه‌ی ما را نابود کرد. چهار نفر را دریبل می‌زد و گل می‌کرد. حتی مدافع‌های اصلی تیم هم مضطرب بودند. یک موجود فضایی بود.',
-    author: 'لودویک گیولی',
-    role: 'هم‌تیمی سابق در بارسلونا'
-  },
-  {
-    text: 'وقتی می‌دیدی‌اش فکر می‌کردی این بچه نمی‌تواند توپ بازی کند. یک کوتوله است، خیلی نحیف، خیلی کوچک. ولی همان لحظه می‌فهمیدی که متفاوت به دنیا آمده — یک پدیده.',
-    author: 'آدریان کوریا',
-    role: 'مربی رده‌های پایه‌ی نیولز اولد بویز'
-  },
-  {
-    text: 'همه‌ی افتخارات شخصی‌ام را می‌دهم تا با تیم ملی جام جهانی ببرم.',
-    author: 'لیونل مسی',
-    role: 'قبل از قطر ۲۰۲۲'
-  },
-  {
-    text: 'یک «قبل از مسی» و «بعد از مسی» داریم. او همه‌چیز را عوض کرد.',
-    author: 'خاویر آسنسی',
-    role: 'معاون باشگاه اینتر میامی'
-  },
-  {
-    text: 'رونالدینیو به هم‌تیمی‌هایش گفت این بچه‌ی شانزده ساله از خودش هم بازیکن بهتری خواهد شد.',
-    author: 'رختکن بارسلونا، ۲۰۰۳',
-    role: 'به نقل از خاطرات بارسلونا'
-  },
-  {
-    text: 'هر بار بازی‌اش را می‌بینم چیز تازه‌ای از فوتبال یاد می‌گیرم.',
-    author: 'ژاوی',
-    role: 'هم‌تیمی سابق در بارسلونا'
-  }
+const GALLERY = [
+  'licensed-image.webp',
+  'images%20(1).webp',
+  'images%20(2).webp',
+  'images%20(3).webp',
+  'images%20(4).webp',
+  'images%20(5).webp',
+  'images%20(6).webp',
+  'images%20(7).webp',
+  'download.webp'
 ];
 
-/* ═══════════════════════════════════════════════════════════
-   RENDER HELPERS
-   ═══════════════════════════════════════════════════════════ */
-const $ = (sel) => document.querySelector(sel);
+const QUOTES = [
+  { text: 'مسی تنها بازیکنی است که با توپ سریع‌تر از بدون توپ می‌دود.', author: 'پپ گواردیولا', role: 'سرمربی سابق بارسلونا' },
+  { text: 'توپ به پایش چسبیده. من کسی با این کنترل توپ ندیده‌ام.', author: 'دیه‌گو مارادونا', role: 'قهرمان جام جهانی ۱۹۸۶' },
+  { text: 'همه‌ی ما را نابود کرد. چهار نفر را دریبل می‌زد و گل می‌کرد. یک موجود فضایی بود.', author: 'لودویک گیولی', role: 'هم‌تیمی سابق' },
+  { text: 'وقتی می‌دیدی‌اش فکر می‌کردی این بچه نمی‌تواند توپ بازی کند. ولی همان لحظه می‌فهمیدی متفاوت به دنیا آمده — یک پدیده.', author: 'آدریان کوریا', role: 'مربی نیولز اولد بویز' },
+  { text: 'همه‌ی افتخارات شخصی‌ام را می‌دهم تا با تیم ملی جام جهانی ببرم.', author: 'لیونل مسی', role: 'قبل از قطر ۲۰۲۲' },
+  { text: 'یک «قبل از مسی» و «بعد از مسی» داریم. او همه‌چیز را عوض کرد.', author: 'خاویر آسنسی', role: 'معاون اینتر میامی' },
+  { text: 'رونالدینیو به هم‌تیمی‌هایش گفت این بچه‌ی شانزده ساله از خودش هم بازیکن بهتری خواهد شد.', author: 'رختکن بارسلونا', role: '۲۰۰۳' },
+  { text: 'هر بار بازی‌اش را می‌بینم چیز تازه‌ای از فوتبال یاد می‌گیرم.', author: 'ژاوی', role: 'هم‌تیمی سابق' }
+];
 
-function imgTag(src, alt) {
-  return `<img src="./images/${src}" alt="${alt}"
-    loading="lazy" decoding="async"
-    onerror="this.parentNode.insertBefore(Object.assign(document.createElement('div'),{className:'img-fallback',textContent:'${src}'}), this); this.remove();">`;
-}
+const $ = (sel) => document.querySelector(sel);
 
 function renderTicker() {
   const track = $('#tickerTrack');
@@ -1145,8 +1012,7 @@ function renderTicker() {
 }
 
 function renderNumbers() {
-  const grid = $('#numbersGrid');
-  grid.innerHTML = NUMBERS.map(n => `
+  $('#numbersGrid').innerHTML = NUMBERS.map(n => `
     <div class="num-card">
       <div class="value" data-target="${n.v}">۰<span class="suffix">${n.suffix}</span></div>
       <div class="label">${n.label}</div>
@@ -1156,11 +1022,10 @@ function renderNumbers() {
 }
 
 function renderTimeline() {
-  const el = $('#timelineEl');
-  el.innerHTML = TIMELINE.map(item => `
+  $('#timelineEl').innerHTML = TIMELINE.map(item => `
     <div class="tl-item" data-era="${item.era}">
       <div class="tl-media">
-        ${imgTag(item.img, item.title)}
+        <img src="./images/${item.img}" alt="${item.title}" loading="lazy">
       </div>
       <div class="tl-body">
         <div class="tl-year">${item.years}</div>
@@ -1194,23 +1059,26 @@ function renderRecords() {
   `).join('');
 }
 
+function renderGallery() {
+  $('#galleryGrid').innerHTML = GALLERY.map((src, i) => `
+    <div class="g-item">
+      <img src="./images/${src}" alt="قاب ${toFa(i+1)}" loading="lazy">
+    </div>
+  `).join('');
+}
+
 function renderQuotes() {
   $('#quotesGrid').innerHTML = QUOTES.map(q => `
     <div class="quote">
       <p class="quote-text">${q.text}</p>
-      <div class="quote-attr">
-        <div>
-          <div class="quote-author">${q.author}</div>
-          <div class="quote-role">${q.role}</div>
-        </div>
+      <div>
+        <div class="quote-author">${q.author}</div>
+        <div class="quote-role">${q.role}</div>
       </div>
     </div>
   `).join('');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   COUNT-UP & REVEAL
-   ═══════════════════════════════════════════════════════════ */
 function animateCount(el) {
   const target = parseFloat(el.dataset.target);
   if (isNaN(target)) return;
@@ -1222,7 +1090,7 @@ function animateCount(el) {
   function frame(now) {
     const k = Math.min(1, (now - start) / dur);
     const e = 1 - Math.pow(1 - k, 3);
-    el.innerHTML = toFa(Math.round(target * e).toLocaleString('en')) + suffixHTML;
+    el.innerHTML = toFa(Math.round(target * e)) + suffixHTML;
     if (k < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -1236,7 +1104,7 @@ function setupObservers() {
         revealObs.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+  }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
   const countObs = new IntersectionObserver((entries) => {
@@ -1250,9 +1118,6 @@ function setupObservers() {
   document.querySelectorAll('.num-card .value').forEach(el => countObs.observe(el));
 }
 
-/* ═══════════════════════════════════════════════════════════
-   NAV
-   ═══════════════════════════════════════════════════════════ */
 function setupNav() {
   const nav = $('#nav');
   const menuBtn = $('#menuBtn');
@@ -1275,15 +1140,13 @@ function setupNav() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BOOT
-   ═══════════════════════════════════════════════════════════ */
 function boot() {
   renderTicker();
   renderNumbers();
   renderTimeline();
   renderTrophies();
   renderRecords();
+  renderGallery();
   renderQuotes();
   setupObservers();
   setupNav();
