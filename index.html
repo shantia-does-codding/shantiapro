@@ -3,1160 +3,3068 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>لیونل مسی — بزغاله</title>
-<meta name="description" content="لیونل آندرس مسی — ۸ توپ طلا، جام جهانی ۲۰۲۲، ۴۷ جام.">
-<meta name="theme-color" content="#050810">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Lalezar&display=swap" rel="stylesheet">
+<title>منظومه شمسی — شبیه‌سازی سه‌بعدی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  :root {
-    --bg:        #050810;
-    --bg-2:      #0a1020;
-    --line:      rgba(120, 160, 255, 0.14);
-    --line-hi:   rgba(120, 160, 255, 0.45);
-    --text:      #e8eefc;
-    --text-dim:  #8fa0c4;
-    --text-mute: #5a6a8a;
-    --gold:      #f5c518;
-    --gold-2:    #ffd964;
-    --sky:       #75a9f5;
-    --sky-2:     #a8c8ff;
-    --argentina: #75c7f5;
-    --barca:     #a50044;
-    --psg:       #004170;
-    --miami:     #f7b5cd;
-    --green:     #10b981;
-    --font: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
-    --font-display: 'Lalezar', 'Vazirmatn', Georgia, serif;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%; height:100%; overflow:hidden; background:#000;
+    font-family:'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+    -webkit-user-select:none; user-select:none;
+    color:#cfe3ff;
+    direction:rtl;
+    touch-action:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  canvas { display:block; }
+
+  #hud {
+    position:fixed; left:20px; bottom:18px; z-index:5;
+    color:#8fb0d4; font-size:11px; line-height:1.95;
+    text-shadow:0 0 14px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.9);
+    pointer-events:none; opacity:.85;
+    max-width:52vw;
+    direction:rtl;
+  }
+  #hud b { color:#cfe4ff; font-weight:600; }
+
+  #title {
+    position:fixed; right:20px; top:18px; z-index:5;
+    color:#cfe3ff; font-size:14px;
+    pointer-events:none; opacity:.75;
+    text-shadow:0 0 18px rgba(90,150,255,.65);
+    font-weight:500;
   }
 
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.85;
-    overflow-x: hidden;
-    direction: rtl;
-    -webkit-font-smoothing: antialiased;
+  #loading {
+    position:fixed; inset:0; z-index:20;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:#000; color:#7fa8d8;
+    font-size:13px; gap:14px;
+    transition:opacity .9s ease;
   }
-  body.menu-open { overflow: hidden; }
-  img { max-width:100%; height:auto; display:block; }
-  a { color: inherit; text-decoration: none; }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  #loading .bar {
+    width:180px; height:2px;
+    background:rgba(90,150,255,.15);
+    border-radius:1px; overflow:hidden;
+  }
+  #loading .bar i {
+    display:block; height:100%; width:0%;
+    background:linear-gradient(90deg,#4a7ac8,#8fb8ff);
+    transition:width .3s ease;
+  }
+  #loading.hide { opacity:0; pointer-events:none; }
 
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: #0a1020; }
-  ::-webkit-scrollbar-thumb { background: rgba(120,160,255,0.28); border-radius: 4px; }
-
-  .aura {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 800px 500px at 20% 10%, rgba(117, 199, 245, 0.10), transparent 60%),
-      radial-gradient(ellipse 700px 600px at 85% 30%, rgba(245, 197, 24, 0.06), transparent 60%),
-      radial-gradient(ellipse 900px 700px at 50% 100%, rgba(165, 0, 68, 0.06), transparent 60%);
+  #status {
+    position:fixed; top:18px; left:20px; z-index:6;
+    color:#7fa8d8; font-size:10.5px; line-height:2;
+    text-align:left; pointer-events:none;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 12px rgba(0,0,0,.9);
+    opacity:.85;
+    direction:rtl;
   }
-
-  nav.top {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 14px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(5, 8, 16, 0.72);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-bottom: 1px solid var(--line);
-    transition: background .3s ease;
-  }
-  nav.top.scrolled { background: rgba(5, 8, 16, 0.94); }
-  .brand {
-    display: flex; align-items: center; gap: 12px;
-    font-weight: 800; font-size: 14px;
-  }
-  .brand .mark {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--argentina), var(--gold));
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-display); font-weight: 900; font-size: 18px;
-    color: #050810; box-shadow: 0 0 20px rgba(117, 199, 245, 0.4);
-  }
-  .brand .name {
-    background: linear-gradient(90deg, var(--argentina), var(--gold-2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    font-size: 17px; font-weight: 900;
-  }
-  .nav-links {
-    display: flex; gap: 22px; align-items: center;
-    font-size: 13px; color: var(--text-dim); font-weight: 500;
-  }
-  .nav-links a { transition: color .2s; }
-  .nav-links a:hover { color: var(--text); }
-
-  .menu-btn {
-    display: none; width: 40px; height: 40px;
-    border-radius: 10px; border: 1px solid var(--line);
-    align-items: center; justify-content: center;
-    background: rgba(14, 22, 40, 0.6);
-  }
-  .menu-btn svg { width: 20px; height: 20px; }
-
-  .hero {
-    position: relative; min-height: 100vh;
-    display: flex; align-items: center;
-    padding: 140px 32px 80px;
-    overflow: hidden; z-index: 1;
-  }
-  .hero-bg {
-    position: absolute; inset: 0; z-index: 0;
-    background:
-      radial-gradient(ellipse 900px 700px at 30% 40%, rgba(117, 199, 245, 0.18), transparent 65%),
-      radial-gradient(ellipse 700px 600px at 85% 80%, rgba(245, 197, 24, 0.10), transparent 60%);
-  }
-  .hero-grid {
-    position: relative; z-index: 2;
-    max-width: 1400px; width: 100%; margin: 0 auto;
-    display: grid; grid-template-columns: 1.05fr 1fr; gap: 60px;
-    align-items: center;
-  }
-  .hero-copy { animation: rise 1s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(30px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 8px 16px; border-radius: 999px;
-    background: rgba(117, 199, 245, 0.08);
-    border: 1px solid rgba(117, 199, 245, 0.25);
-    color: var(--sky-2); font-size: 12px; font-weight: 600;
-    margin-bottom: 28px;
-  }
-  .hero-title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(64px, 11vw, 156px);
-    line-height: 0.92;
-    margin-bottom: 8px;
-    background: linear-gradient(180deg, #ffffff 0%, #a8c8ff 60%, #75a9f5 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .hero-title .gold {
-    background: linear-gradient(180deg, #fff8d0 0%, var(--gold) 60%, #b88800 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .hero-sub {
-    font-size: 16.5px; color: var(--text-dim);
-    max-width: 560px; margin: 22px 0 40px; line-height: 2;
-  }
-  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 14px 26px; border-radius: 999px;
-    font-size: 13.5px; font-weight: 600;
-    transition: all .25s;
-    border: 1px solid transparent;
-    font-family: var(--font);
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--argentina), var(--sky));
-    color: #050810;
-    box-shadow: 0 12px 32px rgba(117, 199, 245, 0.35);
-  }
-  .btn-ghost {
-    border-color: var(--line-hi);
-    color: var(--text);
-  }
-  .btn-ghost:hover {
-    border-color: var(--gold);
-    color: var(--gold-2);
+  #status b { color:#cfe4ff; font-weight:600; }
+  #status .tier {
+    display:inline-block; padding:1px 7px; border-radius:8px;
+    background:rgba(90,150,255,.15); color:#8fb8ff;
+    font-size:9.5px; margin-right:4px;
   }
 
-  .hero-portrait {
-    position: relative;
-    aspect-ratio: 3 / 4;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-    animation: rise 1.2s cubic-bezier(.2,.8,.2,1) .15s both;
-    background: #0a1020;
+  #timebar {
+    position:fixed; top:18px; left:50%; z-index:6;
+    transform:translateX(-50%);
+    display:flex; align-items:center; gap:12px;
+    padding:8px 16px;
+    background:rgba(6,12,24,.72);
+    border:1px solid rgba(90,150,255,.18);
+    border-radius:22px;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    font-size:10.5px;
+    color:#8fb0d4;
+    direction:ltr;
   }
-  .hero-portrait img {
-    width: 100%; height: 100%; object-fit: cover;
+  #timebar .btn {
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%; cursor:pointer;
+    color:#a8c3e4;
+    transition:all .2s;
+    background:rgba(20,32,52,.5);
+    border:1px solid rgba(90,150,255,.20);
+    font-size:11px; font-weight:600;
+    -webkit-user-select:none; user-select:none;
   }
-  .hero-portrait::before {
-    content: ''; position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(180deg, transparent 40%, rgba(5,8,16,0.85) 100%);
-    pointer-events: none;
+  #timebar .btn:hover {
+    color:#e0ecff; border-color:rgba(160,200,255,.7);
+    background:rgba(30,50,80,.85);
   }
-  .hero-badge {
-    position: absolute; bottom: 20px; left: 20px; right: 20px;
-    z-index: 3;
-    display: flex; justify-content: space-between; align-items: flex-end;
+  #timebar .btn.paused { color:#ff9a5a; border-color:rgba(255,154,90,.5); }
+  #timebar .readout {
+    min-width:100px; text-align:center;
+    color:#cfe4ff; font-variant-numeric:tabular-nums;
+    font-weight:500;
   }
-  .hero-badge .num {
-    font-family: var(--font-display);
-    font-size: 72px; line-height: 1;
-    color: var(--gold-2);
-    text-shadow: 0 4px 30px rgba(245,197,24,0.6);
+  #timebar .readout small { color:#7a97be; font-size:9.5px; margin-right:4px; }
+
+  #info {
+    position:fixed; top:0; left:0; z-index:10;
+    width:420px; height:100vh;
+    background:linear-gradient(180deg, rgba(6,12,24,.94) 0%, rgba(4,8,18,.97) 100%);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-right:1px solid rgba(90,150,255,.18);
+    transform:translateX(-100%);
+    transition:transform .42s cubic-bezier(.22,.61,.36,1);
+    overflow-y:auto; overflow-x:hidden;
+    padding:32px 26px 40px;
+    font-size:13px; line-height:1.85;
+    color:#c4d6ee;
+    box-shadow:24px 0 60px rgba(0,0,0,.55);
+    direction:rtl;
+    -webkit-overflow-scrolling:touch;
   }
-  .hero-badge .label {
-    text-align: left;
-    font-size: 12px;
-    color: var(--sky-2); font-weight: 600;
+  #info.open { transform:translateX(0); }
+  #info::-webkit-scrollbar { width:6px; }
+  #info::-webkit-scrollbar-track { background:transparent; }
+  #info::-webkit-scrollbar-thumb { background:rgba(90,150,255,.25); border-radius:3px; }
+
+  #info .close {
+    position:absolute; top:18px; left:22px;
+    width:26px; height:26px;
+    border:1px solid rgba(120,170,255,.30);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:#8fb0d4; font-size:16px;
+    transition:all .2s; background:rgba(20,32,52,.5);
+    z-index:2; line-height:1;
+  }
+  #info .close:hover { border-color:rgba(160,200,255,.7); color:#e0ecff; background:rgba(30,50,80,.7); }
+
+  #info .tag { font-size:10px; color:#5a82b8; margin-bottom:8px; }
+  #info h2 { font-size:28px; font-weight:500; color:#eaf2ff; margin-bottom:6px; line-height:1.3; }
+  #info .subtitle {
+    font-size:12px; color:#7aa0d0; margin-bottom:22px; padding-bottom:22px;
+    border-bottom:1px solid rgba(90,150,255,.14);
+  }
+  #info .desc { font-size:13px; line-height:2; color:#a6bcd8; margin-bottom:26px; }
+  #info .section-label {
+    font-size:10px; color:#5a82b8; margin-bottom:12px;
+    display:flex; align-items:center; gap:10px; font-weight:500;
+  }
+  #info .section-label::after {
+    content:""; flex:1; height:1px;
+    background:linear-gradient(270deg, rgba(90,150,255,.25), transparent);
+  }
+  #info .stat {
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:9px 0; border-bottom:1px solid rgba(90,150,255,.07); gap:14px;
+  }
+  #info .stat:last-child { border-bottom:none; }
+  #info .stat .k { font-size:11.5px; color:#7a97be; flex-shrink:0; }
+  #info .stat .v {
+    font-size:13px; color:#dae6f8; text-align:left;
+    font-variant-numeric:tabular-nums; direction:ltr;
+  }
+  #info .stat .v small { color:#7a97be; font-size:10.5px; margin-right:3px; }
+  #info .stats { margin-bottom:26px; }
+
+  #info .bar-wrap { margin-bottom:20px; }
+  #info .bar-row { margin-bottom:14px; }
+  #info .bar-label {
+    display:flex; justify-content:space-between;
+    font-size:10.5px; color:#7a97be; margin-bottom:6px;
+  }
+  #info .bar-label b { color:#a8c3e4; font-weight:500; font-variant-numeric:tabular-nums; }
+  #info .bar-track { height:3px; background:rgba(90,150,255,.12); border-radius:2px; overflow:hidden; }
+  #info .bar-fill {
+    height:100%; background:linear-gradient(270deg, #4a7ac8, #8fb8ff);
+    border-radius:2px; width:0; transition:width .7s cubic-bezier(.22,.61,.36,1);
   }
 
-  .ticker {
-    position: relative; z-index: 2;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    background: rgba(10, 16, 30, 0.6);
-    overflow: hidden;
-  }
-  .ticker-track {
-    display: flex; gap: 60px;
-    padding: 22px 0;
-    animation: scroll 40s linear infinite;
-    white-space: nowrap;
-  }
-  @keyframes scroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(50%); }
-  }
-  .ticker-item {
-    display: inline-flex; align-items: center; gap: 12px;
-    font-size: 14px; color: var(--text-dim);
-    flex-shrink: 0;
-  }
-  .ticker-item .dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--gold);
-  }
-  .ticker-item strong { color: var(--text); font-weight: 700; font-size: 17px; }
-
-  section { position: relative; z-index: 2; padding: 110px 32px; }
-  .wrap { max-width: 1400px; margin: 0 auto; }
-  .section-eyebrow {
-    display: inline-block;
-    font-size: 12px; font-weight: 700;
-    color: var(--sky); margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(40px, 6vw, 88px);
-    font-weight: 400; line-height: 1.08;
-    margin-bottom: 20px;
-  }
-  .section-title .em { color: var(--gold); }
-  .section-lede {
-    font-size: 16px; color: var(--text-dim);
-    max-width: 660px; line-height: 2;
-    margin-bottom: 60px;
+  #info .fact {
+    font-size:12.5px; line-height:1.95; color:#94aecf;
+    padding:14px 16px; background:rgba(90,150,255,.06);
+    border-right:2px solid rgba(120,170,255,.45);
+    border-radius:3px; margin-bottom:12px;
   }
 
-  .numbers {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2px;
-    background: var(--line);
-    border-radius: 22px;
-    overflow: hidden;
-    border: 1px solid var(--line);
+  #info .feature-list {
+    margin-bottom: 22px;
+    display: flex; flex-direction: column; gap: 6px;
   }
-  .num-card {
-    background: var(--bg-2);
-    padding: 40px 28px;
+  #info .feature-item {
+    font-size: 12.5px; line-height: 1.75; color: #a6bcd8;
+    padding: 7px 22px 7px 12px; position: relative;
+    background: rgba(90,150,255,.035);
+    border-radius: 3px;
+    border-right: 1px solid rgba(120,170,255,.22);
   }
-  .num-card .value {
-    font-family: var(--font-display);
-    font-size: clamp(52px, 6vw, 78px);
-    line-height: 1;
-    background: linear-gradient(180deg, #fff 0%, var(--gold) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 12px;
-    direction: ltr;
-    text-align: right;
+  #info .feature-item::before {
+    content: "\25C2"; position: absolute;
+    right: 8px; color: #5a82b8; font-size: 10px; top: 9px;
   }
-  .num-card .value .suffix { font-size: 0.5em; margin-right: 4px; }
-  .num-card .label {
-    font-size: 13px; color: var(--text-dim); font-weight: 600;
+  #info .feature-item.mission {
+    background: rgba(255,200,100,.04);
+    border-right-color: rgba(255,200,100,.28);
+    color: #c9b88a;
   }
-  .num-card .sub {
-    font-size: 11.5px; color: var(--text-mute);
-    margin-top: 6px;
-    direction: ltr;
-    text-align: right;
+  #info .feature-item.mission::before {
+    content: "\25C9"; color: #c9a05a; font-size: 9px; top: 10px;
   }
 
-  .timeline { position: relative; padding-right: 40px; }
-  .timeline::before {
-    content: ''; position: absolute;
-    top: 20px; bottom: 20px; right: 14px;
-    width: 2px;
-    background: linear-gradient(180deg,
-      transparent 0%, var(--sky) 15%, var(--gold) 50%, var(--miami) 85%, transparent 100%);
-    opacity: 0.4;
+  #edit {
+    margin-top:26px; padding-top:22px;
+    border-top:1px solid rgba(90,150,255,.14);
   }
-  .tl-item {
-    position: relative;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 60px; align-items: center;
-    padding: 50px 0;
+  #edit .row {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:12px; gap:12px;
   }
-  .tl-item:nth-child(even) .tl-media { order: 2; }
-  .tl-item::before {
-    content: ''; position: absolute;
-    right: -33px; top: 60px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: var(--bg-2);
-    border: 3px solid var(--sky);
-    box-shadow: 0 0 20px var(--sky);
-    z-index: 2;
+  #edit .row label {
+    font-size:11px; color:#7a97be; flex-shrink:0; min-width:70px;
   }
-  .tl-item[data-era="barca"]::before { border-color: var(--barca); }
-  .tl-item[data-era="psg"]::before   { border-color: var(--psg); }
-  .tl-item[data-era="miami"]::before { border-color: var(--miami); }
-  .tl-item[data-era="arg"]::before   { border-color: var(--argentina); }
-
-  .tl-media {
-    position: relative; aspect-ratio: 4 / 3;
-    border-radius: 18px; overflow: hidden;
-    border: 1px solid var(--line);
-    background: #0a1020;
+  #edit .row .val {
+    font-size:12px; color:#dae6f8; font-variant-numeric:tabular-nums;
+    min-width:56px; text-align:left; direction:ltr;
   }
-  .tl-media img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform .6s;
+  #edit input[type=range] {
+    flex:1; height:2px;
+    -webkit-appearance:none; appearance:none;
+    background:rgba(90,150,255,.20);
+    border-radius:2px; outline:none; direction:ltr;
+    touch-action:manipulation;
   }
-  .tl-item:hover .tl-media img { transform: scale(1.05); }
-
-  .tl-year {
-    display: inline-block;
-    font-family: var(--font-display);
-    font-size: 15px;
-    padding: 6px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--line-hi);
-    color: var(--sky-2);
-    margin-bottom: 16px;
-    direction: ltr;
+  #edit input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none;
+    width:16px; height:16px; border-radius:50%;
+    background:#8fb8ff; cursor:pointer;
+    box-shadow:0 0 8px rgba(120,170,255,.6);
   }
-  .tl-item[data-era="barca"] .tl-year { color: #ff86aa; border-color: rgba(165,0,68,0.5); }
-  .tl-item[data-era="psg"]   .tl-year { color: #6fb4ff; border-color: rgba(0,65,112,0.6); }
-  .tl-item[data-era="miami"] .tl-year { color: var(--miami); border-color: rgba(247,181,205,0.5); }
-  .tl-item[data-era="arg"]   .tl-year { color: var(--argentina); border-color: rgba(117,199,245,0.5); }
-
-  .tl-title {
-    font-family: var(--font-display);
-    font-size: clamp(30px, 3.6vw, 48px);
-    line-height: 1.15;
-    margin-bottom: 16px;
+  #edit input[type=range]::-moz-range-thumb {
+    width:16px; height:16px; border-radius:50%;
+    background:#8fb8ff; cursor:pointer; border:none;
+    box-shadow:0 0 8px rgba(120,170,255,.6);
   }
-  .tl-desc {
-    font-size: 15px; color: var(--text-dim);
-    line-height: 2;
-    margin-bottom: 20px;
+  #edit .btn-row { display:flex; gap:8px; margin-top:18px; }
+  #edit .btn-row .action {
+    flex:1; text-align:center; padding:10px 12px; font-size:11px;
+    color:#a8c3e4; background:rgba(20,32,52,.6);
+    border:1px solid rgba(90,150,255,.25);
+    border-radius:14px; cursor:pointer; transition:all .2s;
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
   }
-  .tl-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tl-tag {
-    font-size: 11.5px;
-    font-weight: 600;
-    padding: 6px 14px; border-radius: 999px;
-    background: rgba(117, 199, 245, 0.08);
-    border: 1px solid rgba(117, 199, 245, 0.2);
-    color: var(--sky-2);
+  #edit .btn-row .action:hover {
+    color:#eaf2ff; border-color:rgba(160,200,255,.8);
+    background:rgba(30,50,80,.9);
+  }
+  #edit .btn-row .action.danger {
+    color:#e88a8a; border-color:rgba(255,120,120,.3);
+  }
+  #edit .btn-row .action.danger:hover {
+    color:#ffb0b0; border-color:rgba(255,150,150,.8);
+    background:rgba(60,20,30,.85);
   }
 
-  .trophies {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+  #bodies {
+    position:fixed; bottom:20px; right:20px; z-index:6;
+    display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;
+    max-width:52vw;
   }
-  .trophy {
-    padding: 32px 24px;
-    border-radius: 18px;
-    background: linear-gradient(145deg, rgba(245,197,24,0.06) 0%, rgba(14,22,40,0.8) 100%);
-    border: 1px solid rgba(245, 197, 24, 0.15);
-    transition: all .35s;
+  #bodies .chip {
+    font-size:11px; color:#7a97be;
+    padding:7px 14px; background:rgba(8,16,30,.72);
+    border:1px solid rgba(90,150,255,.20);
+    border-radius:14px; cursor:pointer;
+    transition:all .22s ease;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
   }
-  .trophy:hover {
-    transform: translateY(-4px);
-    border-color: var(--gold);
+  #bodies .chip:hover { color:#d8e8ff; border-color:rgba(140,190,255,.55); background:rgba(16,30,54,.85); }
+  #bodies .chip.active { color:#eaf2ff; border-color:rgba(160,200,255,.85); background:rgba(30,56,96,.9); box-shadow:0 0 16px rgba(90,150,255,.35); }
+
+  #spawn {
+    position:fixed; right:20px; top:60px; z-index:6;
+    width:280px; background:rgba(6,12,24,.85);
+    border:1px solid rgba(90,150,255,.18);
+    border-radius:12px; padding:18px 18px 20px;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    display:none; direction:rtl;
   }
-  .trophy .count {
-    font-family: var(--font-display);
-    font-size: 62px; line-height: 1;
-    color: var(--gold-2);
-    margin-bottom: 6px;
-    direction: ltr;
-    text-align: right;
+  #spawn.open { display:block; }
+  #spawn h3 { font-size:12px; color:#5a82b8; margin-bottom:16px; font-weight:500; }
+  #spawn .preset-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:6px;
+    margin-bottom:16px;
   }
-  .trophy .name {
-    font-size: 15px; font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
+  #spawn .preset {
+    text-align:center; padding:8px 4px; font-size:11px;
+    color:#a8c3e4; background:rgba(20,32,52,.6);
+    border:1px solid rgba(90,150,255,.20);
+    border-radius:10px; cursor:pointer; transition:all .2s;
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
   }
-  .trophy .years {
-    font-size: 12px; color: var(--text-mute);
-    line-height: 1.7;
-    direction: ltr;
-    text-align: right;
+  #spawn .preset:hover {
+    color:#eaf2ff; border-color:rgba(160,200,255,.7);
+    background:rgba(30,50,80,.9);
+  }
+  #spawn .hint { font-size:11px; line-height:1.9; color:#6f8bb0; }
+
+  #spawnToggle {
+    position:fixed; right:20px; top:18px; z-index:7;
+    padding:8px 14px; font-size:11px;
+    color:#a8c3e4; background:rgba(8,16,30,.72);
+    border:1px solid rgba(90,150,255,.25);
+    border-radius:14px; cursor:pointer; transition:all .2s;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
+  }
+  #spawnToggle:hover { color:#eaf2ff; border-color:rgba(160,200,255,.7); background:rgba(20,40,70,.85); }
+
+  #qualityToggle {
+    position:fixed; right:20px; top:56px; z-index:7;
+    padding:6px 12px; font-size:10px;
+    color:#7a97be; background:rgba(8,16,30,.72);
+    border:1px solid rgba(90,150,255,.15);
+    border-radius:12px; cursor:pointer; transition:all .2s;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    font-family:'Vazirmatn', sans-serif;
+    -webkit-user-select:none; user-select:none;
+    touch-action:manipulation;
+  }
+  #qualityToggle:hover { color:#cfe4ff; border-color:rgba(140,190,255,.5); }
+
+  /* تبلت / موبایل متوسط */
+  @media (max-width:1024px) {
+    #info { width:380px; padding:28px 22px 36px; }
+  }
+  @media (max-width:820px) {
+    #info { width:100vw; padding:28px 22px 36px; }
+    #bodies { bottom:14px; right:14px; gap:4px; max-width:70vw; }
+    #bodies .chip { padding:7px 11px; font-size:10px; }
+    #title { font-size:12px; }
+    #timebar { top:auto; bottom:76px; font-size:10px; padding:6px 12px; gap:8px; }
+    #timebar .btn { width:30px; height:30px; font-size:12px; }
+    #spawnToggle { display:none; }
+    #qualityToggle { top:56px; right:14px; }
+    #spawn { top:60px; right:12px; width:240px; }
+    #status { font-size:10px; top:14px; left:14px; }
+    #hud { font-size:10px; left:14px; bottom:14px; max-width:60vw; }
+    #title { top:14px; right:14px; }
+  }
+  @media (max-width:480px) {
+    #hud { display:none; }
+    #status { font-size:9.5px; }
+    #timebar .readout { min-width:80px; font-size:9.5px; }
+    #bodies .chip { padding:6px 9px; font-size:9.5px; }
+    #info h2 { font-size:22px; }
+    #info .desc { font-size:12px; line-height:1.9; }
   }
 
-  .wc {
-    position: relative;
-    border-radius: 28px;
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(117,199,245,0.08) 0%, rgba(5,8,16,0.9) 100%);
-    border: 1px solid var(--line);
-  }
-  .wc-grid {
-    display: grid; grid-template-columns: 1.1fr 1fr;
-    align-items: center;
-  }
-  .wc-media {
-    position: relative; aspect-ratio: 4 / 5;
-    overflow: hidden;
-    background: #0a1020;
-  }
-  .wc-media img { width: 100%; height: 100%; object-fit: cover; }
-  .wc-content { padding: 60px 20px 60px 60px; }
-  .wc-content .wc-label {
-    font-size: 12px; color: var(--gold); font-weight: 700; margin-bottom: 20px;
-  }
-  .wc-content h3 {
-    font-family: var(--font-display);
-    font-size: clamp(34px, 4.5vw, 60px);
-    line-height: 1.1;
-    margin-bottom: 24px;
-    direction: ltr;
-    text-align: right;
-  }
-  .wc-content p {
-    font-size: 15px; color: var(--text-dim);
-    line-height: 2; margin-bottom: 26px;
-  }
-  .wc-stats {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 12px; margin-top: 26px;
-  }
-  .wc-stat {
-    padding: 16px 12px;
-    background: rgba(14, 22, 40, 0.6);
-    border: 1px solid var(--line);
-    border-radius: 12px; text-align: center;
-  }
-  .wc-stat .v {
-    font-family: var(--font-display);
-    font-size: 36px;
-    color: var(--gold-2); line-height: 1;
-  }
-  .wc-stat .k {
-    font-size: 11px; color: var(--text-mute);
-    margin-top: 6px;
-  }
-
-  .rivalry {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  .rival-card {
-    padding: 40px 32px;
-    border-radius: 20px;
-    background: rgba(14, 22, 40, 0.6);
-    border: 1px solid var(--line);
-  }
-  .rival-card.messi { border-color: rgba(117, 199, 245, 0.4); }
-  .rival-card.ronaldo { border-color: rgba(165, 0, 68, 0.4); }
-  .rival-card .name {
-    font-family: var(--font-display);
-    font-size: 40px;
-    margin-bottom: 4px;
-  }
-  .rival-card.messi .name { color: var(--sky-2); }
-  .rival-card.ronaldo .name { color: #ff86aa; }
-  .rival-card .role {
-    font-size: 12px; color: var(--text-mute);
-    margin-bottom: 28px;
-    direction: ltr;
-    text-align: right;
-  }
-  .rival-stat {
-    display: flex; justify-content: space-between;
-    align-items: baseline;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .rival-stat:last-child { border-bottom: none; }
-  .rival-stat .k { font-size: 13px; color: var(--text-dim); }
-  .rival-stat .v {
-    font-family: var(--font-display);
-    font-size: 24px;
-    direction: ltr;
-  }
-  .rival-card.messi .v { color: var(--sky-2); }
-  .rival-card.ronaldo .v { color: #ff86aa; }
-
-  .quotes-wrap {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-  }
-  .quote {
-    padding: 36px 32px;
-    border-radius: 20px;
-    background: rgba(14, 22, 40, 0.5);
-    border: 1px solid var(--line);
-    position: relative;
-  }
-  .quote::before {
-    content: '”';
-    position: absolute; top: 10px; right: 20px;
-    font-family: var(--font-display);
-    font-size: 90px; line-height: 1;
-    color: rgba(245, 197, 24, 0.25);
-  }
-  .quote-text {
-    font-size: 15px; line-height: 2;
-    color: var(--text); margin-bottom: 22px;
-    position: relative;
-  }
-  .quote-author {
-    font-size: 13px; font-weight: 700;
-    color: var(--gold-2);
-  }
-  .quote-role {
-    font-size: 11.5px; color: var(--text-mute);
-  }
-
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-  }
-  .gallery .g-item {
-    aspect-ratio: 3/4;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: #0a1020;
-  }
-  .gallery .g-item img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform .6s;
-  }
-  .gallery .g-item:hover img { transform: scale(1.06); }
-
-  .fan-zone {
-    position: relative;
-    border-radius: 24px; overflow: hidden;
-    min-height: 500px;
-    display: flex; align-items: flex-end;
-    background: #0a1020;
-  }
-  .fan-zone img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: cover;
-  }
-  .fan-zone::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(5,8,16,0.4) 0%, rgba(5,8,16,0.95) 90%);
-    pointer-events: none;
-  }
-  .fan-content {
-    position: relative; z-index: 2;
-    padding: 60px 48px;
-    max-width: 720px;
-  }
-  .fan-content h3 {
-    font-family: var(--font-display);
-    font-size: clamp(32px, 4vw, 56px);
-    line-height: 1.15;
-    margin-bottom: 20px;
-  }
-  .fan-content p {
-    font-size: 15px; color: var(--text-dim); line-height: 2;
-  }
-
-  footer {
-    position: relative; z-index: 2;
-    padding: 60px 32px 40px;
-    border-top: 1px solid var(--line);
-    background: rgba(5, 8, 16, 0.9);
-  }
-  .footer-wrap {
-    max-width: 1400px; margin: 0 auto;
-    display: flex; flex-wrap: wrap; gap: 40px;
-    justify-content: space-between; align-items: flex-start;
-  }
-  .footer-brand {
-    font-family: var(--font-display);
-    font-size: 36px;
-    margin-bottom: 12px;
-    background: linear-gradient(90deg, var(--argentina), var(--gold-2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .footer-meta {
-    font-size: 12.5px; color: var(--text-mute);
-    line-height: 2;
-  }
-
-  .reveal {
-    opacity: 0; transform: translateY(30px);
-    transition: opacity .8s, transform .8s;
-  }
-  .reveal.in { opacity: 1; transform: translateY(0); }
-
-  @media (max-width: 1024px) {
-    .hero-grid { grid-template-columns: 1fr; gap: 50px; }
-    .hero-portrait { max-width: 460px; margin: 0 auto; }
-    .wc-grid { grid-template-columns: 1fr; }
-    .wc-media { aspect-ratio: 16/10; }
-    .wc-content { padding: 40px 32px; }
-    .rivalry { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 820px) {
-    .nav-links { display: none; }
-    .menu-btn { display: flex; }
-    section { padding: 80px 20px; }
-    .hero { padding: 110px 20px 60px; }
-    .tl-item { grid-template-columns: 1fr; gap: 24px; padding: 36px 0; }
-    .tl-item:nth-child(even) .tl-media { order: 0; }
-    .tl-item::before { top: 40px; }
-    .fan-content { padding: 40px 24px; }
-    .footer-wrap { gap: 24px; }
-  }
-  @media (max-width: 480px) {
-    nav.top { padding: 12px 16px; }
-    .hero { padding: 100px 16px 50px; }
-    .hero-title { font-size: clamp(56px, 15vw, 84px); }
-    .hero-sub { font-size: 15px; }
-    section { padding: 70px 16px; }
-    .num-card { padding: 28px 20px; }
-    .trophy { padding: 24px 20px; }
-    .trophy .count { font-size: 48px; }
-    .quote { padding: 28px 22px; }
-    .wc-content { padding: 30px 20px; }
-    .wc-stats { grid-template-columns: 1fr; }
-    .rival-card { padding: 28px 22px; }
-    .footer-brand { font-size: 26px; }
-  }
-
-  .mobile-menu {
-    position: fixed; inset: 0; z-index: 99;
-    background: rgba(5, 8, 16, 0.98);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 26px;
-    opacity: 0; visibility: hidden;
-    transition: opacity .3s, visibility .3s;
-  }
-  .mobile-menu.open { opacity: 1; visibility: visible; }
-  .mobile-menu a {
-    font-family: var(--font-display);
-    font-size: 34px;
-    color: var(--text);
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<div class="aura"></div>
+<div id="loading">
+  <div>در حال ساخت جهان‌ها…</div>
+  <div class="bar"><i id="loadBar"></i></div>
+</div>
+<div id="title">منظومه شمسی — شبیه‌سازی N-Body</div>
 
-<nav class="top" id="nav">
-  <div class="brand">
-    <div class="mark">۱۰</div>
-    <div class="name">مسی</div>
-  </div>
-  <div class="nav-links">
-    <a href="#timeline">مسیر</a>
-    <a href="#trophies">جام‌ها</a>
-    <a href="#worldcup">جام جهانی</a>
-    <a href="#rivalry">رقابت</a>
-    <a href="#records">رکوردها</a>
-    <a href="#gallery">گالری</a>
-  </div>
-  <button class="menu-btn" id="menuBtn" aria-label="منو">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-      <line x1="4" y1="7" x2="20" y2="7"></line>
-      <line x1="4" y1="12" x2="20" y2="12"></line>
-      <line x1="4" y1="17" x2="20" y2="17"></line>
-    </svg>
-  </button>
-</nav>
+<div id="spawnToggle">+ افزودن جرم</div>
+<div id="qualityToggle">کیفیت: خودکار</div>
 
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#timeline">مسیر</a>
-  <a href="#trophies">جام‌ها</a>
-  <a href="#worldcup">جام جهانی</a>
-  <a href="#rivalry">رقابت</a>
-  <a href="#records">رکوردها</a>
-  <a href="#gallery">گالری</a>
+<div id="status"></div>
+
+<div id="timebar">
+  <div class="btn" id="btnSlower">−</div>
+  <div class="btn" id="btnPause">❚❚</div>
+  <div class="btn" id="btnFaster">+</div>
+  <div class="readout" id="timeReadout">۱.۰× <small>واقعی</small></div>
 </div>
 
-<header class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid">
-    <div class="hero-copy">
-      <div class="eyebrow">روساریو · بارسلونا · پاریس · میامی</div>
-      <h1 class="hero-title">لیونل<br><span class="gold">مسی.</span></h1>
-      <p class="hero-sub">
-        هشت توپ طلا. چهل و هفت جام. یک جام جهانی که در لوسیل بالای سرش رفت.
-        پرافتخارترین بازیکن تاریخ فوتبال — همان شماره دهی که همه‌چیز را
-        طوری رقم زد که انگار از قبل نوشته شده بود.
-      </p>
-      <div class="hero-cta">
-        <a href="#timeline" class="btn btn-primary">از کجا شروع شد</a>
-        <a href="#worldcup" class="btn btn-ghost">جام جهانی ۲۰۲۲</a>
-      </div>
-    </div>
-    <div class="hero-portrait">
-      <img src="./images/images.webp" alt="لیونل مسی">
-      <div class="hero-badge">
-        <div class="num">۱۰</div>
-        <div class="label">کاپیتان آرژانتین<br>قهرمان جهان</div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<div class="ticker" aria-hidden="true">
-  <div class="ticker-track" id="tickerTrack"></div>
+<div id="hud">
+  <b>کشیدن</b> برای چرخش &nbsp;·&nbsp; <b>اسکرول</b> برای زوم &nbsp;·&nbsp; <b>WASD</b> برای پرواز &nbsp;·&nbsp; <b>R / F</b> بالا / پایین &nbsp;·&nbsp; <b>Shift</b> سرعت<br>
+  <b>کلیک</b> روی یک جرم برای انتخاب &nbsp;·&nbsp; <b>Esc</b> لغو انتخاب &nbsp;·&nbsp; <b>P</b> توقف &nbsp;·&nbsp; <b>[ / ]</b> زمان
 </div>
 
-<section id="numbers">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">با عدد حرف بزنیم</span>
-    <h2 class="section-title reveal">کارنامه در یک <span class="em">نگاه.</span></h2>
-    <p class="section-lede reveal">
-      بیش از هزار و صد بازی رسمی. عددهایی که خواندنشان شبیه اشتباه تایپی است،
-      ولی اشتباه نیستند.
-    </p>
-    <div class="numbers reveal" id="numbersGrid"></div>
+<div id="spawn">
+  <h3>افزودن جرم آسمانی</h3>
+  <div class="preset-row" id="presetRow"></div>
+  <div class="hint">
+    در موقعیت فعلی دوربین، با سرعت مداری محاسبه‌شده بر اساس جرم خورشید، در صفحه مداری محلی اضافه می‌شود.
   </div>
-</section>
+</div>
 
-<section id="timeline">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">جاده</span>
-    <h2 class="section-title reveal">از <span class="em">روساریو</span> تا دنیا.</h2>
-    <p class="section-lede reveal">
-      شش تکه از زندگی‌ای که شماره ده را ساخت.
-    </p>
-    <div class="timeline" id="timelineEl"></div>
-  </div>
-</section>
+<div id="bodies"></div>
 
-<section id="trophies">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">قفسه</span>
-    <h2 class="section-title reveal">چهل و هفت <span class="em">جام.</span></h2>
-    <p class="section-lede reveal">
-      باشگاهی و ملی. ده لالیگا، چهار لیگ قهرمانان، یک طلای المپیک، دو کوپا آمه‌ریکا.
-    </p>
-    <div class="trophies reveal" id="trophyGrid"></div>
-  </div>
-</section>
+<aside id="info">
+  <div class="close" id="closeInfo">×</div>
+  <div id="infoContent"></div>
+</aside>
 
-<section id="worldcup">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">قطر ۲۰۲۲</span>
-    <h2 class="section-title reveal">همان <span class="em">یکی</span> که کم بود.</h2>
-    <div class="wc reveal">
-      <div class="wc-grid">
-        <div class="wc-media">
-          <img src="./images/images%20(1).webp" alt="خوشحالی مسی">
-        </div>
-        <div class="wc-content">
-          <div class="wc-label">۱۸ دسامبر ۲۰۲۲ · ورزشگاه لوسیل</div>
-          <h3>آرژانتین ۳–۳ فرانسه<br>(۴–۲ در پنالتی)</h3>
-          <p>
-            مسی در آن فینال دو گل زد — یکی از روی نقطه پنالتی، یکی در وقت‌های اضافه —
-            و پنالتی‌اش را در ضربات پنالتی هم گل کرد. در کل تورنمنت هفت گل زد و سه پاس گل داد.
-            توپ طلای جام را برای بار دوم برد؛ اولین کسی که این جایزه را دو بار گرفته.
-          </p>
-          <div class="wc-stats">
-            <div class="wc-stat"><div class="v">۷</div><div class="k">گل</div></div>
-            <div class="wc-stat"><div class="v">۳</div><div class="k">پاس گل</div></div>
-            <div class="wc-stat"><div class="v">۲</div><div class="k">توپ طلا</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="rivalry">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">آن دوره</span>
-    <h2 class="section-title reveal">دو اسم. <span class="em">یک دهه.</span></h2>
-    <p class="section-lede reveal">
-      نزدیک به بیست سال، این بحث با هر فصل جلو رفت. بیشترش را عددها حل می‌کنند.
-    </p>
-    <div class="rivalry reveal">
-      <div class="rival-card messi">
-        <div class="name">مسی</div>
-        <div class="role">آرژانتین · بارسلونا · پاری سن ژرمن · اینتر میامی</div>
-        <div class="rival-stat"><span class="k">توپ طلا</span><span class="v">۸</span></div>
-        <div class="rival-stat"><span class="k">جام جهانی</span><span class="v">۱</span></div>
-        <div class="rival-stat"><span class="k">لیگ قهرمانان</span><span class="v">۴</span></div>
-        <div class="rival-stat"><span class="k">گل در سطح بزرگسالان</span><span class="v">+۹۰۰</span></div>
-        <div class="rival-stat"><span class="k">پاس گل</span><span class="v">+۴۲۰</span></div>
-        <div class="rival-stat"><span class="k">جام‌های مهم</span><span class="v">۴۷</span></div>
-      </div>
-      <div class="rival-card ronaldo">
-        <div class="name">کریستیانو رونالدو</div>
-        <div class="role">پرتغال · رئال مادرید · منچستر یونایتد · یوونتوس · النصر</div>
-        <div class="rival-stat"><span class="k">توپ طلا</span><span class="v">۵</span></div>
-        <div class="rival-stat"><span class="k">جام جهانی</span><span class="v">۰</span></div>
-        <div class="rival-stat"><span class="k">لیگ قهرمانان</span><span class="v">۵</span></div>
-        <div class="rival-stat"><span class="k">گل در سطح بزرگسالان</span><span class="v">+۹۰۰</span></div>
-        <div class="rival-stat"><span class="k">پاس گل</span><span class="v">+۲۶۰</span></div>
-        <div class="rival-stat"><span class="k">جام‌های مهم</span><span class="v">۳۵</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="records">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">دیوار</span>
-    <h2 class="section-title reveal">رکوردهایی که <span class="em">تکان</span> نمی‌خورند.</h2>
-    <p class="section-lede reveal">
-      یک لیست ناقص — چون لیست کامل از توی صفحه بیرون می‌زند.
-    </p>
-    <div class="trophies reveal" id="recordsGrid"></div>
-  </div>
-</section>
-
-<section id="gallery">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">آلبوم</span>
-    <h2 class="section-title reveal">قاب‌های <span class="em">ماندگار.</span></h2>
-    <p class="section-lede reveal">
-      نُه قاب از مسیری که هنوز تمام نشده.
-    </p>
-    <div class="gallery reveal" id="galleryGrid"></div>
-  </div>
-</section>
-
-<section id="quotes">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">حکم</span>
-    <h2 class="section-title reveal">دیگران چه <span class="em">گفتند.</span></h2>
-    <p class="section-lede reveal">
-      از زبان کسانی که مربی‌اش بودند، با او بازی کردند، و مقابلش دفاع کردند.
-    </p>
-    <div class="quotes-wrap reveal" id="quotesGrid"></div>
-  </div>
-</section>
-
-<section id="fans">
-  <div class="wrap">
-    <span class="section-eyebrow reveal">دنیا تماشا می‌کند</span>
-    <h2 class="section-title reveal">بیشتر از یک <span class="em">فوتبالیست.</span></h2>
-    <div class="fan-zone reveal">
-      <img src="./images/images%20(7).webp" alt="هواداران آرژانتین">
-      <div class="fan-content">
-        <h3>از روساریو تا هر گوشه‌ی زمین.</h3>
-        <p>
-          وقتی اینتر میامی خبر پیوستنش را داد، اینستاگرام باشگاه در یک روز پنج میلیون
-          فالوور گرفت. پیراهنش پرفروش‌ترین پیراهن دنیا شد. یک کشور سه میلیون نفری
-          تقویم فوتبالش را عوض کرد. هر ورزشگاهی که واردش می‌شود پر می‌شود.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="footer-wrap">
-    <div>
-      <div class="footer-brand">مسی · ۱۰</div>
-      <div class="footer-meta">
-        یک سایت هواداری غیررسمی. آمار و نقل‌قول‌ها از ویکی‌پدیا، messi.com، ESPN و MLSsoccer.com.
-      </div>
-    </div>
-    <div class="footer-meta" style="text-align:left;">
-      <div>یک صفحه‌ی استاتیک تک‌فایلی.</div>
-      <div>© پروژه‌ی هواداری.</div>
-    </div>
-  </div>
-</footer>
-
-<script>
-const FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-const toFa = (s) => String(s).replace(/[0-9]/g, d => FA[+d]);
-
-const TICKER = [
-  ['۸', 'توپ طلا'], ['۶', 'کفش طلای اروپا'], ['۴۷', 'جام مهم'],
-  ['+۹۰۰', 'گل در سطح بزرگسالان'], ['+۴۲۰', 'پاس گل'], ['۲۰۸', 'بازی ملی'],
-  ['۱۲۶', 'گل ملی'], ['۴', 'لیگ قهرمانان'], ['۱۰', 'لالیگا'],
-  ['۲', 'کوپا آمه‌ریکا'], ['۱', 'جام جهانی'], ['۱', 'طلای المپیک'],
-  ['۶۷۲', 'گل برای بارسلونا'], ['۴۷۴', 'گل در لالیگا']
-];
-
-const NUMBERS = [
-  { v: 8,   suffix: '', label: 'توپ طلا', sub: '۲۰۰۹ · ۲۰۱۰ · ۲۰۱۱ · ۲۰۱۲ · ۲۰۱۵ · ۲۰۱۹ · ۲۰۲۱ · ۲۰۲۳' },
-  { v: 47,  suffix: '', label: 'جام مهم', sub: 'باشگاهی و ملی' },
-  { v: 900, suffix: '+', label: 'گل در سطح بزرگسالان', sub: 'دومین گلزن تاریخ' },
-  { v: 420, suffix: '+', label: 'پاس گل', sub: 'رکورد تمام دوران‌ها' },
-  { v: 208, suffix: '', label: 'بازی ملی', sub: 'رکورد آرژانتین' },
-  { v: 126, suffix: '', label: 'گل ملی', sub: 'رکورد آرژانتین' },
-  { v: 672, suffix: '', label: 'گل برای یک باشگاه', sub: 'بارسلونا' },
-  { v: 76,  suffix: '', label: 'گل از ضربه‌ی آزاد مستقیم', sub: 'دومین در تاریخ' }
-];
-
-const TIMELINE = [
-  {
-    era: 'arg', years: '۱۹۸۷ — ۲۰۰۰', title: 'روساریو و نیولز اولد بویز',
-    desc: 'بیست و چهارم ژوئن ۱۹۸۷ در روساریو به دنیا آمد. چهار سالگی به گرندولی رفت، هفت سالگی به نیولز اولد بویز. ده سالگی، تشخیص کمبود هورمون رشد. بارسلونا یک استعدادیاب فرستاد.',
-    tags: ['روساریو', 'نیولز', 'درمان هورمون رشد'],
-    img: 'images%20(2).webp'
-  },
-  {
-    era: 'barca', years: '۲۰۰۰ — ۲۰۰۴', title: 'قرارداد روی دستمال کاغذی',
-    desc: 'سپتامبر ۲۰۰۰، سیزده سالگی، تست در بارسلونا. کارلس رکساچ قرارداد را روی دستمال کاغذی نوشت. فوریه ۲۰۰۱، خانواده به کاتالونیا کوچ کرد. بعد لاماسیا و سی و شش گل در سی بازی.',
-    tags: ['لاماسیا', 'قرارداد دستمالی', '۳۶ گل در ۳۰ بازی'],
-    img: 'images%20(3).webp'
-  },
-  {
-    era: 'barca', years: '۲۰۰۴ — ۲۰۲۱', title: 'بارسلونا — هفده سال، سی و چهار جام',
-    desc: 'شانزدهم اکتبر ۲۰۰۴، هفده سالگی، اولین بازی. زیر دست پپ گواردیولا شد نقطه‌ی ثقل بهترین تیم باشگاهی تاریخ. ششصد و هفتاد و دو گل، بیشترین گلی که کسی برای یک باشگاه زده. اوت ۲۰۲۱، اشک در نیوکمپ.',
-    tags: ['۴ لیگ قهرمانان', '۱۰ لالیگا', '۶۷۲ گل'],
-    img: 'images%20(4).webp'
-  },
-  {
-    era: 'psg', years: '۲۰۲۱ — ۲۰۲۳', title: 'پاری سن ژرمن',
-    desc: 'دو روز بعد از خداحافظی نیوکمپ، به پی‌اس‌جی پیوست. دو لالیگ فرانسه. فصل ۲۰۲۲-۲۳ شانزده گل و شانزده پاس گل داد، برترین گلزن تاریخ باشگاهی اروپا شد.',
-    tags: ['۲ لالیگ فرانسه', '۷۰۲ گل باشگاهی اروپا'],
-    img: 'images%20(5).webp'
-  },
-  {
-    era: 'arg', years: '۲۰۲۱ — ۲۰۲۴', title: 'کوپا آمه‌ریکا، جام جهانی، کوپا آمه‌ریکا',
-    desc: 'خشکسالی تمام شد. برزیل در فینال کوپا آمه‌ریکا ۲۰۲۱ در ماراکانا باخته شد. بعد فینالیسیما، بعد قطر. هفت گل و سه پاس در جام جهانی ۲۰۲۲، و جام در لوسیل بالا رفت. سال ۲۰۲۴ آرژانتین دوباره کوپا آمه‌ریکا را برد.',
-    tags: ['کوپا آمه‌ریکا ۲۰۲۱', 'جام جهانی ۲۰۲۲'],
-    img: 'images%20(6).webp'
-  },
-  {
-    era: 'miami', years: '۲۰۲۳ — تا امروز', title: 'اینتر میامی و توپ طلای هشتم',
-    desc: 'پانزدهم ژوئیه ۲۰۲۳، مسی به اینتر میامی پیوست. توپ طلای هشتم در اکتبر. سال ۲۰۲۵ میامی را به اولین جام ام‌ال‌اس رساند، دومین ام‌وی‌پی پشت سر هم را گرفت.',
-    tags: ['جام ام‌ال‌اس ۲۰۲۵', 'دو بار ام‌وی‌پی'],
-    img: 'download.webp'
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
   }
-];
+}
+</script>
 
-const TROPHIES = [
-  { count: 8,  name: 'توپ طلا', years: '۲۰۰۹، ۲۰۱۰، ۲۰۱۱، ۲۰۱۲، ۲۰۱۵، ۲۰۱۹، ۲۰۲۱، ۲۰۲۳' },
-  { count: 1,  name: 'جام جهانی فیفا', years: '۲۰۲۲' },
-  { count: 2,  name: 'کوپا آمه‌ریکا', years: '۲۰۲۱، ۲۰۲۴' },
-  { count: 1,  name: 'فینالیسیما', years: '۲۰۲۲' },
-  { count: 1,  name: 'طلای المپیک', years: '۲۰۰۸' },
-  { count: 1,  name: 'جام جهانی زیر ۲۰ سال', years: '۲۰۰۵' },
-  { count: 4,  name: 'لیگ قهرمانان اروپا', years: '۲۰۰۶، ۲۰۰۹، ۲۰۱۱، ۲۰۱۵' },
-  { count: 10, name: 'لالیگا', years: '۲۰۰۵، ۲۰۰۶، ۲۰۰۹، ۲۰۱۰، ۲۰۱۱، ۲۰۱۳، ۲۰۱۵، ۲۰۱۶، ۲۰۱۸، ۲۰۱۹' },
-  { count: 2,  name: 'لیگ ۱ فرانسه', years: '۲۰۲۲، ۲۰۲۳' },
-  { count: 1,  name: 'جام ام‌ال‌اس', years: '۲۰۲۵' },
-  { count: 1,  name: 'لیگ کاپ', years: '۲۰۲۳' },
-  { count: 7,  name: 'کوپا دل ری', years: '۲۰۰۹، ۲۰۱۲، ۲۰۱۵، ۲۰۱۶، ۲۰۱۷، ۲۰۱۸، ۲۰۲۱' },
-  { count: 8,  name: 'سوپرکوپا اسپانیا', years: '۲۰۰۵، ۲۰۰۶، ۲۰۰۹، ۲۰۱۰، ۲۰۱۱، ۲۰۱۳، ۲۰۱۶، ۲۰۱۸' },
-  { count: 3,  name: 'سوپرکاپ اروپا', years: '۲۰۰۹، ۲۰۱۱، ۲۰۱۵' },
-  { count: 3,  name: 'جام باشگاه‌های جهان', years: '۲۰۰۹، ۲۰۱۱، ۲۰۱۵' }
-];
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const RECORDS = [
-  { count: '۸',  name: 'توپ طلا', years: 'بیشترین در تاریخ' },
-  { count: '۲',  name: 'توپ طلای جام جهانی', years: 'اولین کسی که دو بار برد' },
-  { count: '۶',  name: 'کفش طلای اروپا', years: 'بیشترین در تاریخ' },
-  { count: '۶۷۲', name: 'گل برای یک باشگاه', years: 'بارسلونا' },
-  { count: '۴۷۴', name: 'گل در لالیگا', years: 'بیشترین در تاریخ' },
-  { count: '۱۲۶', name: 'گل ملی', years: 'رکورد آرژانتین' },
-  { count: '۲۰۸', name: 'بازی ملی', years: 'رکورد آرژانتین' },
-  { count: '+۴۲۰', name: 'پاس گل', years: 'رکورد تمام دوران‌ها' },
-  { count: '۱۲', name: 'پاس گل در جام جهانی', years: 'از ۱۹۶۶' },
-  { count: '۹۱', name: 'گل در یک سال میلادی', years: '۲۰۱۲' },
-  { count: '۷۳', name: 'گل در یک فصل', years: '۲۰۱۱-۱۲' },
-  { count: '۵',  name: 'پاس گل در یک بازی ام‌ال‌اس', years: '۲۰۲۴' }
-];
+/* ═══════════════════════════════════════════════════════════
+   DEVICE PROFILE — drives every quality decision below
+   ═══════════════════════════════════════════════════════════ */
+const UA = navigator.userAgent;
+const isIOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/.test(UA);
+const isMobileUA = isIOS || isAndroid || /Mobi/.test(UA);
+const cores = navigator.hardwareConcurrency || 2;
+const memGB = navigator.deviceMemory || (isMobileUA ? 3 : 8);
+const dpr = window.devicePixelRatio || 1;
+const screenArea = window.innerWidth * window.innerHeight;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const saveData = navigator.connection && navigator.connection.saveData;
 
-const GALLERY = [
-  'licensed-image.webp',
-  'images%20(1).webp',
-  'images%20(2).webp',
-  'images%20(3).webp',
-  'images%20(4).webp',
-  'images%20(5).webp',
-  'images%20(6).webp',
-  'images%20(7).webp',
-  'download.webp'
-];
+// WebGL capability probe
+function probeGPU() {
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl2') || c.getContext('webgl');
+    if (!gl) return { ok:false, maxTex:0 };
+    const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const maxAniso = gl.getExtension('EXT_texture_filter_anisotropic')
+      ? gl.getParameter(gl.getExtension('EXT_texture_filter_anisotropic').MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+      : 1;
+    const lose = gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return { ok:true, maxTex, maxAniso };
+  } catch { return { ok:false, maxTex:0 }; }
+}
+const GPU = probeGPU();
 
-const QUOTES = [
-  { text: 'مسی تنها بازیکنی است که با توپ سریع‌تر از بدون توپ می‌دود.', author: 'پپ گواردیولا', role: 'سرمربی سابق بارسلونا' },
-  { text: 'توپ به پایش چسبیده. من کسی با این کنترل توپ ندیده‌ام.', author: 'دیه‌گو مارادونا', role: 'قهرمان جام جهانی ۱۹۸۶' },
-  { text: 'همه‌ی ما را نابود کرد. چهار نفر را دریبل می‌زد و گل می‌کرد. یک موجود فضایی بود.', author: 'لودویک گیولی', role: 'هم‌تیمی سابق' },
-  { text: 'وقتی می‌دیدی‌اش فکر می‌کردی این بچه نمی‌تواند توپ بازی کند. ولی همان لحظه می‌فهمیدی متفاوت به دنیا آمده — یک پدیده.', author: 'آدریان کوریا', role: 'مربی نیولز اولد بویز' },
-  { text: 'همه‌ی افتخارات شخصی‌ام را می‌دهم تا با تیم ملی جام جهانی ببرم.', author: 'لیونل مسی', role: 'قبل از قطر ۲۰۲۲' },
-  { text: 'یک «قبل از مسی» و «بعد از مسی» داریم. او همه‌چیز را عوض کرد.', author: 'خاویر آسنسی', role: 'معاون اینتر میامی' },
-  { text: 'رونالدینیو به هم‌تیمی‌هایش گفت این بچه‌ی شانزده ساله از خودش هم بازیکن بهتری خواهد شد.', author: 'رختکن بارسلونا', role: '۲۰۰۳' },
-  { text: 'هر بار بازی‌اش را می‌بینم چیز تازه‌ای از فوتبال یاد می‌گیرم.', author: 'ژاوی', role: 'هم‌تیمی سابق' }
-];
+/* Score 0..100 → tier. Weighted so weak phones fall fast, strong desktops top out. */
+function computeTier() {
+  let score = 0;
+  score += Math.min(cores, 16) * 3.5;                 // 0..56
+  score += Math.min(memGB, 16) * 1.5;                  // 0..24
+  score += isMobileUA ? 0 : 14;
+  score += Math.min(dpr, 3) * 3;                       // 0..9
+  score += GPU.maxTex >= 8192 ? 8 : GPU.maxTex >= 4096 ? 4 : 0;
+  score += GPU.maxAniso >= 8 ? 4 : GPU.maxAniso >= 4 ? 2 : 0;
+  if (saveData) score -= 25;
+  if (reducedMotion) score -= 5;
+  return Math.max(0, Math.min(100, score));
+}
+const SCORE = computeTier();
 
-const $ = (sel) => document.querySelector(sel);
+let TIER = 'high';
+if (SCORE < 30) TIER = 'minimal';
+else if (SCORE < 55) TIER = 'low';
+else if (SCORE < 78) TIER = 'medium';
 
-function renderTicker() {
-  const track = $('#tickerTrack');
-  const html = TICKER.map(([num, label]) =>
-    `<span class="ticker-item"><strong>${toFa(num)}</strong> ${label}<span class="dot"></span></span>`
-  ).join('');
-  track.innerHTML = html + html;
+const PRESET = {
+  minimal: { texSize:256, segPlanet:24, segSun:32, stars:800,  starFar:false, aniso:1, shadow:false, bloom:false, bloomRes:0,   trails:180, substeps:4, dpr:1.0, cloudTex:0,   ringRes:256,  showAtmosphere:false },
+  low:     { texSize:512, segPlanet:32, segSun:48, stars:2200, starFar:true,  aniso:2, shadow:false, bloom:false, bloomRes:0,   trails:300, substeps:5, dpr:1.0, cloudTex:256, ringRes:512,  showAtmosphere:true  },
+  medium:  { texSize:768, segPlanet:48, segSun:64, stars:5000, starFar:true,  aniso:4, shadow:false, bloom:true,  bloomRes:0.6, trails:420, substeps:6, dpr:1.5, cloudTex:512, ringRes:1024, showAtmosphere:true  },
+  high:    { texSize:1024,segPlanet:72, segSun:96, stars:10000,starFar:true,  aniso:8, shadow:false, bloom:true,  bloomRes:1.0, trails:512, substeps:8, dpr:2.0, cloudTex:1024,ringRes:2048, showAtmosphere:true  },
+};
+
+let Q = PRESET[TIER];
+let qualityOverride = null;
+
+function applyQualityPreset(name) {
+  Q = PRESET[name];
+  qualityOverride = name;
+  renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer && composer.setSize(window.innerWidth, window.innerHeight);
+  if (bloomPass) bloomPass.enabled = Q.bloom;
+  bloom && bloomPass && (bloomPass.strength = bloom);
+  document.getElementById('qualityToggle').textContent = `کیفیت: ${name}`;
 }
 
-function renderNumbers() {
-  $('#numbersGrid').innerHTML = NUMBERS.map(n => `
-    <div class="num-card">
-      <div class="value" data-target="${n.v}">۰<span class="suffix">${n.suffix}</span></div>
-      <div class="label">${n.label}</div>
-      <div class="sub">${n.sub}</div>
-    </div>
-  `).join('');
+const tierLabel = { minimal:'حداقلی', low:'پایین', medium:'متوسط', high:'بالا' };
+
+/* ═══════════════════════════════════════════════════════════ */
+
+const G = 2.959122082855911e-4;
+const MASS_SUN = 1.0;
+const MU_SUN = G * MASS_SUN;
+const AU_TO_SCENE = 18.6;
+const DAYS_PER_SECOND_AT_1X = 365.25 / 45;
+const KM_PER_AU = 1.495978707e8;
+const SECONDS_PER_DAY = 86400;
+
+const PERSIAN_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+function toFa(str) {
+  return String(str).replace(/[0-9]/g, d => PERSIAN_DIGITS[+d]);
 }
 
-function renderTimeline() {
-  $('#timelineEl').innerHTML = TIMELINE.map(item => `
-    <div class="tl-item" data-era="${item.era}">
-      <div class="tl-media">
-        <img src="./images/${item.img}" alt="${item.title}" loading="lazy">
-      </div>
-      <div class="tl-body">
-        <div class="tl-year">${item.years}</div>
-        <h3 class="tl-title">${item.title}</h3>
-        <p class="tl-desc">${item.desc}</p>
-        <div class="tl-tags">
-          ${item.tags.map(t => `<span class="tl-tag">${t}</span>`).join('')}
-        </div>
-      </div>
-    </div>
-  `).join('');
+const createCanvas = (w, h) => {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+};
+
+function hash(x, y, s) {
+  let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 1442695041);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
 }
 
-function renderTrophies() {
-  $('#trophyGrid').innerHTML = TROPHIES.map(t => `
-    <div class="trophy">
-      <div class="count">${toFa(t.count)}</div>
-      <div class="name">${t.name}</div>
-      <div class="years">${t.years}</div>
-    </div>
-  `).join('');
+function pnoise(x, y, px, s) {
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf);
+  const v = yf * yf * (3 - 2 * yf);
+  const x0 = ((xi % px) + px) % px;
+  const x1 = (x0 + 1) % px;
+  const a = hash(x0, yi, s),     b = hash(x1, yi, s);
+  const c = hash(x0, yi + 1, s), d = hash(x1, yi + 1, s);
+  return (a + (b - a) * u) * (1 - v) + (c + (d - c) * u) * v;
 }
 
-function renderRecords() {
-  $('#recordsGrid').innerHTML = RECORDS.map(r => `
-    <div class="trophy">
-      <div class="count">${toFa(r.count)}</div>
-      <div class="name">${r.name}</div>
-      <div class="years">${r.years}</div>
-    </div>
-  `).join('');
-}
-
-function renderGallery() {
-  $('#galleryGrid').innerHTML = GALLERY.map((src, i) => `
-    <div class="g-item">
-      <img src="./images/${src}" alt="قاب ${toFa(i+1)}" loading="lazy">
-    </div>
-  `).join('');
-}
-
-function renderQuotes() {
-  $('#quotesGrid').innerHTML = QUOTES.map(q => `
-    <div class="quote">
-      <p class="quote-text">${q.text}</p>
-      <div>
-        <div class="quote-author">${q.author}</div>
-        <div class="quote-role">${q.role}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function animateCount(el) {
-  const target = parseFloat(el.dataset.target);
-  if (isNaN(target)) return;
-  const suffix = el.querySelector('.suffix');
-  const suffixHTML = suffix ? suffix.outerHTML : '';
-  const dur = 1400;
-  const start = performance.now();
-
-  function frame(now) {
-    const k = Math.min(1, (now - start) / dur);
-    const e = 1 - Math.pow(1 - k, 3);
-    el.innerHTML = toFa(Math.round(target * e)) + suffixHTML;
-    if (k < 1) requestAnimationFrame(frame);
+function pfbm(x, y, px, s, oct) {
+  let val = 0, amp = 0.5, f = 1, norm = 0;
+  for (let i = 0; i < oct; i++) {
+    val += amp * pnoise(x * f, y * f, px * f, s + i * 19);
+    norm += amp;
+    f *= 2; amp *= 0.5;
   }
-  requestAnimationFrame(frame);
+  return val / norm;
 }
 
-function setupObservers() {
-  const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        revealObs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
-
-  const countObs = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        animateCount(entry.target);
-        countObs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.4 });
-  document.querySelectorAll('.num-card .value').forEach(el => countObs.observe(el));
+function pridge(x, y, px, s, oct) {
+  let val = 0, amp = 0.5, f = 1, norm = 0;
+  for (let i = 0; i < oct; i++) {
+    let n = pnoise(x * f, y * f, px * f, s + i * 23);
+    n = 1 - Math.abs(n * 2 - 1);
+    n *= n;
+    val += amp * n;
+    norm += amp;
+    f *= 2; amp *= 0.5;
+  }
+  return val / norm;
 }
 
-function setupNav() {
-  const nav = $('#nav');
-  const menuBtn = $('#menuBtn');
-  const mobileMenu = $('#mobileMenu');
+let maxAniso = 1;
 
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  }, { passive: true });
+function buildTexture(w, h, sampler) {
+  const cv  = createCanvas(w, h);
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d   = img.data;
+  const PX  = 8, NY = PX / 2;
+  for (let y = 0; y < h; y++) {
+    const v = y / h, ny = v * NY;
+    for (let x = 0; x < w; x++) {
+      const u = x / w, nx = u * PX;
+      const col = sampler(u, v, nx, ny);
+      const i = (y * w + x) * 4;
+      d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2];
+      d[i + 3] = col.length > 3 ? col[3] : 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAniso;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
 
-  menuBtn.addEventListener('click', () => {
-    const open = mobileMenu.classList.toggle('open');
-    document.body.classList.toggle('menu-open', open);
+function buildHeightMap(w, h, sampler) {
+  const cv = createCanvas(w, h);
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+  const PX = 8, NY = PX / 2;
+  for (let y = 0; y < h; y++) {
+    const v = y / h, ny = v * NY;
+    for (let x = 0; x < w; x++) {
+      const u = x / w, nx = u * PX;
+      const hv = Math.max(0, Math.min(1, sampler(u, v, nx, ny)));
+      const i = (y * w + x) * 4;
+      const g = hv * 255;
+      d[i] = g; d[i + 1] = g; d[i + 2] = g; d[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.NoColorSpace;
+  tex.anisotropy = maxAniso;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const SAMPLERS = {
+  sun: (u, v, nx, ny) => {
+    const gran = pfbm(nx * 6, ny * 6, 48, 901, 5);
+    const cell = pridge(nx * 14, ny * 14, 112, 903, 3);
+    const big  = pfbm(nx * 2, ny * 2, 16, 907, 3);
+    let t = gran * 0.42 + cell * 0.28 + big * 0.30;
+    t = Math.pow(t, 1.35);
+    const limb = 1 - Math.pow(Math.abs(v - 0.5) * 2, 2.2) * 0.18;
+    t *= limb;
+    return [255, 140 + t * 105, 20 + t * 200];
+  },
+  mercury: (u, v, nx, ny) => {
+    const base = pfbm(nx * 2, ny * 2, 16, 11, 6);
+    const rid  = pridge(nx * 5, ny * 5, 40, 13, 5);
+    const fine = pfbm(nx * 16, ny * 16, 128, 17, 3);
+    let t = base * 0.42 + rid * 0.40 + fine * 0.18;
+    t = Math.pow(t, 1.25);
+    const mare = pfbm(nx * 3, ny * 3, 24, 19, 4);
+    const m = Math.max(0, mare - 0.52) * 1.4;
+    const g = 46 + t * 150 - m * 40;
+    return [g * 1.05, g * 1.0, g * 0.90];
+  },
+  venus: (u, v, nx, ny) => {
+    const warp = (pfbm(nx * 2, ny * 3, 16, 31, 5) - 0.5) * 3.2;
+    const n = pfbm(nx * 3 + warp, ny * 6, 24, 37, 5);
+    const s = pfbm(nx * 8 + warp * 0.6, ny * 10, 64, 41, 4);
+    const band = 0.5 + 0.5 * Math.sin((v + warp * 0.08) * Math.PI * 9);
+    let t = n * 0.48 + s * 0.32 + band * 0.20;
+    return [206 + t * 49, 172 + t * 66, 96 + t * 116];
+  },
+  earth: (u, v, nx, ny) => {
+    const lat = Math.abs(v - 0.5) * 2;
+    const cont = pfbm(nx * 2, ny * 2, 16, 101, 6);
+    const detail = pfbm(nx * 8, ny * 8, 64, 131, 5);
+    const ridge = pridge(nx * 4, ny * 4, 32, 137, 4);
+    let e = cont * 0.62 + detail * 0.26 + ridge * 0.12;
+    e = (e - 0.5) * 1.55 + 0.52;
+    let r, g, b;
+    if (e < 0.52) {
+      const t = Math.max(0, e) / 0.52;
+      r = 4 + t * 20; g = 20 + t * 82; b = 66 + t * 106;
+    } else {
+      const t = Math.min(1, (e - 0.52) / 0.34);
+      const dry = pfbm(nx * 6, ny * 6, 48, 199, 4);
+      const veg = pfbm(nx * 3, ny * 3, 24, 211, 4);
+      const tropical = 1 - Math.min(1, Math.abs(lat - 0.28) * 3.5);
+      const desert = Math.max(0, dry - 0.45) * 1.6 * tropical;
+      let lr = 62 + t * 108 + dry * 40;
+      let lg = 104 + t * 30 - dry * 40;
+      let lb = 46 + t * 50 - dry * 8;
+      const vg = veg * (1 - desert) * 0.55;
+      lg += vg * 34; lr -= vg * 22; lb -= vg * 12;
+      const mountain = Math.max(0, ridge - 0.62) * 2.2;
+      lr = lr * (1 - mountain) + 138 * mountain;
+      lg = lg * (1 - mountain) + 132 * mountain;
+      lb = lb * (1 - mountain) + 128 * mountain;
+      r = lr; g = lg; b = lb;
+    }
+    const iceEdge = 0.80 + (pfbm(nx * 8, ny * 8, 64, 271, 3) - 0.5) * 0.10;
+    const ice = (lat - iceEdge) / 0.18;
+    if (ice > 0) {
+      const k = Math.min(1, ice * 1.4);
+      const sp = 0.84 + 0.16 * pfbm(nx * 12, ny * 12, 96, 273, 3);
+      r = r * (1 - k) + 238 * k * sp;
+      g = g * (1 - k) + 246 * k * sp;
+      b = b * (1 - k) + 255 * k * sp;
+    }
+    return [r, g, b];
+  },
+  earthBump: (u, v, nx, ny) => {
+    const cont = pfbm(nx * 2, ny * 2, 16, 101, 6);
+    const detail = pfbm(nx * 8, ny * 8, 64, 131, 5);
+    const ridge = pridge(nx * 4, ny * 4, 32, 137, 4);
+    let e = cont * 0.62 + detail * 0.26 + ridge * 0.12;
+    e = (e - 0.5) * 1.55 + 0.52;
+    if (e < 0.52) return 0.10;
+    return Math.min(1, (e - 0.52) / 0.34);
+  },
+  earthRoughness: (u, v, nx, ny) => {
+    const cont = pfbm(nx * 2, ny * 2, 16, 101, 6);
+    const detail = pfbm(nx * 8, ny * 8, 64, 131, 5);
+    const ridge = pridge(nx * 4, ny * 4, 32, 137, 4);
+    let e = cont * 0.62 + detail * 0.26 + ridge * 0.12;
+    e = (e - 0.5) * 1.55 + 0.52;
+    return e < 0.52 ? 0.28 : 0.90;
+  },
+  earthNight: (u, v, nx, ny) => {
+    const cont = pfbm(nx * 2, ny * 2, 16, 101, 6);
+    const detail = pfbm(nx * 8, ny * 8, 64, 131, 5);
+    const ridge = pridge(nx * 4, ny * 4, 32, 137, 4);
+    let e = cont * 0.62 + detail * 0.26 + ridge * 0.12;
+    e = (e - 0.5) * 1.55 + 0.52;
+    if (e < 0.52) return [0, 0, 0];
+    const lat = Math.abs(v - 0.5) * 2;
+    if (lat > 0.82) return [0, 0, 0];
+    const cities = pfbm(nx * 22, ny * 22, 176, 601, 4);
+    const density = pfbm(nx * 4, ny * 4, 32, 611, 3);
+    const pop = Math.exp(-Math.pow(lat - 0.42, 2) / 0.18);
+    const intensity = Math.pow(Math.max(0, cities - 0.52) * 2, 2) * density * pop * 3.2;
+    const warm = 0.85 + 0.15 * pfbm(nx * 40, ny * 40, 320, 621, 2);
+    return [
+      Math.min(255, 255 * intensity * warm),
+      Math.min(255, 220 * intensity * warm),
+      Math.min(255, 150 * intensity * warm)
+    ];
+  },
+  clouds: (u, v, nx, ny) => {
+    let c = pfbm(nx * 2, ny * 2, 16, 211, 7);
+    const w = pfbm(nx * 6, ny * 6, 48, 223, 5);
+    const d = pfbm(nx * 14, ny * 14, 112, 227, 3);
+    c = c * 0.55 + w * 0.30 + d * 0.15;
+    c = Math.max(0, c - 0.50) * 2.8;
+    c = Math.min(1, c);
+    const lat = Math.abs(v - 0.5) * 2;
+    const itcz = Math.exp(-Math.pow(lat - 0.04, 2) / 0.008) * 0.35;
+    const midlat = Math.exp(-Math.pow(lat - 0.48, 2) / 0.020) * 0.30;
+    const polar = Math.exp(-Math.pow(lat - 0.85, 2) / 0.020) * 0.20;
+    const subtrop = Math.exp(-Math.pow(lat - 0.25, 2) / 0.012) * -0.30;
+    c = Math.min(1, Math.max(0, c + itcz + midlat + polar + subtrop));
+    return [255, 255, 255, c * 240];
+  },
+  mars: (u, v, nx, ny) => {
+    const lat = Math.abs(v - 0.5) * 2;
+    const base = pfbm(nx * 2, ny * 2, 16, 301, 6);
+    const detail = pfbm(nx * 8, ny * 8, 64, 311, 5);
+    const ridge = pridge(nx * 4, ny * 4, 32, 317, 5);
+    let t = base * 0.55 + detail * 0.25 + ridge * 0.20;
+    let r = 118 + t * 122, g = 58 + t * 76, b = 32 + t * 48;
+    const dk = pfbm(nx * 3, ny * 3, 24, 331, 4);
+    const k = Math.max(0, dk - 0.52) * 1.8;
+    r *= (1 - k * 0.48); g *= (1 - k * 0.42); b *= (1 - k * 0.30);
+    const dust = pfbm(nx * 5, ny * 5, 40, 337, 4);
+    const du = Math.max(0, dust - 0.55) * 1.5;
+    r += du * 30; g += du * 12; b += du * 4;
+    const canyon = pridge(nx * 7, ny * 7, 56, 341, 3);
+    const cy = Math.max(0, canyon - 0.72) * 2.0;
+    r *= (1 - cy * 0.35); g *= (1 - cy * 0.30); b *= (1 - cy * 0.20);
+    const iceEdge = 0.86 + (pfbm(nx * 8, ny * 8, 64, 347, 3) - 0.5) * 0.08;
+    const ice = (lat - iceEdge) / 0.14;
+    if (ice > 0) {
+      const kk = Math.min(1, ice * 1.5);
+      r = r * (1 - kk) + 248 * kk;
+      g = g * (1 - kk) + 246 * kk;
+      b = b * (1 - kk) + 252 * kk;
+    }
+    return [r, g, b];
+  },
+  jupiter: (u, v, nx, ny) => {
+    const lat = (v - 0.5) * 2;
+    const warp1 = (pfbm(nx * 2, ny * 5, 16, 401, 6) - 0.5) * 2.8;
+    const warp2 = (pfbm(nx * 5, ny * 12, 40, 403, 4) - 0.5) * 1.1;
+    const turb = (pfbm(nx * 12, ny * 28, 96, 411, 4) - 0.5) * 0.55;
+    const q = Math.sin((lat + warp1 * 0.06 + warp2 * 0.02) * Math.PI * 9 + turb * 0.6);
+    let t = Math.pow(q * 0.5 + 0.5, 0.78);
+    let r = 168 + t * 82, g = 126 + t * 96, b = 92 + t * 96;
+    const gx = ((u - 0.28 + 0.5) % 1 - 0.5) * 2;
+    const gy = (v - 0.62) * 2;
+    const spot = Math.exp(-(gx * gx / 0.004 + gy * gy / 0.006));
+    if (spot > 0.01) {
+      r = r * (1 - spot) + 196 * spot;
+      g = g * (1 - spot) + 88 * spot;
+      b = b * (1 - spot) + 62 * spot;
+    }
+    const p = Math.pow(Math.abs(lat), 3.2) * 0.42;
+    r *= (1 - p); g *= (1 - p); b *= (1 - p);
+    return [r, g, b];
+  },
+  saturn: (u, v, nx, ny) => {
+    const lat = (v - 0.5) * 2;
+    const warp = (pfbm(nx * 2, ny * 5, 16, 501, 6) - 0.5) * 2.4;
+    const turb = (pfbm(nx * 10, ny * 24, 80, 511, 4) - 0.5) * 0.5;
+    const q = Math.sin((lat + warp * 0.05) * Math.PI * 8 + turb * 0.5);
+    let t = Math.pow(q * 0.5 + 0.5, 0.82);
+    let r = 192 + t * 58, g = 166 + t * 68, b = 116 + t * 88;
+    const p = Math.pow(Math.abs(lat), 3.2) * 0.38;
+    r *= (1 - p); g *= (1 - p); b *= (1 - p);
+    return [r, g, b];
+  },
+  uranus: (u, v, nx, ny) => {
+    const n = pfbm(nx * 2, ny * 2, 16, 601, 5);
+    const band = 0.5 + 0.5 * Math.sin(v * Math.PI * 6 + n * 2.2);
+    const t = n * 0.55 + band * 0.45;
+    return [142 + t * 68, 214 + t * 32, 226 + t * 26];
+  },
+  neptune: (u, v, nx, ny) => {
+    const n = pfbm(nx * 2, ny * 2, 16, 701, 6);
+    const band = 0.5 + 0.5 * Math.sin(v * Math.PI * 7 + n * 3.2);
+    const t = n * 0.5 + band * 0.5;
+    let r = 38 + t * 58, g = 88 + t * 68, b = 188 + t * 58;
+    const gx = ((u - 0.68 + 0.5) % 1 - 0.5) * 2;
+    const gy = (v - 0.42) * 2;
+    const spot = Math.exp(-(gx * gx / 0.006 + gy * gy / 0.008));
+    if (spot > 0.01) {
+      r *= (1 - spot * 0.55); g *= (1 - spot * 0.55); b *= (1 - spot * 0.35);
+    }
+    return [r, g, b];
+  },
+  moon: (u, v, nx, ny) => {
+    const base = pfbm(nx * 2, ny * 2, 16, 811, 6);
+    const rid  = pridge(nx * 6, ny * 6, 48, 813, 5);
+    const fine = pfbm(nx * 18, ny * 18, 144, 817, 3);
+    let t = base * 0.38 + rid * 0.42 + fine * 0.20;
+    const mare = pfbm(nx * 2, ny * 2, 16, 821, 4);
+    const m = Math.max(0, mare - 0.48) * 1.6;
+    const g = 62 + t * 128 - m * 34;
+    return [g, g * 0.985, g * 0.945];
+  }
+};
+
+function normalMapFromHeight(heightTex, strength) {
+  const src = heightTex.image;
+  const w = src.width, h = src.height;
+  const sctx = src.getContext('2d');
+  const srcData = sctx.getImageData(0, 0, w, h).data;
+  const cv = createCanvas(w, h);
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const out = img.data;
+  const hAt = (x, y) => {
+    x = ((x % w) + w) % w;
+    y = Math.max(0, Math.min(h - 1, y));
+    return srcData[(y * w + x) * 4] / 255;
+  };
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const l = hAt(x - 1, y), r = hAt(x + 1, y);
+      const u = hAt(x, y - 1), d = hAt(x, y + 1);
+      let nx = (l - r) * strength;
+      let ny = (d - u) * strength;
+      let nz = 1;
+      const len = Math.hypot(nx, ny, nz);
+      nx /= len; ny /= len; nz /= len;
+      const i = (y * w + x) * 4;
+      out[i]     = (nx * 0.5 + 0.5) * 255;
+      out[i + 1] = (ny * 0.5 + 0.5) * 255;
+      out[i + 2] = (nz * 0.5 + 0.5) * 255;
+      out[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.NoColorSpace;
+  tex.anisotropy = maxAniso;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function makeRingTexture(kind, W) {
+  const H = 8;
+  const cv = createCanvas(W, H);
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(W, H);
+  const d = img.data;
+  for (let x = 0; x < W; x++) {
+    const t = x / W;
+    let a = pnoise(t * 260, 0.5, 260, 55) * 0.55 +
+            pnoise(t * 900, 3.3, 900, 77) * 0.30 +
+            pnoise(t * 2800, 9.1, 2800, 89) * 0.15;
+    let r, g, b;
+    if (kind === 'main') {
+      if (t < 0.055) a *= 0.10;
+      if (t > 0.18 && t < 0.22) a *= 0.45;
+      if (t > 0.62 && t < 0.70) a *= 0.08;
+      if (t > 0.97) a *= 0.20;
+      const bright = 0.55 + 0.45 * pnoise(t * 420, 1.7, 420, 91);
+      r = 214 + 34 * bright; g = 196 + 40 * bright; b = 158 + 56 * bright;
+    } else {
+      if (t < 0.05) a *= 0.05;
+      if (t > 0.95) a *= 0.05;
+      a *= 0.35;
+      r = 160; g = 180; b = 200;
+    }
+    a = Math.min(1, a * 1.55);
+    for (let y = 0; y < H; y++) {
+      const i = (y * W + x) * 4;
+      d[i] = r; d[i + 1] = g; d[i + 2] = b; d[i + 3] = a * 240;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAniso;
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  return tex;
+}
+
+function makeGlowTexture(size) {
+  const cv = createCanvas(size, size);
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0.00, 'rgba(255,255,250,1.00)');
+  g.addColorStop(0.06, 'rgba(255,248,224,0.95)');
+  g.addColorStop(0.14, 'rgba(255,224,150,0.72)');
+  g.addColorStop(0.28, 'rgba(255,168,58,0.32)');
+  g.addColorStop(0.52, 'rgba(255,112,18,0.10)');
+  g.addColorStop(0.78, 'rgba(255,70,0,0.02)');
+  g.addColorStop(1.00, 'rgba(255,70,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function makeStarTexture() {
+  const s = 64;
+  const cv = createCanvas(s, s);
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0.00, 'rgba(255,255,255,1)');
+  g.addColorStop(0.18, 'rgba(255,255,255,0.85)');
+  g.addColorStop(0.45, 'rgba(255,255,255,0.18)');
+  g.addColorStop(1.00, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ATMOSPHERE SHADER
+   ═══════════════════════════════════════════════════════════ */
+const sunPosUniform = { value: new THREE.Vector3(0, 0, 0) };
+
+function createAtmosphere(radius, color, intensity, power) {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+      uIntensity: { value: intensity },
+      uPower: { value: power },
+      uSunPos: sunPosUniform,
+    },
+    vertexShader: `
+      varying vec3 vWorldPos;
+      varying vec3 vWorldNormal;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorldPos = wp.xyz;
+        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor;
+      uniform float uIntensity;
+      uniform float uPower;
+      uniform vec3 uSunPos;
+      varying vec3 vWorldPos;
+      varying vec3 vWorldNormal;
+      void main() {
+        vec3 viewDir = normalize(cameraPosition - vWorldPos);
+        vec3 sunDir = normalize(uSunPos - vWorldPos);
+        float fresnel = pow(1.0 - max(0.0, dot(vWorldNormal, viewDir)), uPower);
+        float sunFacing = max(0.0, dot(vWorldNormal, sunDir) * 0.85 + 0.15);
+        float alpha = fresnel * uIntensity * sunFacing;
+        gl_FragColor = vec4(uColor * alpha, alpha);
+      }
+    `,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.FrontSide,
+  });
+  return new THREE.Mesh(new THREE.SphereGeometry(radius, 48, 32), mat);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   داده‌ها
+   ═══════════════════════════════════════════════════════════ */
+
+const SYSTEM_OVERVIEW = {
+  tag: 'نمای کلی منظومه',
+  subtitle: 'مشخصات کلی و موقعیت کهکشانی',
+  desc: 'منظومه شمسی ۴.۵۶۸ میلیارد سال پیش از فروپاشی گرانشی یک ابر مولکولی شکل گرفته است. خورشید ۹۹.۸۶٪ جرم کل منظومه را در خود دارد و باقی جرم عمدتاً به مشتری و زحل تعلق دارد. کل منظومه در کهکشان راه شیری، در بازوی شکارچی، حدود ۲۶٬۰۰۰ سال نوری از مرکز کهکشان قرار دارد و با سرعت ۷۲۰٬۰۰۰ کیلومتر بر ساعت به دور مرکز آن می‌گردد.',
+  stats: [
+    ['سن منظومه', '۴.۵۶۸ میلیارد', 'سال'],
+    ['موقعیت کهکشانی', 'بازوی شکارچی، راه شیری', ''],
+    ['نزدیک‌ترین ستاره', 'پروکسیما قنطورس (۴.۲۴ سال نوری)', ''],
+    ['نوع طیفی خورشید', 'G2V', ''],
+    ['سیارات شناخته‌شده', '۸', ''],
+    ['سیارات کوتوله', '۵', ''],
+    ['قمرهای طبیعی', '۷۵۸', ''],
+    ['سیارک‌های شناخته‌شده', '۱٬۴۶۲٬۴۰۲', ''],
+    ['دنباله‌دارها', '۴٬۶۲۹', ''],
+    ['خط یخ‌بندان', 'حدود ۵', 'واحد نجومی'],
+    ['پرتوکره خورشیدی', 'تا ۱۲۰', 'واحد نجومی'],
+    ['لبه کیپربلت', '۵۰ تا ۷۰', 'واحد نجومی'],
+    ['کره هیل', '۱۷۸٬۰۰۰ تا ۲۲۷٬۰۰۰', 'واحد نجومی'],
+    ['فاصله تا مرکز کهکشان', '۲۶٬۰۰۰', 'سال نوری'],
+    ['دوره گردش کهکشانی', 'حدود ۲۳۰ میلیون', 'سال']
+  ],
+  fact: 'گفته می‌شود که کل منظومه شمسی از ابری به قطر چند سال نوری شکل گرفته و از آن زمان تا کنون ۲۰ بار به دور مرکز کهکشان گشته است.'
+};
+
+const CONSTANTS_INFO = {
+  tag: 'ثابت‌های مرجع نجومی',
+  subtitle: 'مقادیر کلیدی مورد استفاده',
+  desc: 'این ثابت‌ها پایه تمام محاسبات نجومی هستند و در شبیه‌سازی فعلی نیز مورد استفاده قرار می‌گیرند.',
+  stats: [
+    ['واحد نجومی (AU)', '۱۴۹٬۵۹۷٬۸۷۰.۷', 'کیلومتر'],
+    ['یک سال نوری', '۶۳٬۲۴۱', 'واحد نجومی'],
+    ['جرم خورشیدی', '۱.۹۸۹ × ۱۰³⁰', 'کیلوگرم'],
+    ['جرم زمین', '۵.۹۷۲ × ۱۰²⁴', 'کیلوگرم'],
+    ['جرم مشتری', '۱.۸۹۸ × ۱۰²⁷', 'کیلوگرم'],
+    ['سرعت نور', '۲۹۹٬۷۹۲.۴۵۸', 'کیلومتر بر ثانیه'],
+    ['درخشندگی خورشید', '۳.۸۲۸ × ۱۰²⁶', 'وات']
+  ],
+  fact: 'یک واحد نجومی، میانگین فاصله زمین تا خورشید است. نور خورشید ۸ دقیقه و ۲۰ ثانیه طول می‌کشد تا این فاصله را بپیماید.'
+};
+
+const OUTER_SPACE_INFO = {
+  tag: 'فضای بیرونی',
+  subtitle: 'محیط میان‌ستاره‌ای و کهکشانی',
+  desc: 'فضای بیرونی، یا به اختصار فضا، گستره‌ای است که فراتر از جو زمین و میان اجرام آسمانی وجود دارد. این فضا حاوی سطوح بسیار پایین چگالی ذرات است و خلأی تقریباً کامل را تشکیل می‌دهد — عمدتاً پلاسمای هیدروژن و هلیوم، همراه با تشعشعات الکترومغناطیسی، پرتوهای کیهانی، نوترینوها، میدان‌های مغناطیسی و غبار. دمای پایه فضا که توسط تابش زمینه‌ای کیهانی تعیین می‌شود، ۲.۷ کلوین (منفی ۲۷۰ درجه سانتی‌گراد) است. خط کارمان در ارتفاع ۱۰۰ کیلومتری، به‌طور متعارف آغاز فضای بیرونی در نظر گرفته می‌شود.',
+  composition: [
+    ['پلاسمای میان‌کهکشانی', 'حدود نیمی از ماده باریونی جهان'],
+    ['هیدروژن (محیط میان‌ستاره‌ای)', '۹۰٪'],
+    ['هلیوم (محیط میان‌ستاره‌ای)', '۹٪'],
+    ['عناصر سنگین‌تر', '۱٪'],
+    ['ماده تاریک', 'حدود ۲۷٪ از کل انرژی-جرم جهان'],
+    ['انرژی تاریک', 'حدود ۶۸٪ از کل انرژی-جرم جهان'],
+    ['ماده معمولی (باریونی)', 'حدود ۵٪ از کل انرژی-جرم جهان']
+  ],
+  features: [
+    'دمای پایه ۲.۷ کلوین (منفی ۲۷۰ درجه سانتی‌گراد) — ناشی از تابش زمینه‌ای کیهانی',
+    'تابش زمینه‌ای کیهانی (CMB) — دمای دقیق ۲.۷۲۵ کلوین، کشف‌شده در ۱۹۶۵',
+    'پلاسمای میان‌کهکشانی — چگالی کمتر از یک اتم هیدروژن در هر متر مکعب',
+    'محیط میان‌ستاره‌ای — ۹۰٪ هیدروژن، ۹٪ هلیوم، ۱٪ عناصر سنگین‌تر',
+    'ماده تاریک و انرژی تاریک — ۹۵٪ از کل محتوای انرژی-جرم جهان',
+    'خط کارمان — ارتفاع ۱۰۰ کیلومتری، مرز متعارف آغاز فضا',
+    'معاهده فضای بیرونی — معاهده ۱۹۶۷ که حاکمیت ملی بر فضا را ممنوع می‌کند',
+    'یوری گاگارین — اولین انسان در فضا، ۱۹۶۱، اتحاد جماهیر شوروی'
+  ],
+  missions: [
+    'وویجر ۱ — عبور از شوک پایانی ۲۰۰۴، هلیوپاز ۲۰۱۲',
+    'وویجر ۲ — عبور از شوک پایانی ۲۰۰۷، هلیوپاز ۲۰۱۸',
+    'IBEX — نقشه‌برداری از مرزهای منظومه شمسی',
+    'تلسکوپ فضایی جیمز وب — مشاهده کهکشان‌های اولیه بدون انسداد'
+  ],
+  stats: [
+    ['دمای پایه فضا', '۲.۷', 'کلوین'],
+    ['دمای تابش زمینه‌ای', '۲.۷۲۵', 'کلوین'],
+    ['چگالی میان‌کهکشانی', 'کمتر از ۱ اتم هیدروژن در متر مکعب', ''],
+    ['چگالی میان‌ستاره‌ای', 'حدود ۱۰ ذره در سانتی‌متر مکعب', ''],
+    ['دمای جنبشی پلاسما', 'میلیون‌ها', 'کلوین'],
+    ['نسبت ماده تاریک', '۲۷', 'درصد'],
+    ['نسبت انرژی تاریک', '۶۸', 'درصد'],
+    ['نسبت ماده معمولی', '۵', 'درصد'],
+    ['خط کارمان', '۱۰۰', 'کیلومتر'],
+    ['شوک پایانی', 'بیش از ۲ برابر مدار پلوتو', ''],
+    ['هلیوپاز', 'حدود ۱۲۰', 'واحد نجومی'],
+    ['سرعت نور', '۲۹۹٬۷۹۲.۴۵۸', 'کیلومتر بر ثانیه'],
+    ['امپدانس خلأ', '۳۷۶.۷۳', 'اهم'],
+    ['مساحت جهان قابل مشاهده', '۹۳ میلیارد سال نوری', 'قطر'],
+    ['تعداد کهکشان‌ها', 'حدود ۲ تریلیون', 'تخمینی']
+  ],
+  fact: 'وویجر ۱ در سال ۲۰۱۲ از هلیوپاز گذشت و به فضای میان‌ستاره‌ای وارد شد. چگالی پلاسما در آن نقطه از ۰.۰۳۹ ذره در سانتی‌متر مکعب به ۰.۱۲ ذره در سانتی‌متر مکعب افزایش یافت — تأییدی بر اینکه فضا واقعاً «خالی» نیست، فقط بسیار رقیق است. حتی در «خلأ» آزمایشگاهی LHC، چگالی ذرات حدود ۲.۴ تریلیون اتم در متر مکعب است.'
+};
+
+const BODY_INFO = {
+  Sun: {
+    nameFa: 'خورشید',
+    tag: 'ستاره رشته اصلی نوع G2V',
+    subtitle: 'ستاره مرکز منظومه شمسی',
+    desc: 'یک کوتوله زرد که هر ثانیه ۶۰۰ میلیون تن هیدروژن را در هسته‌اش ذوب می‌کند. حاوی ۹۹.۸۶٪ از کل جرم منظومه شمسی است. دمای سطح حدود ۵۷۷۲ کلوین و دمای هسته به ۱۵.۷ میلیون کلوین می‌رسد.',
+    composition: [['هیدروژن', 'حدود ۹۸٪'], ['هلیوم', 'حدود ۱.۵٪'], ['اکسیژن، کربن، آهن', 'بقیه']],
+    features: [
+      'سلول‌های دانه‌ای با اندازه حدود ۱۰۰۰ کیلومتر',
+      'لکه‌های خورشیدی با چرخه ۱۱ ساله',
+      'فوران‌های جرم تاجی',
+      'باد خورشیدی با سرعت ۴۰۰ تا ۸۰۰ کیلومتر بر ثانیه',
+      'فتوسفر با دمای حدود ۵۷۷۲ کلوین',
+      'تاج خورشیدی با دمای ۱ تا ۳ میلیون کلوین'
+    ],
+    missions: ['کاوشگر خورشیدی پارکر (۲۰۱۸ تا کنون)', 'مدارگرد خورشیدی (۲۰۲۰ تا کنون)', 'رصدخانه دینامیک خورشیدی (۲۰۱۰ تا کنون)', 'سوهو (۱۹۹۵ تا کنون)'],
+    stats: [
+      ['قطر','۱٬۳۹۲٬۷۰۰','کیلومتر'],
+      ['شعاع','۷۰۰٬۰۰۰','کیلومتر'],
+      ['جرم','۱.۹۸۹ × ۱۰³⁰','کیلوگرم'],
+      ['دمای سطح','۵٬۷۷۲','کلوین'],
+      ['دمای هسته','۱۵.۷ میلیون','کلوین'],
+      ['دوره چرخش','۲۵.۴','روز (استوا)'],
+      ['سن','۴.۶ میلیارد','سال'],
+      ['درخشندگی','۳.۸۲۸ × ۱۰²⁶','وات'],
+      ['درصد جرم منظومه','۹۹.۸۶','درصد']
+    ],
+    bars: [['اندازه نسبی', 100], ['دمای سطح', 58], ['گرانش', 100]],
+    fact: 'خورشید هر ثانیه ۴.۳ میلیون تن از جرم خود را از طریق همجوشی و باد خورشیدی از دست می‌دهد. در طول عمر ۱۰ میلیارد ساله‌اش حدود ۰.۱٪ از کل جرمش را پیش از تبدیل شدن به غول سرخ از دست خواهد داد.'
+  },
+  Mercury: {
+    nameFa: 'عطارد',
+    tag: 'سیاره سنگی',
+    subtitle: 'اولین سیاره از خورشید — پیام‌آور',
+    desc: 'کوچک‌ترین سیاره منظومه شمسی که به نام خدای پیام‌آور رومی نام‌گذاری شده است. هسته آهنی آن ۸۵٪ شعاع سیاره را تشکیل می‌دهد.',
+    composition: [['هسته آهنی', '۸۵٪ شعاع'], ['گوشته سیلیکاتی', 'حدود ۱۵٪'], ['پوسته', 'نازک، حدود ۳۵ کیلومتر']],
+    features: [
+      'حوضه کالوریس — دهانه برخوردی به عرض ۱۵۵۰ کیلومتر',
+      'نوسان دمایی شدید: ۴۳۰ درجه سانتی‌گراد روز، منفی ۱۸۰ درجه شب',
+      'رزونانس چرخشی-مداری ۳:۲ — یک روز خورشیدی معادل ۱۷۶ روز زمینی',
+      'یخ آب در دهانه‌های سایه‌افتاده قطبی تأیید شده',
+      'دنباله سدیمی شبیه دنباله‌دار به طول ۲۴ میلیون کیلومتر'
+    ],
+    missions: ['مارینر ۱۰ (۱۹۷۴ تا ۱۹۷۵)', 'مسنجر (۲۰۱۱ تا ۲۰۱۵)', 'بپی‌کلمبو (ورود ۲۰۲۶)'],
+    stats: [
+      ['قطر','۴٬۸۷۹','کیلومتر'],
+      ['جرم','۳.۳۰ × ۱۰²³','کیلوگرم'],
+      ['جرم نسبت به زمین','۰.۰۵۵','برابر'],
+      ['چگالی','۵.۴۳','گرم بر سانتی‌متر مکعب'],
+      ['دمای سطح','منفی ۱۸۰ تا ۴۳۰','درجه سانتی‌گراد'],
+      ['دوره مداری','۸۸','روز'],
+      ['دوره چرخش','۵۸.۶','روز'],
+      ['روز خورشیدی','۱۷۶','روز زمینی'],
+      ['نیم‌محور بزرگ','۰.۳۸۷','واحد نجومی'],
+      ['خروج از مرکز','۰.۲۰۵۶',''],
+      ['شیب مداری','۷.۰۱','درجه'],
+      ['سرعت مداری','۴۷.۴','کیلومتر بر ثانیه'],
+      ['شیب محوری','۰.۰۳','درجه'],
+      ['قمرها','۰',''],
+      ['گرانش','۳.۷','متر بر مربع ثانیه']
+    ],
+    bars: [['اندازه نسبی', 6], ['دمای سطح (میانگین)', 42], ['گرانش', 38]],
+    fact: 'مدار عطارد خروج از مرکزترین مدار میان تمام سیارات است — فاصله‌اش از خورشید بین ۴۶ تا ۷۰ میلیون کیلومتر نوسان می‌کند.'
+  },
+  Venus: {
+    nameFa: 'زهره',
+    tag: 'سیاره سنگی',
+    subtitle: 'دومین سیاره از خورشید — دوقلوی زمین',
+    desc: 'تقریباً از نظر اندازه و جرم با زمین یکسان است. جهانی با اثر گلخانه‌ای فراری، جو ۹۶.۵٪ دی‌اکسید کربن، و دمای سطح ۴۶۵ درجه سانتی‌گراد.',
+    composition: [['دی‌اکسید کربن', '۹۶.۵٪'], ['نیتروژن', '۳.۵٪'], ['دی‌اکسید گوگرد', 'اثر'], ['ابرهای اسید سولفوریک', 'ارتفاع ۵۰ تا ۷۰ کیلومتر']],
+    features: [
+      'بیش از ۱۶۰۰ آتشفشان بزرگ — بیشتر از هر سیاره دیگر',
+      'چرخش بازگشتی: ۲۴۳ روز زمینی برای یک دور چرخش',
+      'یک روز زهره از یک سال آن (۲۲۵ روز) طولانی‌تر است',
+      'خورشید از غرب طلوع می‌کند و از شرق غروب',
+      'فسفین در ابرها شناسایی شد (۲۰۲۰) — نشانگر زیستی مورد مناقشه',
+      'شیب محوری ۱۷۷.۴ درجه — تقریباً واژگون'
+    ],
+    missions: ['مارینر ۲ (۱۹۶۲)', 'ونرا ۷ تا ۱۶ (۱۹۷۰ تا ۱۹۸۳)', 'ماژلان (۱۹۹۰ تا ۱۹۹۴)', 'آکاتسوکی (۲۰۱۵ تا کنون)'],
+    stats: [
+      ['قطر','۱۲٬۱۰۴','کیلومتر'],
+      ['جرم','۴.۸۷ × ۱۰²⁴','کیلوگرم'],
+      ['جرم نسبت به زمین','۰.۸۱۵','برابر'],
+      ['چگالی','۵.۲۴','گرم بر سانتی‌متر مکعب'],
+      ['دمای سطح','۴۶۵','درجه سانتی‌گراد'],
+      ['فشار سطح','۹۲','برابر زمین'],
+      ['دوره مداری','۲۲۵','روز'],
+      ['دوره چرخش','منفی ۲۴۳','روز (بازگشتی)'],
+      ['نیم‌محور بزرگ','۰.۷۲۳','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۰۶۸',''],
+      ['شیب مداری','۳.۳۹','درجه'],
+      ['سرعت مداری','۳۵.۰','کیلومتر بر ثانیه'],
+      ['شیب محوری','۱۷۷.۴','درجه (بازگشتی)'],
+      ['قمرها','۰',''],
+      ['گرانش','۸.۸۷','متر بر مربع ثانیه']
+    ],
+    bars: [['اندازه نسبی', 95], ['دمای سطح', 100], ['گرانش', 90]],
+    fact: 'زهره ممکن است در دو میلیارد سال نخست عمرش قابل سکونت بوده باشد. شواهد نشان می‌دهد آب سطحی مایع تا حدود ۷۰۰ میلیون سال پیش وجود داشته.'
+  },
+  Earth: {
+    nameFa: 'زمین',
+    tag: 'سیاره سنگی',
+    subtitle: 'سومین سیاره از خورشید — تنها جهان شناخته‌شده با حیات',
+    desc: 'شعاع ۶۳۷۱ کیلومتر. ۴.۵ میلیارد سال پیش از سحابی خورشیدی شکل گرفت. تنها جایی در جهان که به طور قطعی میزبان حیات است.',
+    composition: [['نیتروژن', '۷۸.۰۸٪'], ['اکسیژن', '۲۰.۹۵٪'], ['آرگون', '۰.۹۳٪'], ['دی‌اکسید کربن', '۰.۰۴٪'], ['سایر گازها', 'جزئی']],
+    features: [
+      'زمین‌ساخت صفحه‌ای — پوسته به صفحات متحرک تقسیم شده',
+      'میدان مغناطیسی ناشی از هسته بیرونی آهن مایع',
+      '۷۱٪ اقیانوس، ۲۹٪ خشکی',
+      'لایه اوزون پرتو فرابنفش را جذب می‌کند',
+      'ماه شیب محوری را در ۲۳.۴۴ درجه تثبیت می‌کند'
+    ],
+    missions: ['این خانه ماست', 'لندست (۱۹۷۲ تا کنون)', 'ترا / آکوا (۱۹۹۹ تا کنون)', 'ایستگاه فضایی بین‌المللی (۲۰۰۰ تا کنون)'],
+    stats: [
+      ['قطر','۱۲٬۷۴۲','کیلومتر'],
+      ['جرم','۵.۹۷۲ × ۱۰²⁴','کیلوگرم'],
+      ['جرم نسبت به زمین','۱.۰۰۰','برابر'],
+      ['چگالی','۵.۵۱','گرم بر سانتی‌متر مکعب'],
+      ['دمای میانگین','۱۵','درجه سانتی‌گراد'],
+      ['دوره مداری','۳۶۵.۲۵','روز'],
+      ['دوره چرخش','۲۳ ساعت و ۵۶ دقیقه',''],
+      ['نیم‌محور بزرگ','۱.۰۰۰','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۱۶۷',''],
+      ['شیب مداری','۰.۰۰','درجه'],
+      ['سرعت مداری','۲۹.۸','کیلومتر بر ثانیه'],
+      ['قمرها','۱',''],
+      ['گرانش','۹.۸۱','متر بر مربع ثانیه'],
+      ['شیب محوری','۲۳.۴۴','درجه'],
+      ['سن','۴.۵۴ میلیارد','سال'],
+      ['فاصله از خورشید','۱۴۹.۶ میلیون','کیلومتر']
+    ],
+    bars: [['اندازه نسبی', 100], ['دمای سطح', 18], ['گرانش', 100], ['قابلیت سکونت', 100]],
+    fact: 'میدان مغناطیسی زمین در ۸۳ میلیون سال گذشته ۱۸۳ بار جهت خود را معکوس کرده است. آخرین وارونگی ۷۸۰ هزار سال پیش رخ داد.'
+  },
+  Moon: {
+    nameFa: 'ماه',
+    tag: 'قمر طبیعی زمین',
+    subtitle: 'تنها قمر زمین — زاده فاجعه',
+    desc: 'حدود ۴.۵ میلیارد سال پیش زمانی شکل گرفت که جسمی به اندازه مریخ به نام تیا با زمین اولیه برخورد کرد. قفل جزر و مدی است.',
+    composition: [['پوسته آنورتوزیتی', 'مواد فلات‌های مرتفع'], ['دریاوارهای بازالتی', 'دشت‌های آتشفشانی'], ['هسته کم‌آهن', 'کوچک، شعاع حدود ۳۵۰ کیلومتر'], ['رگولیت', 'ضخامت ۲ تا ۱۵ متر']],
+    features: [
+      'قفل جزر و مدی به زمین (چرخش همگام)',
+      'جو باستانی در ۳.۵ میلیارد سال پیش',
+      'دهانه‌های قطبی همیشه در سایه با یخ آب',
+      'نرخ دور شدن ۳.۸ سانتی‌متر در سال',
+      'نمونه‌های بازگردانده شده توسط آپولو و چانگ‌ای ۵',
+      'تنها جهان دیگری که انسان روی آن قدم گذاشته'
+    ],
+    missions: ['آپولو ۱۱ تا ۱۷ (۱۹۶۹ تا ۱۹۷۲)', 'برنامه لونا (۱۹۵۹ تا ۱۹۷۶)', 'چانگ‌ای ۴ تا ۶ (۲۰۱۹ تا ۲۰۲۴)', 'آرتمیس (برنامه‌ریزی شده)'],
+    stats: [
+      ['قطر','۳٬۴۷۴','کیلومتر'],
+      ['جرم','۷.۳۵ × ۱۰²²','کیلوگرم'],
+      ['دمای سطح','منفی ۱۷۳ تا ۱۲۷','درجه سانتی‌گراد'],
+      ['دوره مداری','۲۷.۳','روز'],
+      ['فاصله','۳۸۴٬۴۰۰','کیلومتر (میانگین)'],
+      ['گرانش','۱.۶۲','متر بر مربع ثانیه'],
+      ['نرخ دور شدن','۳.۸','سانتی‌متر در سال'],
+      ['سن','۴.۵۱ میلیارد','سال']
+    ],
+    bars: [['اندازه نسبی', 27], ['دمای سطح', 35], ['گرانش', 17]],
+    fact: 'هسته آهنی تیا با هسته زمین ادغام شد و هسته سیاره ما را بزرگ‌تر و فعال‌تر ساخت. بدون آن، زمین ممکن بود میدان مغناطیسی و جو خود را مانند مریخ از دست بدهد.'
+  },
+  Mars: {
+    nameFa: 'مریخ',
+    tag: 'سیاره سنگی',
+    subtitle: 'چهارمین سیاره از خورشید — گورستان سرخ',
+    desc: 'تقریباً نصف زمین. جوی نازک از دی‌اکسید کربن با فشاری معادل ۰.۶٪ فشار زمین. روزگاری گرم‌تر و مرطوب‌تر بوده.',
+    composition: [['دی‌اکسید کربن', '۹۵.۳٪'], ['نیتروژن', '۲.۷٪'], ['آرگون', '۱.۶٪'], ['اکسیژن', '۰.۱۳٪'], ['مونوکسید کربن', '۰.۰۸٪']],
+    features: [
+      'المپوس مونس — ۲۱.۹ کیلومتر ارتفاع، بلندترین آتشفشان منظومه شمسی',
+      'دره مارینر — سیستم دره‌ای به طول ۴۰۰۰ کیلومتر',
+      'طوفان‌های گرد و غبار پوشاننده کل سیاره، به مدت چند ماه',
+      'دو قمر: فوبوس و دیموس (احتمالاً سیارک‌های اسیر شده)',
+      'فوبوس در حال فروپاشی — حدود ۵۰ میلیون سال دیگر سقوط یا حلقه می‌شود',
+      'بدون میدان مغناطیسی جهانی — باد خورشیدی جو را از بین برده',
+      'کلاهک‌های یخی قطبی از آب و دی‌اکسید کربن'
+    ],
+    missions: ['وایکینگ ۱ و ۲ (۱۹۷۶)', 'سوجورنر (۱۹۹۷)', 'اسپیریت و آپورچونیتی (۲۰۰۴)', 'کیوریاسیتی (۲۰۱۲ تا کنون)', 'پرسویرنس + اینجنیویتی (۲۰۲۱ تا کنون)'],
+    stats: [
+      ['قطر','۶٬۷۷۹','کیلومتر'],
+      ['جرم','۶.۴۲ × ۱۰²³','کیلوگرم'],
+      ['جرم نسبت به زمین','۰.۱۰۷','برابر'],
+      ['چگالی','۳.۹۳','گرم بر سانتی‌متر مکعب'],
+      ['دمای سطح','منفی ۱۵۳ تا ۲۰','درجه سانتی‌گراد'],
+      ['دوره مداری','۶۸۷','روز'],
+      ['دوره چرخش','۲۴ ساعت و ۳۷ دقیقه',''],
+      ['نیم‌محور بزرگ','۱.۵۲۴','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۹۳۴',''],
+      ['شیب مداری','۱.۸۵','درجه'],
+      ['سرعت مداری','۲۴.۱','کیلومتر بر ثانیه'],
+      ['شیب محوری','۲۵.۱۹','درجه'],
+      ['قمرها','۲',''],
+      ['گرانش','۳.۷۱','متر بر مربع ثانیه'],
+      ['فشار جوی','۰.۶٪','از زمین']
+    ],
+    bars: [['اندازه نسبی', 53], ['دمای سطح', 30], ['گرانش', 38]],
+    fact: 'جو مریخ ۱۰۰ برابر نازک‌تر از جو زمین است — برای فرود آوردن یک فرودگر سنگین با چتر نجات کافی نیست.'
+  },
+  Jupiter: {
+    nameFa: 'مشتری',
+    tag: 'غول گازی',
+    subtitle: 'پنجمین سیاره از خورشید — پادشاه',
+    desc: 'بیش از دو برابر جرم همه سیارات دیگر روی هم. لکه سرخ بزرگ حداقل ۳۵۰ سال است که می‌طپد. جونو (۲۰۱۶) کشف کرد که مشتری هسته‌ای «مبهم» دارد.',
+    composition: [['هیدروژن', 'حدود ۹۰٪'], ['هلیوم', 'حدود ۱۰٪'], ['ابرهای آمونیاک', 'لایه بالایی'], ['یخ آب', 'لایه‌های عمیق‌تر'], ['هیدروژن فلزی', 'داخل سیاره']],
+    features: [
+      'لکه سرخ بزرگ — طوفان ۳۵۰+ ساله، در حال کوچک شدن',
+      'هسته مبهم — کشف جونو، ترکیب هیدروژن و سنگ',
+      'قوی‌ترین میدان مغناطیسی میان سیارات — ۲۰٬۰۰۰ برابر زمین',
+      'سرعت باد تا ۵۰۰ کیلومتر بر ساعت',
+      'حلقه گرد و غبار نازک از مواد پرتاب‌شده از قمرها',
+      '۹۵ قمر تأیید شده',
+      'اقمار گالیله‌ای: آیو، اروپا، گانیمد، کالیستو'
+    ],
+    missions: ['پایونیر ۱۰ و ۱۱ (۱۹۷۳ تا ۱۹۷۴)', 'وویجر ۱ و ۲ (۱۹۷۹)', 'گالیله (۱۹۹۵ تا ۲۰۰۳)', 'جونو (۲۰۱۶ تا کنون)', 'اروپا کلیپر (ورود ۲۰۳۰)', 'JUICE (ورود ۲۰۳۱)'],
+    stats: [
+      ['قطر','۱۳۹٬۸۲۰','کیلومتر'],
+      ['جرم','۱.۸۹۸ × ۱۰²⁷','کیلوگرم'],
+      ['جرم نسبت به زمین','۳۱۷.۸','برابر'],
+      ['چگالی','۱.۳۳','گرم بر سانتی‌متر مکعب'],
+      ['دمای ابرها','منفی ۱۴۵','درجه سانتی‌گراد'],
+      ['دوره مداری','۱۱.۸۶','سال'],
+      ['دوره چرخش','۹ ساعت و ۵۶ دقیقه',''],
+      ['نیم‌محور بزرگ','۵.۲۰۳','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۴۸۹',''],
+      ['شیب مداری','۱.۳۱','درجه'],
+      ['سرعت مداری','۱۳.۱','کیلومتر بر ثانیه'],
+      ['شیب محوری','۳.۱۳','درجه'],
+      ['قمرها','۹۵','تأیید شده'],
+      ['میدان مغناطیسی','۲۰٬۰۰۰','برابر زمین'],
+      ['سن لکه سرخ بزرگ','۳۵۰+','سال'],
+      ['گرانش','۲۴.۷۹','متر بر مربع ثانیه']
+    ],
+    bars: [['اندازه نسبی', 100], ['دمای سطح', 3], ['گرانش', 100], ['میدان مغناطیسی', 100]],
+    fact: 'مشتری ممکن است از طریق برافزایش سنگریزه‌ای شکل گرفته باشد — دانه‌هایی کمتر از یک اینچ عرض که به هم پیوسته‌اند، نه برخورد سیارک‌های کامل.'
+  },
+  Saturn: {
+    nameFa: 'زحل',
+    tag: 'غول گازی',
+    subtitle: 'ششمین سیاره از خورشید — جواهر حلقه‌دار',
+    desc: 'دومین سیاره بزرگ، ۹ برابر عرض زمین، و کم‌چگال‌ترین — روی آب شنا می‌کند. حلقه‌ها ۲۸۲٬۰۰۰ کیلومتر وسعت دارند اما به طور میانگین فقط حدود ۱۰ متر ضخامت.',
+    composition: [['هیدروژن', 'حدود ۹۶٪'], ['هلیوم', 'حدود ۳٪'], ['یخ آمونیاک', 'ابرهای بالایی'], ['یخ آب', 'داخل / حلقه‌ها'], ['متان', 'اثر']],
+    features: [
+      'سیستم حلقه‌ای — وسعت ۲۸۲٬۰۰۰ کیلومتر، ضخامت میانگین حدود ۱۰ متر',
+      'حلقه‌ها جوان و در حال ناپدید شدن — مواد به داخل سیاره می‌بارند',
+      'طوفان‌های لکه سفید بزرگ — دوره‌ای، دور کل سیاره را می‌پیمایند',
+      'سرعت باد بیش از ۱۸۰۰ کیلومتر بر ساعت',
+      'شش‌ضلعی قطبی شمالی — به عرض ۳۰٬۰۰۰ کیلومتر',
+      '۱۴۵ قمر از جمله تیتان با جو غلیظ نیتروژنی'
+    ],
+    missions: ['پایونیر ۱۱ (۱۹۷۹)', 'وویجر ۱ و ۲ (۱۹۸۰ تا ۱۹۸۱)', 'کاسینی-هویگنس (۲۰۰۴ تا ۲۰۱۷)', 'دراگون‌فلای (برنامه‌ریزی ۲۰۳۴، به تیتان)'],
+    stats: [
+      ['قطر','۱۱۶٬۴۶۰','کیلومتر'],
+      ['جرم','۵.۶۸ × ۱۰²⁶','کیلوگرم'],
+      ['جرم نسبت به زمین','۹۵.۲','برابر'],
+      ['چگالی','۰.۶۸۷','گرم بر سانتی‌متر مکعب'],
+      ['دمای ابرها','منفی ۱۷۸','درجه سانتی‌گراد'],
+      ['دوره مداری','۲۹.۴۶','سال'],
+      ['دوره چرخش','۱۰ ساعت و ۴۲ دقیقه',''],
+      ['نیم‌محور بزرگ','۹.۵۳۷','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۵۶۵',''],
+      ['شیب مداری','۲.۴۹','درجه'],
+      ['سرعت مداری','۹.۷','کیلومتر بر ثانیه'],
+      ['شیب محوری','۲۶.۷۳','درجه'],
+      ['قمرها','۱۴۵','تأیید شده'],
+      ['وسعت حلقه','۲۸۲٬۰۰۰','کیلومتر'],
+      ['ضخامت حلقه','حدود ۱۰','متر (میانگین)'],
+      ['گرانش','۱۰.۴۴','متر بر مربع ثانیه']
+    ],
+    bars: [['اندازه نسبی', 85], ['دمای سطح', 3], ['گرانش', 91], ['وسعت حلقه', 100]],
+    fact: 'حلقه‌های زحل در ۱۰۰ تا ۳۰۰ میلیون سال دیگر از بین خواهند رفت. مواد با سرعت تا ۱۰٬۰۰۰ کیلوگرم در ثانیه به داخل سیاره می‌بارند.'
+  },
+  Uranus: {
+    nameFa: 'اورانوس',
+    tag: 'غول یخی',
+    subtitle: 'هفتمین سیاره از خورشید — جهان کج',
+    desc: '۹۸ درجه کج شده — احتمالاً از یک برخورد باستانی. سردترین سیاره منظومه شمسی با دمای منفی ۲۲۴ درجه سانتی‌گراد.',
+    composition: [['هیدروژن', 'حدود ۸۳٪'], ['هلیوم', 'حدود ۱۵٪'], ['متان', 'حدود ۲.۳٪'], ['یخ‌های آب-آمونیاک', 'داخل سیاره']],
+    features: [
+      'شیب محوری ۹۸ درجه — روی پهلو به دور خورشید می‌غلتد',
+      '۲۷ قمر به نام شخصیت‌های شکسپیر و الکساندر پوپ نام‌گذاری شده',
+      'سیستم حلقه‌ای تیره و نازک، کشف‌شده در ۱۹۷۷',
+      'قوی‌ترین باد ثبت‌شده: ۹۰۰ کیلومتر بر ساعت',
+      'تنها یک فضاپیما بازدید کرده: وویجر ۲، ۱۹۸۶',
+      '۴۲ سال نور پیوسته در هر قطب و سپس ۴۲ سال تاریکی'
+    ],
+    missions: ['وویجر ۲ (پرواز نزدیک ۱۹۸۶)', 'مدارگرد و کاوشگر اورانوس (پیشنهادی، دهه ۲۰۳۰)'],
+    stats: [
+      ['قطر','۵۰٬۷۲۴','کیلومتر'],
+      ['جرم','۸.۶۸ × ۱۰²⁵','کیلوگرم'],
+      ['جرم نسبت به زمین','۱۴.۵','برابر'],
+      ['چگالی','۱.۲۷','گرم بر سانتی‌متر مکعب'],
+      ['دمای ابرها','منفی ۲۲۴','درجه سانتی‌گراد'],
+      ['دوره مداری','۸۴.۰۱','سال'],
+      ['دوره چرخش','منفی ۱۷ ساعت و ۱۴ دقیقه','بازگشتی'],
+      ['نیم‌محور بزرگ','۱۹.۱۹','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۴۵۷',''],
+      ['شیب مداری','۰.۷۷','درجه'],
+      ['سرعت مداری','۶.۸۱','کیلومتر بر ثانیه'],
+      ['شیب محوری','۹۷.۷۷','درجه'],
+      ['قمرها','۲۸','تأیید شده'],
+      ['سرعت باد','۹۰۰','کیلومتر بر ساعت'],
+      ['گرانش','۸.۶۹','متر بر مربع ثانیه']
+    ],
+    bars: [['اندازه نسبی', 36], ['دمای سطح', 1], ['گرانش', 89], ['شیب محوری', 100]],
+    fact: 'محور اورانوس به قدری کج است که قطب‌هایش گاهی تقریباً مستقیم به سمت خورشید اشاره می‌کنند.'
+  },
+  Neptune: {
+    nameFa: 'نپتون',
+    tag: 'غول یخی',
+    subtitle: 'هشتمین سیاره از خورشید — جهان بادی',
+    desc: 'پیش از مشاهده با ریاضیات کشف شد. سریع‌ترین بادها در منظومه شمسی: تا ۲۱۰۰ کیلومتر بر ساعت.',
+    composition: [['هیدروژن', 'حدود ۸۰٪'], ['هلیوم', 'حدود ۱۹٪'], ['متان', 'حدود ۱.۵٪'], ['یخ‌های آب-آمونیاک', 'داخل سیاره']],
+    features: [
+      'سریع‌ترین بادها در منظومه شمسی: ۲۱۰۰ کیلومتر بر ساعت',
+      'لکه تاریک بزرگ — رصد شده توسط وویجر ۲، بعداً محو شد',
+      '۱۴ قمر تأیید شده',
+      'تریتون — بزرگ‌ترین قمر، مدار بازگشتی (جسم اسیرشده از کمربند کویپر)',
+      'سیستم حلقه‌ای نازک با پنج حلقه نام‌گذاری‌شده',
+      'تنها یک فضاپیما: وویجر ۲، ۱۹۸۹'
+    ],
+    missions: ['وویجر ۲ (پرواز نزدیک ۱۹۸۹)', 'ادیسه نپتون (پیشنهادی)'],
+    stats: [
+      ['قطر','۴۹٬۲۴۴','کیلومتر'],
+      ['جرم','۱.۰۲ × ۱۰²⁶','کیلوگرم'],
+      ['جرم نسبت به زمین','۱۷.۱','برابر'],
+      ['چگالی','۱.۶۴','گرم بر سانتی‌متر مکعب'],
+      ['دمای ابرها','منفی ۲۱۴','درجه سانتی‌گراد'],
+      ['دوره مداری','۱۶۴.۸','سال'],
+      ['دوره چرخش','۱۶ ساعت و ۶ دقیقه',''],
+      ['نیم‌محور بزرگ','۳۰.۰۷','واحد نجومی'],
+      ['خروج از مرکز','۰.۰۱۱۳',''],
+      ['شیب مداری','۱.۷۷','درجه'],
+      ['سرعت مداری','۵.۴۳','کیلومتر بر ثانیه'],
+      ['شیب محوری','۲۸.۳۲','درجه'],
+      ['قمرها','۱۶','تأیید شده'],
+      ['سرعت باد','۲۱۰۰','کیلومتر بر ساعت'],
+      ['گرانش','۱۱.۱۵','متر بر ثانیه مربع']
+    ],
+    bars: [['اندازه نسبی', 35], ['دمای سطح', 1], ['گرانش', 114], ['سرعت باد', 100]],
+    fact: 'نپتون ۲.۶ برابر انرژی بیشتری از آنچه از خورشید دریافت می‌کند، تابش می‌کند. این گرمای داخلی همان چیزی است که سریع‌ترین بادهای منظومه شمسی را به راه می‌اندازد.'
+  }
+};
+
+const DWARF_PLANETS = {
+  Ceres: { nameFa: 'سِرِس', location: 'کمربند سیارک‌ها', diameter: '۹۳۹ کیلومتر', period: '۴.۶۰ سال' },
+  Pluto: { nameFa: 'پلوتو', location: 'کمربند کویپر', diameter: '۲٬۳۷۷ کیلومتر', period: '۲۴۸ سال' },
+  Haumea: { nameFa: 'هائومیا', location: 'کمربند کویپر', diameter: '۱٬۶۳۲ کیلومتر', period: '۲۸۵ سال' },
+  Makemake: { nameFa: 'ماکی‌ماکی', location: 'کمربند کویپر', diameter: '۱٬۴۳۰ کیلومتر', period: '۳۰۹ سال' },
+  Eris: { nameFa: 'اریس', location: 'قرص پراکنده', diameter: '۲٬۳۲۶ کیلومتر', period: '۵۵۸ سال' }
+};
+
+const BODY_NAME_FA = {
+  Sun: 'خورشید',
+  Mercury: 'عطارد',
+  Venus: 'زهره',
+  Earth: 'زمین',
+  Moon: 'ماه',
+  Mars: 'مریخ',
+  Jupiter: 'مشتری',
+  Saturn: 'زحل',
+  Uranus: 'اورانوس',
+  Neptune: 'نپتون',
+  __overview: 'نمای کلی',
+  __constants: 'ثابت‌ها',
+  __outerspace: 'فضای بیرونی'
+};
+
+/* ═══════════════════════════════════════════════════════════
+   RENDERER
+   ═══════════════════════════════════════════════════════════ */
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: SCORE > 55,
+  powerPreference: 'high-performance',
+  logarithmicDepthBuffer: true,
+  alpha: false,
+  stencil: false,
+  depth: true
+});
+renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+maxAniso = Math.min(GPU.maxAniso, Q.aniso);
+
+const scene = new THREE.Scene();
+const sceneRoot = new THREE.Group();
+scene.add(sceneRoot);
+
+const camera = new THREE.PerspectiveCamera(
+  55,
+  window.innerWidth / window.innerHeight,
+  0.001,
+  40000
+);
+camera.position.set(0, 42, 96);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.07;
+controls.rotateSpeed     = 0.55;
+controls.zoomSpeed       = 1.05;
+controls.panSpeed        = 0.85;
+controls.minDistance     = 0.05;
+controls.maxDistance     = 1400;
+controls.screenSpacePanning = true;
+controls.target.set(0, 0, 0);
+controls.touches = {
+  ONE: THREE.TOUCH.ROTATE,
+  TWO: THREE.TOUCH.DOLLY_PAN
+};
+
+let composer = null;
+let bloomPass = null;
+let bloom = 0.62;
+
+if (Q.bloom) {
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(
+      Math.max(64, window.innerWidth * Q.bloomRes),
+      Math.max(64, window.innerHeight * Q.bloomRes)
+    ),
+    bloom, 0.55, 0.22
+  );
+  composer.addPass(bloomPass);
+}
+
+const sunLight = new THREE.PointLight(0xfff4e4, 4.2, 0, 0);
+scene.add(sunLight);
+scene.add(new THREE.AmbientLight(0x1a2440, 0.35));
+scene.add(new THREE.HemisphereLight(0x223355, 0x000000, 0.15));
+
+const starTex = makeStarTexture();
+
+function makeStars(count, radiusMin, radiusMax, size, opacity) {
+  const positions = new Float32Array(count * 3);
+  const colors    = new Float32Array(count * 3);
+  const c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const u = Math.random() * 2 - 1;
+    const th = Math.random() * Math.PI * 2;
+    const r = radiusMin + Math.random() * (radiusMax - radiusMin);
+    const s = Math.sqrt(1 - u * u);
+    positions[i * 3]     = Math.cos(th) * s * r;
+    positions[i * 3 + 1] = u * r;
+    positions[i * 3 + 2] = Math.sin(th) * s * r;
+    const roll = Math.random();
+    let hue, sat;
+    if (roll < 0.55) { hue = 0.58; sat = 0.05 + Math.random() * 0.15; }
+    else if (roll < 0.82) { hue = 0.12; sat = 0.10 + Math.random() * 0.20; }
+    else if (roll < 0.95) { hue = 0.55; sat = 0.25 + Math.random() * 0.25; }
+    else { hue = 0.03; sat = 0.35 + Math.random() * 0.30; }
+    const lit = 0.70 + Math.random() * 0.30;
+    c.setHSL(hue, sat, lit);
+    colors[i * 3]     = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size, map: starTex, vertexColors: true, transparent: true,
+    opacity, depthWrite: false, blending: THREE.AdditiveBlending,
+    sizeAttenuation: false
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+  return pts;
+}
+
+const nearStars = makeStars(Math.max(400, Q.stars * 0.9), 8000, 12000, 2.6, 0.92);
+const farStars = Q.starFar
+  ? makeStars(Math.max(200, Q.stars * 0.15), 7000, 11000, 5.5, 1.0)
+  : null;
+
+/* ── Milky Way band: extra stars concentrated along a great circle ── */
+function makeMilkyWay(count) {
+  const positions = new Float32Array(count * 3);
+  const colors    = new Float32Array(count * 3);
+  const c = new THREE.Color();
+  const tiltX = 1.05, tiltZ = 0.35;
+  const cosX = Math.cos(tiltX), sinX = Math.sin(tiltX);
+  const cosZ = Math.cos(tiltZ), sinZ = Math.sin(tiltZ);
+
+  for (let i = 0; i < count; i++) {
+    const l = Math.random() * Math.PI * 2;
+    const b = (Math.random() + Math.random() + Math.random() - 1.5) * 0.28;
+    const r = 8500 + Math.random() * 3000;
+
+    const x = Math.cos(l) * Math.cos(b);
+    const y = Math.sin(b);
+    const z = Math.sin(l) * Math.cos(b);
+
+    const y2 = y * cosX - z * sinX;
+    const z2 = y * sinX + z * cosX;
+    const x2 = x * cosZ - y2 * sinZ;
+    const y3 = x * sinZ + y2 * cosZ;
+
+    positions[i * 3]     = x2 * r;
+    positions[i * 3 + 1] = y3 * r;
+    positions[i * 3 + 2] = z2 * r;
+
+    c.setHSL(0.09 + Math.random() * 0.12, 0.12 + Math.random() * 0.20,
+             0.55 + Math.random() * 0.35);
+    colors[i * 3]     = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 3.5, map: starTex, vertexColors: true, transparent: true,
+    opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending,
+    sizeAttenuation: false
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+  return pts;
+}
+const milkyWay = makeMilkyWay(Math.max(400, Math.round(Q.stars * 0.4)));
+
+/* ── Asteroid belt ── */
+let asteroidBelt = null;
+const asteroidData = [];
+const ASTEROID_COUNT = Math.max(600, Math.min(2000, Math.round(Q.stars * 0.22)));
+let asteroidTime = 0;
+
+function buildAsteroidBelt() {
+  const N = ASTEROID_COUNT;
+  const pos = new Float32Array(N * 3);
+  const col = new Float32Array(N * 3);
+
+  for (let i = 0; i < N; i++) {
+    const a  = 2.1 + Math.random() * 1.2;
+    const e  = Math.random() * 0.15;
+    const inc = (Math.random() - 0.5) * 0.28;
+    const phase = Math.random() * Math.PI * 2;
+    const n = Math.sqrt(MU_SUN / (a * a * a));
+    asteroidData.push({ a, e, inc, phase, n });
+
+    const g = 0.55 + Math.random() * 0.45;
+    col[i * 3]     = g * 0.85;
+    col[i * 3 + 1] = g * 0.74;
+    col[i * 3 + 2] = g * 0.62;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 2.2, map: starTex, vertexColors: true, transparent: true,
+    opacity: 0.65, depthWrite: false, blending: THREE.AdditiveBlending,
+    sizeAttenuation: false
+  });
+  asteroidBelt = new THREE.Points(geo, mat);
+  sceneRoot.add(asteroidBelt);
+}
+
+function updateAsteroidBelt(dtDays) {
+  if (!asteroidBelt) return;
+  asteroidTime += dtDays;
+  const sun = bodyByName['Sun'];
+  if (!sun) return;
+  const arr = asteroidBelt.geometry.attributes.position.array;
+  const sunX = sun.pos.x * AU_TO_SCENE;
+  const sunY = sun.pos.y * AU_TO_SCENE;
+  const sunZ = sun.pos.z * AU_TO_SCENE;
+
+  for (let i = 0; i < asteroidData.length; i++) {
+    const a = asteroidData[i];
+    const th = a.phase + a.n * asteroidTime;
+    const cT = Math.cos(th), sT = Math.sin(th);
+    const cI = Math.cos(a.inc), sI = Math.sin(a.inc);
+
+    const xe = a.a * cT;
+    const ye = a.a * sT * cI;
+    const ze = a.a * sT * sI;
+
+    arr[i * 3]     = sunX + xe * AU_TO_SCENE;
+    arr[i * 3 + 1] = sunY + ze * AU_TO_SCENE;
+    arr[i * 3 + 2] = sunZ - ye * AU_TO_SCENE;
+  }
+  asteroidBelt.geometry.attributes.position.needsUpdate = true;
+}
+
+const setLoad = (p) => {
+  const bar = document.getElementById('loadBar');
+  if (bar) bar.style.width = p + '%';
+};
+
+let TEX = {};
+let NORMALS = {};
+let earthHeight = null;
+let ringTexMain = null;
+let ringTexThin = null;
+let glowTex = null;
+
+async function buildAssetsAsync() {
+  setLoad(5);
+  await new Promise(r => requestAnimationFrame(r));
+
+  const SZ = Q.texSize;
+  const YSZ = Math.round(SZ / 2);
+
+  const order = [
+    'mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','sun','moon'
+  ];
+
+  for (let i = 0; i < order.length; i++) {
+    const key = order[i];
+    const w = key === 'moon' ? Math.round(SZ / 2) : SZ;
+    const h = key === 'moon' ? Math.round(YSZ / 2) : YSZ;
+    TEX[key] = buildTexture(w, h, SAMPLERS[key]);
+    setLoad(5 + (i + 1) / (order.length + 3) * 80);
+    await new Promise(r => requestAnimationFrame(r));
+  }
+
+  if (Q.cloudTex > 0) {
+    TEX.clouds = buildTexture(Q.cloudTex, Q.cloudTex / 2, SAMPLERS.clouds);
+  }
+  setLoad(88);
+  await new Promise(r => requestAnimationFrame(r));
+
+  TEX.earthNight = buildTexture(Math.min(SZ, 1024), Math.min(YSZ, 512), SAMPLERS.earthNight);
+  setLoad(90);
+  await new Promise(r => requestAnimationFrame(r));
+
+  earthHeight = buildHeightMap(
+    Math.min(SZ, 768),
+    Math.min(YSZ, 384),
+    SAMPLERS.earthBump
+  );
+  NORMALS.earth = normalMapFromHeight(earthHeight, 3.2);
+  NORMALS.earthRoughness = buildHeightMap(
+    Math.min(SZ, 768),
+    Math.min(YSZ, 384),
+    SAMPLERS.earthRoughness
+  );
+  setLoad(95);
+  await new Promise(r => requestAnimationFrame(r));
+
+  ringTexMain = makeRingTexture('main', Q.ringRes);
+  ringTexThin = makeRingTexture('thin', Math.round(Q.ringRes / 2));
+  glowTex     = makeGlowTexture(SCORE > 55 ? 512 : 256);
+  setLoad(100);
+}
+
+const bodies = [];
+const bodyByName = Object.create(null);
+
+class Body {
+  constructor(opts) {
+    this.name = opts.name;
+    this.mass = opts.mass;
+    this.radiusAU = opts.radiusAU;
+    this.radiusScene = opts.radiusScene;
+    this.isSun = !!opts.isSun;
+    this.texKey = opts.texKey;
+    this.spin = opts.spin || 0;
+    this.tilt = opts.tilt || 0;
+    this.hasRings = opts.hasRings || null;
+    this.hasClouds = !!opts.hasClouds;
+    this.hasMoon = !!opts.hasMoon;
+
+    this.pos = opts.pos ? opts.pos.clone() : new THREE.Vector3();
+    this.vel = opts.vel ? opts.vel.clone() : new THREE.Vector3();
+
+    this.group = new THREE.Group();
+    sceneRoot.add(this.group);
+
+    this.buildMeshes();
+  }
+
+  buildMeshes() {
+    const r = this.radiusScene;
+
+    if (this.isSun) {
+      this.mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(r, Q.segSun, Math.round(Q.segSun * 0.66)),
+        new THREE.MeshBasicMaterial({ map: TEX.sun })
+      );
+      this.group.add(this.mesh);
+      this.glowInner = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex, color: 0xffdc9a, transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.95
+      }));
+      this.glowInner.scale.setScalar(r * 5.6);
+      this.group.add(this.glowInner);
+      this.glowOuter = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex, color: 0xff8a2e, transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.32
+      }));
+      this.glowOuter.scale.setScalar(r * 16);
+      this.group.add(this.glowOuter);
+      this.glowFar = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex, color: 0xff6020, transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.10
+      }));
+      this.glowFar.scale.setScalar(r * 34);
+      this.group.add(this.glowFar);
+      return;
+    }
+
+    const tiltGroup = new THREE.Group();
+    tiltGroup.rotation.z = this.tilt;
+    this.group.add(tiltGroup);
+    this.tiltGroup = tiltGroup;
+
+    const matOpts = {
+      map: TEX[this.texKey],
+      roughness: 0.9,
+      metalness: 0.0
+    };
+    if (this.texKey === 'earth' && NORMALS.earth) {
+      matOpts.normalMap = NORMALS.earth;
+      matOpts.normalScale = new THREE.Vector2(0.7, 0.7);
+      if (NORMALS.earthRoughness) {
+        matOpts.roughnessMap = NORMALS.earthRoughness;
+        matOpts.roughness = 1.0;
+      } else {
+        matOpts.roughness = 0.78;
+      }
+    }
+
+    const seg = Math.round(
+      r > 2 ? Q.segPlanet :
+      r > 1 ? Q.segPlanet :
+      Math.max(16, Math.round(Q.segPlanet * 0.7))
+    );
+
+    this.mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(r, seg, Math.round(seg / 1.5)),
+      new THREE.MeshStandardMaterial(matOpts)
+    );
+    this.mesh.userData.body = this;
+    tiltGroup.add(this.mesh);
+
+    // Earth: emissive night lights on the dark side
+    if (this.texKey === 'earth' && TEX.earthNight) {
+      const earthMat = this.mesh.material;
+      earthMat.onBeforeCompile = (shader) => {
+        shader.uniforms.sunDirWorld = { value: new THREE.Vector3(1, 0, 0) };
+        shader.uniforms.nightMap = { value: TEX.earthNight };
+        shader.fragmentShader = shader.fragmentShader
+          .replace(
+            '#include <common>',
+            '#include <common>\nuniform vec3 sunDirWorld;\nuniform sampler2D nightMap;'
+          )
+          .replace(
+            '#include <emissivemap_fragment>',
+            `#include <emissivemap_fragment>
+             vec3 wn = normalize((vec4(vNormal, 0.0) * viewMatrix).xyz);
+             float nightMask = smoothstep(0.15, -0.15, dot(wn, sunDirWorld));
+             vec3 nightCol = texture2D(nightMap, vMapUv).rgb;
+             totalEmissiveRadiance += nightCol * nightMask * 1.9;`
+          );
+        earthMat.userData.shader = shader;
+      };
+    }
+
+    // Atmospheric rim glow
+    const atmoCfg = {
+      earth:   { color: 0x4a9eff, intensity: 0.90, power: 2.8, scale: 1.020 },
+      venus:   { color: 0xffd88a, intensity: 0.55, power: 2.4, scale: 1.028 },
+      mars:    { color: 0xff8855, intensity: 0.14, power: 3.0, scale: 1.015 },
+      jupiter: { color: 0xffe0b8, intensity: 0.28, power: 3.2, scale: 1.020 },
+      saturn:  { color: 0xffd9a0, intensity: 0.26, power: 3.2, scale: 1.020 },
+      uranus:  { color: 0x9ee6ff, intensity: 0.40, power: 2.8, scale: 1.022 },
+      neptune: { color: 0x5a8aff, intensity: 0.40, power: 2.8, scale: 1.022 },
+    };
+    if (Q.showAtmosphere && atmoCfg[this.texKey]) {
+      const a = atmoCfg[this.texKey];
+      tiltGroup.add(createAtmosphere(r * a.scale, a.color, a.intensity, a.power));
+    }
+
+    if (this.hasClouds && TEX.clouds) {
+      this.cloudMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(r * 1.020, seg, Math.round(seg / 1.5)),
+        new THREE.MeshStandardMaterial({
+          map: TEX.clouds, transparent: true, depthWrite: false,
+          roughness: 1.0, metalness: 0.0
+        })
+      );
+      tiltGroup.add(this.cloudMesh);
+    }
+
+    if (this.hasRings && ringTexMain) {
+      const isMain = this.hasRings === 'main';
+      const inner = isMain ? r * 1.30 : r * 1.55;
+      const outer = isMain ? r * 2.35 : r * 1.92;
+      const ringSegs = SCORE > 55 ? 256 : 128;
+      const geo = new THREE.RingGeometry(inner, outer, ringSegs, 1);
+      const pos = geo.attributes.position;
+      const uv  = geo.attributes.uv;
+      const v   = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        const rad = Math.hypot(v.x, v.y);
+        const t = (rad - inner) / (outer - inner);
+        uv.setXY(i, t, 0.5);
+      }
+      uv.needsUpdate = true;
+      this.ringMesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+        map: isMain ? ringTexMain : ringTexThin,
+        transparent: true, side: THREE.DoubleSide, depthWrite: false,
+        opacity: isMain ? 0.95 : 0.42
+      }));
+      this.ringMesh.rotation.x = -Math.PI / 2;
+      tiltGroup.add(this.ringMesh);
+    }
+  }
+
+  setScenePosition() {
+    this.group.position.set(
+      this.pos.x * AU_TO_SCENE,
+      this.pos.y * AU_TO_SCENE,
+      this.pos.z * AU_TO_SCENE
+    );
+  }
+
+  updateSpin(dtDays) {
+    if (this.mesh) this.mesh.rotation.y += this.spin * dtDays;
+    if (this.cloudMesh) this.cloudMesh.rotation.y += this.spin * dtDays * 1.16;
+    if (this.isSun) {
+      if (this.glowInner) this.glowInner.material.rotation += dtDays * 0.012;
+      if (this.glowOuter) this.glowOuter.material.rotation -= dtDays * 0.006;
+      if (this.glowFar)   this.glowFar.material.rotation   += dtDays * 0.002;
+    }
+  }
+}
+
+const BODY_DEFS = [
+  { name:'Sun',     mass:1.0,           aAU:0,    rAU:0.00465, rScene:4.5,  isSun:true },
+  { name:'Mercury', mass:1.6601e-7,     aAU:0.387, rAU:2.44e-5, rScene:0.48, e:0.2056, tilt:0.0005, spin:0.0171, texKey:'mercury' },
+  { name:'Venus',   mass:2.4478e-6,     aAU:0.723, rAU:6.05e-5, rScene:1.02, e:0.0068, tilt:3.096, spin:-0.00411, texKey:'venus' },
+  { name:'Earth',   mass:3.0035e-6,     aAU:1.000, rAU:6.37e-5, rScene:1.10, e:0.0167, tilt:0.409, spin:1.0, texKey:'earth', hasClouds:true, hasMoon:true },
+  { name:'Mars',    mass:3.2271e-7,     aAU:1.524, rAU:3.39e-5, rScene:0.64, e:0.0934, tilt:0.440, spin:0.974, texKey:'mars' },
+  { name:'Jupiter', mass:9.5479e-4,     aAU:5.203, rAU:6.99e-4, rScene:2.70, e:0.0489, tilt:0.055, spin:2.418, texKey:'jupiter' },
+  { name:'Saturn',  mass:2.8589e-4,     aAU:9.537, rAU:5.82e-4, rScene:2.25, e:0.0565, tilt:0.466, spin:2.252, texKey:'saturn', hasRings:'main' },
+  { name:'Uranus',  mass:4.3662e-5,     aAU:19.19, rAU:2.54e-4, rScene:1.55, e:0.0457, tilt:1.706, spin:-1.392, texKey:'uranus', hasRings:'thin' },
+  { name:'Neptune', mass:5.1514e-5,     aAU:30.07, rAU:2.46e-4, rScene:1.50, e:0.0113, tilt:0.494, spin:1.491, texKey:'neptune' }
+];
+
+/* ═══════════════════════════════════════════════════════════
+   REAL J2000 ELEMENTS + KEPLER SOLVER
+   ═══════════════════════════════════════════════════════════ */
+const DEG = Math.PI / 180;
+const J2000 = {
+  Mercury: { a: 0.38709927, e: 0.20563593, i: 7.00497902,  Om:  48.33076593, w:  29.12703035, M0: 174.79252722 },
+  Venus:   { a: 0.72333566, e: 0.00677672, i: 3.39467605,  Om:  76.67984255, w:  54.92262463, M0:  50.4161     },
+  Earth:   { a: 1.00000261, e: 0.01671123, i: 0.00005,     Om: -11.26064,    w: 114.20783,    M0: 358.617      },
+  Mars:    { a: 1.52371034, e: 0.09339410, i: 1.84969142,  Om:  49.55953891, w: 286.4968315,  M0:  -4.5534     },
+  Jupiter: { a: 5.20288700, e: 0.04838624, i: 1.30439695,  Om: 100.47390909, w: 274.2545700,  M0:  19.6679606  },
+  Saturn:  { a: 9.53667594, e: 0.05386179, i: 2.48599187,  Om: 113.66242448, w: 338.9364535,  M0: 317.0205365  },
+  Uranus:  { a: 19.18916464,e: 0.04725744, i: 0.77263783,  Om:  74.01692503, w:  96.93735127, M0: 142.2839185  },
+  Neptune: { a: 30.06992276,e: 0.00859048, i: 1.77004347,  Om: 131.78422574, w: 273.1805365,  M0: 256.228      },
+};
+
+function keplerSolve(M, e) {
+  M = ((M % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  let E = e < 0.8 ? M : Math.PI;
+  for (let k = 0; k < 15; k++) {
+    const dE = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+    E -= dE;
+    if (Math.abs(dE) < 1e-10) break;
+  }
+  return E;
+}
+
+function elementsToStateAU(el, mu) {
+  const { a, e } = el;
+  const i = el.i * DEG, Om = el.Om * DEG, w = el.w * DEG, M0 = el.M0 * DEG;
+  const E = keplerSolve(M0, e);
+  const cosE = Math.cos(E), sinE = Math.sin(E);
+  const n = Math.sqrt(mu / (a * a * a));
+  const f = a * n / (1 - e * cosE);
+
+  const xp = a * (cosE - e);
+  const yp = a * Math.sqrt(1 - e * e) * sinE;
+  const vxp = -f * sinE;
+  const vyp = f * Math.sqrt(1 - e * e) * cosE;
+
+  const cO = Math.cos(Om), sO = Math.sin(Om);
+  const cw = Math.cos(w),  sw = Math.sin(w);
+  const ci = Math.cos(i),  si = Math.sin(i);
+
+  const R11 = cO * cw - sO * sw * ci, R12 = -cO * sw - sO * cw * ci;
+  const R21 = sO * cw + cO * sw * ci, R22 = -sO * sw + cO * cw * ci;
+  const R31 = sw * si,               R32 = cw * si;
+
+  const xe  = R11 * xp  + R12 * yp;
+  const ye  = R21 * xp  + R22 * yp;
+  const ze  = R31 * xp  + R32 * yp;
+  const vxe = R11 * vxp + R12 * vyp;
+  const vye = R21 * vxp + R22 * vyp;
+  const vze = R31 * vxp + R32 * vyp;
+
+  // Ecliptic (x,y,z) → scene (x, z, -y)
+  return {
+    pos: new THREE.Vector3(xe, ze, -ye),
+    vel: new THREE.Vector3(vxe, vze, -vye),
+  };
+}
+
+function initBodies() {
+  for (const def of BODY_DEFS) {
+    const posAU = new THREE.Vector3();
+    const velAU = new THREE.Vector3();
+
+    if (def.aAU > 0 && J2000[def.name]) {
+      const st = elementsToStateAU(J2000[def.name], MU_SUN);
+      posAU.copy(st.pos);
+      velAU.copy(st.vel);
+    }
+
+    const body = new Body({
+      name: def.name,
+      mass: def.mass,
+      radiusAU: def.rAU,
+      radiusScene: def.rScene,
+      isSun: def.isSun,
+      texKey: def.texKey,
+      tilt: def.tilt,
+      spin: def.spin,
+      hasRings: def.hasRings,
+      hasClouds: def.hasClouds,
+      hasMoon: def.hasMoon,
+      pos: posAU,
+      vel: velAU
+    });
+
+    bodies.push(body);
+    bodyByName[body.name] = body;
+  }
+
+  // Moon — Keplerian around Earth
+  const earth = bodyByName['Earth'];
+  const moonEl = { a: 0.00257, e: 0.0549, i: 5.145, Om: 0, w: 0, M0: 120 };
+  const st = elementsToStateAU(moonEl, G * earth.mass);
+  const moon = new Body({
+    name: 'Moon', mass: 3.694e-8,
+    radiusAU: 1.16e-5, radiusScene: 0.30,
+    texKey: 'moon',
+    tilt: 0.0, spin: 0.0,
+    pos: st.pos.clone().add(earth.pos),
+    vel: st.vel.clone().add(earth.vel)
+  });
+  bodies.push(moon);
+  bodyByName['Moon'] = moon;
+
+  // Zero total momentum
+  let totM = 0;
+  const totP = new THREE.Vector3();
+  for (const b of bodies) {
+    totM += b.mass;
+    totP.addScaledVector(b.vel, b.mass);
+  }
+  const cmVel = totP.divideScalar(totM);
+  for (const b of bodies) b.vel.sub(cmVel);
+}
+
+const orbitTrails = new Map();
+function buildTrails() {
+  for (const b of bodies) {
+    if (b.isSun) continue;
+    if (b.name === 'Moon') continue;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(Q.trails * 3);
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setDrawRange(0, 0);
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+      color: 0x3a6a9a, transparent: true, opacity: 0.28
+    }));
+    sceneRoot.add(line);
+    orbitTrails.set(b, { line, positions, count: 0, head: 0, maxPoints: Q.trails });
+  }
+}
+
+const _acc = [];
+const _r = new THREE.Vector3();
+
+function computeAccelerations() {
+  const n = bodies.length;
+  while (_acc.length < n) _acc.push(new THREE.Vector3());
+  for (let i = 0; i < n; i++) _acc[i].set(0, 0, 0);
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      _r.subVectors(bodies[j].pos, bodies[i].pos);
+      const r2 = _r.lengthSq();
+      if (r2 < 1e-12) continue;
+      const r = Math.sqrt(r2);
+      const invR3 = 1 / (r2 * r);
+      const f = G * invR3;
+      _acc[i].x += f * bodies[j].mass * _r.x;
+      _acc[i].y += f * bodies[j].mass * _r.y;
+      _acc[i].z += f * bodies[j].mass * _r.z;
+      _acc[j].x -= f * bodies[i].mass * _r.x;
+      _acc[j].y -= f * bodies[i].mass * _r.y;
+      _acc[j].z -= f * bodies[i].mass * _r.z;
+    }
+  }
+}
+
+const _oldAcc = [];
+let adaptiveSubsteps = Q.substeps;
+
+function stepPhysics(dtDays) {
+  const n = bodies.length;
+  while (_oldAcc.length < n) _oldAcc.push(new THREE.Vector3());
+
+  const substeps = adaptiveSubsteps;
+  const h = dtDays / substeps;
+
+  for (let s = 0; s < substeps; s++) {
+    computeAccelerations();
+    for (let i = 0; i < n; i++) _oldAcc[i].copy(_acc[i]);
+
+    for (let i = 0; i < n; i++) {
+      const b = bodies[i];
+      b.vel.x += 0.5 * _oldAcc[i].x * h;
+      b.vel.y += 0.5 * _oldAcc[i].y * h;
+      b.vel.z += 0.5 * _oldAcc[i].z * h;
+      b.pos.x += b.vel.x * h;
+      b.pos.y += b.vel.y * h;
+      b.pos.z += b.vel.z * h;
+    }
+
+    computeAccelerations();
+
+    for (let i = 0; i < n; i++) {
+      const b = bodies[i];
+      b.vel.x += 0.5 * _acc[i].x * h;
+      b.vel.y += 0.5 * _acc[i].y * h;
+      b.vel.z += 0.5 * _acc[i].z * h;
+    }
+  }
+}
+
+const _scenePos = new THREE.Vector3();
+
+function updateFloatingOrigin() {
+  const focus = focusBody || bodyByName['Sun'];
+  if (!focus) return;
+
+  _scenePos.set(
+    focus.pos.x * AU_TO_SCENE,
+    focus.pos.y * AU_TO_SCENE,
+    focus.pos.z * AU_TO_SCENE
+  );
+
+  sceneRoot.position.copy(_scenePos).multiplyScalar(-1);
+
+  const sun = bodyByName['Sun'];
+  if (sun) {
+    sunLight.position.set(
+      (sun.pos.x * AU_TO_SCENE) + sceneRoot.position.x,
+      (sun.pos.y * AU_TO_SCENE) + sceneRoot.position.y,
+      (sun.pos.z * AU_TO_SCENE) + sceneRoot.position.z
+    );
+  }
+}
+
+const ringGeo = new THREE.RingGeometry(1.0, 1.06, 64);
+const ringMat = new THREE.MeshBasicMaterial({
+  color: 0x8fb8ff, transparent: true, opacity: 0.0,
+  side: THREE.DoubleSide, depthTest: false, depthWrite: false
+});
+const selectionRing = new THREE.Mesh(ringGeo, ringMat);
+selectionRing.renderOrder = 999;
+selectionRing.visible = false;
+scene.add(selectionRing);
+
+const selectionRing2 = new THREE.Mesh(new THREE.RingGeometry(1.14, 1.155, 64), ringMat.clone());
+selectionRing2.renderOrder = 999;
+selectionRing2.visible = false;
+scene.add(selectionRing2);
+
+const infoEl = document.getElementById('info');
+const infoContent = document.getElementById('infoContent');
+const bodiesEl = document.getElementById('bodies');
+const closeBtn = document.getElementById('closeInfo');
+const statusEl = document.getElementById('status');
+const timeReadout = document.getElementById('timeReadout');
+const btnSlower = document.getElementById('btnSlower');
+const btnPause = document.getElementById('btnPause');
+const btnFaster = document.getElementById('btnFaster');
+const spawnPanel = document.getElementById('spawn');
+const spawnToggle = document.getElementById('spawnToggle');
+const presetRow = document.getElementById('presetRow');
+const qualityToggle = document.getElementById('qualityToggle');
+
+const BODY_ORDER = ['Sun', 'Mercury', 'Venus', 'Earth', 'Moon', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
+
+function buildChips() {
+  bodiesEl.innerHTML = '';
+
+  const outerspaceChip = document.createElement('div');
+  outerspaceChip.className = 'chip';
+  outerspaceChip.dataset.body = '__outerspace';
+  outerspaceChip.textContent = 'فضای بیرونی';
+  outerspaceChip.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectSpecial('__outerspace');
+  });
+  bodiesEl.appendChild(outerspaceChip);
+
+  const overviewChip = document.createElement('div');
+  overviewChip.className = 'chip';
+  overviewChip.dataset.body = '__overview';
+  overviewChip.textContent = 'نمای کلی';
+  overviewChip.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectSpecial('__overview');
+  });
+  bodiesEl.appendChild(overviewChip);
+
+  const constantsChip = document.createElement('div');
+  constantsChip.className = 'chip';
+  constantsChip.dataset.body = '__constants';
+  constantsChip.textContent = 'ثابت‌ها';
+  constantsChip.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectSpecial('__constants');
+  });
+  bodiesEl.appendChild(constantsChip);
+
+  for (const name of BODY_ORDER) {
+    if (!bodyByName[name]) continue;
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.dataset.body = name;
+    chip.textContent = BODY_NAME_FA[name] || name;
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectBody(name);
+    });
+    bodiesEl.appendChild(chip);
+  }
+  for (const b of bodies) {
+    if (BODY_ORDER.includes(b.name)) continue;
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.dataset.body = b.name;
+    chip.textContent = b.name;
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectBody(b.name);
+    });
+    bodiesEl.appendChild(chip);
+  }
+}
+
+function formatNumber(n, digits = 3) {
+  if (!isFinite(n)) return '—';
+  const abs = Math.abs(n);
+  if (abs === 0) return '۰';
+  if (abs < 1e-3 || abs >= 1e6) return toFa(n.toExponential(2));
+  return toFa(n.toFixed(digits));
+}
+
+function renderInfo(name) {
+  const body = bodyByName[name];
+  if (!body) return;
+  const data = BODY_INFO[name];
+
+  let html = '';
+  if (data) {
+    html += `<div class="tag">${data.tag}</div>`;
+    html += `<h2>${data.nameFa || name}</h2>`;
+    html += `<div class="subtitle">${data.subtitle}</div>`;
+    html += `<div class="desc">${data.desc}</div>`;
+  } else {
+    html += `<div class="tag">جسم سفارشی</div>`;
+    html += `<h2>${name}</h2>`;
+    html += `<div class="subtitle">ایجاد شده</div>`;
+  }
+
+  if (data && data.composition && data.composition.length) {
+    html += `<div class="section-label">ترکیب</div>`;
+    html += `<div class="stats">`;
+    data.composition.forEach(([k, v]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (data && data.features && data.features.length) {
+    html += `<div class="section-label">ویژگی‌ها</div>`;
+    html += `<div class="feature-list">`;
+    data.features.forEach(f => {
+      html += `<div class="feature-item">${f}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  const rAU = body.pos.length();
+  const vAU = body.vel.length();
+  const speed_kms = vAU * KM_PER_AU / SECONDS_PER_DAY;
+  const r_km = rAU * KM_PER_AU;
+  const period = body.isSun ? 0 : Math.sqrt(4 * Math.PI * Math.PI * rAU * rAU * rAU / (MU_SUN * (1 + body.mass)));
+
+  html += `<div class="section-label">شبیه‌سازی زنده</div>`;
+  html += `<div class="stats">`;
+  html += `<div class="stat"><span class="k">فاصله از خورشید</span><span class="v">${formatNumber(rAU, 3)} <small>واحد نجومی</small></span></div>`;
+  html += `<div class="stat"><span class="k"></span><span class="v">${toFa((r_km / 1e6).toFixed(2))} <small>میلیون کیلومتر</small></span></div>`;
+  html += `<div class="stat"><span class="k">سرعت</span><span class="v">${toFa(speed_kms.toFixed(2))} <small>کیلومتر بر ثانیه</small></span></div>`;
+  if (!body.isSun) {
+    html += `<div class="stat"><span class="k">دوره مداری</span><span class="v">${toFa(period.toFixed(2))} <small>سال</small></span></div>`;
+  }
+  html += `<div class="stat"><span class="k">جرم</span><span class="v">${formatNumber(body.mass, 3)} <small>جرم خورشیدی</small></span></div>`;
+  html += `</div>`;
+
+  if (data && data.bars) {
+    html += `<div class="section-label">در یک نگاه</div>`;
+    html += `<div class="bar-wrap">`;
+    data.bars.forEach(([label, val]) => {
+      html += `<div class="bar-row"><div class="bar-label"><span>${label}</span><b>${toFa(val)}٪</b></div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (data && data.stats) {
+    html += `<div class="section-label">داده‌های مرجع</div>`;
+    html += `<div class="stats">`;
+    data.stats.forEach(([k, v, unit]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}${unit ? ' <small>' + unit + '</small>' : ''}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (data && data.missions && data.missions.length) {
+    html += `<div class="section-label">مأموریت‌ها</div>`;
+    html += `<div class="feature-list">`;
+    data.missions.forEach(m => {
+      html += `<div class="feature-item mission">${m}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (data && data.fact) {
+    html += `<div class="section-label">نکته</div>`;
+    html += `<div class="fact">${data.fact}</div>`;
+  }
+
+  html += `<div id="edit">`;
+  html += `<div class="section-label">کارگاه</div>`;
+  html += `<div class="row"><label>جرم</label><input type="range" id="editMass" min="0.01" max="1000" step="0.01" value="${body.mass}"><span class="val" id="editMassVal">${formatNumber(body.mass, 3)}</span></div>`;
+  html += `<div class="row"><label>شعاع</label><input type="range" id="editRadius" min="0.1" max="5" step="0.05" value="${body.radiusScene}"><span class="val" id="editRadiusVal">${toFa(body.radiusScene.toFixed(2))}</span></div>`;
+  html += `<div class="btn-row">`;
+  if (body.name !== 'Sun' && body.name !== 'Moon') {
+    html += `<div class="action danger" id="btnDelete">حذف</div>`;
+  }
+  html += `<div class="action" id="btnReset">بازنشانی جرم</div>`;
+  html += `</div>`;
+  html += `</div>`;
+
+  infoContent.innerHTML = html;
+  infoEl.classList.add('open');
+
+  requestAnimationFrame(() => {
+    const fills = infoContent.querySelectorAll('.bar-fill');
+    fills.forEach((el, i) => {
+      const val = data && data.bars && data.bars[i] ? data.bars[i][1] : 0;
+      setTimeout(() => { el.style.width = val + '%'; }, 30 + i * 90);
+    });
   });
 
-  mobileMenu.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      mobileMenu.classList.remove('open');
-      document.body.classList.remove('menu-open');
+  const massSlider = document.getElementById('editMass');
+  const massVal = document.getElementById('editMassVal');
+  if (massSlider) {
+    massSlider.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      body.mass = v;
+      massVal.textContent = formatNumber(v, 3);
     });
+  }
+  const radiusSlider = document.getElementById('editRadius');
+  const radiusVal = document.getElementById('editRadiusVal');
+  if (radiusSlider) {
+    radiusSlider.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      body.radiusScene = v;
+      body.group.remove(body.mesh);
+      if (body.cloudMesh) { body.group.remove(body.cloudMesh); body.cloudMesh = null; }
+      if (body.ringMesh) { body.group.remove(body.ringMesh); body.ringMesh = null; }
+      if (body.tiltGroup) body.group.remove(body.tiltGroup);
+      body.buildMeshes();
+      body.updateSpin(0);
+      radiusVal.textContent = toFa(v.toFixed(2));
+    });
+  }
+  const delBtn = document.getElementById('btnDelete');
+  if (delBtn) {
+    delBtn.addEventListener('click', () => {
+      if (confirm(`حذف ${BODY_NAME_FA[body.name] || body.name}؟`)) {
+        removeBody(body);
+        deselect();
+      }
+    });
+  }
+  const resetBtn = document.getElementById('btnReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      const def = BODY_DEFS.find(d => d.name === body.name);
+      if (def) {
+        body.mass = def.mass;
+        if (massSlider) massSlider.value = def.mass;
+        if (massVal) massVal.textContent = formatNumber(def.mass, 3);
+      }
+    });
+  }
+}
+
+function renderSpecial(key) {
+  let html = '';
+  if (key === '__outerspace') {
+    const d = OUTER_SPACE_INFO;
+    html += `<div class="tag">${d.tag}</div>`;
+    html += `<h2>فضای بیرونی</h2>`;
+    html += `<div class="subtitle">${d.subtitle}</div>`;
+    html += `<div class="desc">${d.desc}</div>`;
+
+    html += `<div class="section-label">ترکیب</div>`;
+    html += `<div class="stats">`;
+    d.composition.forEach(([k, v]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section-label">ویژگی‌ها</div>`;
+    html += `<div class="feature-list">`;
+    d.features.forEach(f => {
+      html += `<div class="feature-item">${f}</div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section-label">مأموریت‌ها</div>`;
+    html += `<div class="feature-list">`;
+    d.missions.forEach(m => {
+      html += `<div class="feature-item mission">${m}</div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section-label">داده‌های مرجع</div>`;
+    html += `<div class="stats">`;
+    d.stats.forEach(([k, v, unit]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}${unit ? ' <small>' + unit + '</small>' : ''}</span></div>`;
+    });
+    html += `</div>`;
+
+    if (d.fact) {
+      html += `<div class="section-label">نکته</div>`;
+      html += `<div class="fact">${d.fact}</div>`;
+    }
+  } else if (key === '__overview') {
+    const d = SYSTEM_OVERVIEW;
+    html += `<div class="tag">${d.tag}</div>`;
+    html += `<h2>منظومه شمسی</h2>`;
+    html += `<div class="subtitle">${d.subtitle}</div>`;
+    html += `<div class="desc">${d.desc}</div>`;
+
+    html += `<div class="section-label">مشخصات کلی</div>`;
+    html += `<div class="stats">`;
+    d.stats.forEach(([k, v, unit]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}${unit ? ' <small>' + unit + '</small>' : ''}</span></div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section-label">سیارات کوتوله</div>`;
+    html += `<div class="stats">`;
+    Object.entries(DWARF_PLANETS).forEach(([en, p]) => {
+      html += `<div class="stat"><span class="k">${p.nameFa} (${en})</span><span class="v">${p.diameter} <small>— ${p.period}</small></span></div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section-label">مناطق منظومه</div>`;
+    html += `<div class="stats">`;
+    html += `<div class="stat"><span class="k">منظومه داخلی</span><span class="v">&lt; ۵ <small>واحد نجومی</small></span></div>`;
+    html += `<div class="stat"><span class="k">منظومه بیرونی</span><span class="v">۵ تا ۳۰ <small>واحد نجومی</small></span></div>`;
+    html += `<div class="stat"><span class="k">کمربند کویپر</span><span class="v">۳۰ تا ۵۰ <small>واحد نجومی</small></span></div>`;
+    html += `<div class="stat"><span class="k">پرتوکره خورشیدی</span><span class="v">تا ۱۲۰ <small>واحد نجومی</small></span></div>`;
+    html += `<div class="stat"><span class="k">ابر اورت</span><span class="v">۲٬۰۰۰ تا ۲۰۰٬۰۰۰ <small>واحد نجومی</small></span></div>`;
+    html += `<div class="stat"><span class="k">کره هیل</span><span class="v">۱۷۸٬۰۰۰ تا ۲۲۷٬۰۰۰ <small>واحد نجومی</small></span></div>`;
+    html += `</div>`;
+
+    html += `<div class="section-label">توزیع جرم</div>`;
+    html += `<div class="stats">`;
+    html += `<div class="stat"><span class="k">خورشید</span><span class="v">۹۹.۸۶ <small>درصد</small></span></div>`;
+    html += `<div class="stat"><span class="k">سیارات، اقمار، سیارک‌ها</span><span class="v">کمتر از ۰.۰۰۲ <small>درصد</small></span></div>`;
+    html += `<div class="stat"><span class="k">مشتری + زحل</span><span class="v">&gt; ۹۰٪ باقی جرم سیاره‌ای</span></div>`;
+    html += `</div>`;
+
+    if (d.fact) {
+      html += `<div class="section-label">نکته</div>`;
+      html += `<div class="fact">${d.fact}</div>`;
+    }
+  } else if (key === '__constants') {
+    const d = CONSTANTS_INFO;
+    html += `<div class="tag">${d.tag}</div>`;
+    html += `<h2>ثابت‌های نجومی</h2>`;
+    html += `<div class="subtitle">${d.subtitle}</div>`;
+    html += `<div class="desc">${d.desc}</div>`;
+
+    html += `<div class="section-label">مقادیر مرجع</div>`;
+    html += `<div class="stats">`;
+    d.stats.forEach(([k, v, unit]) => {
+      html += `<div class="stat"><span class="k">${k}</span><span class="v">${v}${unit ? ' <small>' + unit + '</small>' : ''}</span></div>`;
+    });
+    html += `</div>`;
+
+    if (d.fact) {
+      html += `<div class="section-label">نکته</div>`;
+      html += `<div class="fact">${d.fact}</div>`;
+    }
+  }
+
+  infoContent.innerHTML = html;
+  infoEl.classList.add('open');
+}
+
+let focusBody = null;
+let zoomTween = null;
+let selectedName = null;
+
+function updateChipActive(name) {
+  const chips = bodiesEl.querySelectorAll('.chip');
+  chips.forEach(c => c.classList.toggle('active', c.dataset.body === name));
+}
+
+function selectSpecial(key) {
+  focusBody = null;
+  selectedName = key;
+  zoomTween = null;
+  selectionRing.visible = false;
+  selectionRing2.visible = false;
+
+  if (key === '__outerspace') renderSpecial('__outerspace');
+  else if (key === '__overview') renderSpecial('__overview');
+  else if (key === '__constants') renderSpecial('__constants');
+
+  updateChipActive(key);
+}
+
+function selectBody(name) {
+  const body = bodyByName[name];
+  if (!body) return;
+
+  focusBody = body;
+  selectedName = name;
+  renderInfo(name);
+  updateChipActive(name);
+
+  selectionRing.visible = true;
+  selectionRing2.visible = true;
+
+  body.group.updateMatrixWorld(true);
+  const wp = new THREE.Vector3();
+  body.group.getWorldPosition(wp);
+
+  const r = body.radiusScene;
+  const desired = Math.max(r * 4.5, 1.0);
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  if (dir.lengthSq() < 0.001) dir.set(0, 0.4, 1).normalize();
+
+  const cur = camera.position.distanceTo(controls.target);
+  camera.position.copy(wp).add(dir.multiplyScalar(cur));
+  controls.target.copy(wp);
+  zoomTween = { t: 0, dur: 1.15, from: cur, to: desired };
+}
+
+function deselect() {
+  focusBody = null;
+  selectedName = null;
+  zoomTween = null;
+  selectionRing.visible = false;
+  selectionRing2.visible = false;
+  infoEl.classList.remove('open');
+  updateChipActive(null);
+}
+
+closeBtn.addEventListener('click', deselect);
+
+function removeBody(body) {
+  const idx = bodies.indexOf(body);
+  if (idx < 0) return;
+  bodies.splice(idx, 1);
+  delete bodyByName[body.name];
+  sceneRoot.remove(body.group);
+  body.group.traverse(obj => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material.dispose();
+    }
+  });
+  if (orbitTrails.has(body)) {
+    const t = orbitTrails.get(body);
+    sceneRoot.remove(t.line);
+    t.line.geometry.dispose();
+    t.line.material.dispose();
+    orbitTrails.delete(body);
+  }
+  buildChips();
+}
+
+let customCounter = 0;
+
+function spawnBody(preset) {
+  customCounter++;
+  const name = `${preset.name} ${customCounter}`;
+
+  const sun = bodyByName['Sun'];
+  const focus = focusBody || sun;
+
+  const offsetAU = new THREE.Vector3(
+    focus.pos.x - sun.pos.x,
+    focus.pos.y - sun.pos.y,
+    focus.pos.z - sun.pos.z
+  );
+
+  const r0 = Math.max(offsetAU.length() + preset.radiusScene * 3, preset.radiusScene * 3);
+  if (r0 < 0.05) {
+    offsetAU.set(0.5 + Math.random() * 0.5, 0, 0);
+  } else {
+    offsetAU.setLength(r0);
+    if (offsetAU.lengthSq() < 1e-6) offsetAU.set(0.5, 0, 0);
+  }
+
+  const posAU = new THREE.Vector3().copy(sun.pos).add(offsetAU);
+  const vCirc = Math.sqrt(MU_SUN / posAU.distanceTo(sun.pos));
+  const radialDir = new THREE.Vector3().subVectors(posAU, sun.pos).normalize();
+  const tangential = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), radialDir).normalize();
+  const velAU = tangential.multiplyScalar(vCirc).add(sun.vel);
+
+  const body = new Body({
+    name,
+    mass: preset.mass,
+    radiusAU: preset.radiusScene * 1e-5,
+    radiusScene: preset.radiusScene,
+    texKey: preset.texKey,
+    tilt: 0,
+    spin: 0.5,
+    hasRings: preset.hasRings || null,
+    hasClouds: !!preset.hasClouds,
+    pos: posAU,
+    vel: velAU
+  });
+
+  bodies.push(body);
+  bodyByName[name] = body;
+
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(Q.trails * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setDrawRange(0, 0);
+  const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+    color: 0x5a90c8, transparent: true, opacity: 0.35
+  }));
+  sceneRoot.add(line);
+  orbitTrails.set(body, { line, positions, count: 0, head: 0, maxPoints: Q.trails });
+
+  buildChips();
+  selectBody(name);
+}
+
+const SPAWN_PRESETS = [
+  { name: 'سنگی',   radiusScene: 0.5, mass: 3e-6, texKey: 'mars',    label: 'سنگی' },
+  { name: 'یخی',    radiusScene: 0.6, mass: 4e-6, texKey: 'neptune', label: 'یخی' },
+  { name: 'اقیانوسی', radiusScene: 1.0, mass: 3e-6, texKey: 'earth',   label: 'اقیانوسی', hasClouds: true },
+  { name: 'گازی',    radiusScene: 2.4, mass: 9e-4, texKey: 'jupiter', label: 'گازی' },
+  { name: 'حلقه‌دار', radiusScene: 1.8, mass: 3e-4, texKey: 'saturn',  label: 'حلقه‌دار', hasRings: 'main' },
+  { name: 'غول یخی', radiusScene: 1.3, mass: 4e-5, texKey: 'uranus',  label: 'غول یخی', hasRings: 'thin' }
+];
+
+function buildSpawnPresets() {
+  SPAWN_PRESETS.forEach(p => {
+    const btn = document.createElement('div');
+    btn.className = 'preset';
+    btn.textContent = p.label;
+    btn.addEventListener('click', () => spawnBody(p));
+    presetRow.appendChild(btn);
   });
 }
 
-function boot() {
-  renderTicker();
-  renderNumbers();
-  renderTimeline();
-  renderTrophies();
-  renderRecords();
-  renderGallery();
-  renderQuotes();
-  setupObservers();
-  setupNav();
+spawnToggle.addEventListener('click', () => {
+  spawnPanel.classList.toggle('open');
+});
+
+let timeScale = 1;
+let paused = false;
+
+function updateTimeReadout() {
+  if (paused) {
+    timeReadout.innerHTML = `۰.۰× <small>متوقف</small>`;
+  } else {
+    const label = timeScale >= 1 ? toFa(timeScale.toFixed(1)) : toFa(timeScale.toFixed(2));
+    const dps = toFa((timeScale * DAYS_PER_SECOND_AT_1X).toFixed(2));
+    timeReadout.innerHTML = `${label}× <small>${dps} روز/ثانیه</small>`;
+  }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
+btnFaster.addEventListener('click', () => {
+  timeScale = Math.min(timeScale * 1.5, 200);
+  paused = false;
+  updateTimeReadout();
+});
+btnSlower.addEventListener('click', () => {
+  timeScale = Math.max(timeScale / 1.5, 0.01);
+  paused = false;
+  updateTimeReadout();
+});
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.classList.toggle('paused', paused);
+  updateTimeReadout();
+});
+updateTimeReadout();
+
+const keys = Object.create(null);
+
+window.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+    e.preventDefault();
+  }
+  if (e.code === 'Escape') deselect();
+  if (e.code === 'KeyP') {
+    paused = !paused;
+    btnPause.classList.toggle('paused', paused);
+    updateTimeReadout();
+  }
+  if (e.code === 'BracketLeft')  { timeScale = Math.max(timeScale / 1.5, 0.01); updateTimeReadout(); }
+  if (e.code === 'BracketRight') { timeScale = Math.min(timeScale * 1.5, 200);  updateTimeReadout(); }
+});
+
+window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+const _fwd = new THREE.Vector3();
+const _right = new THREE.Vector3();
+const _move = new THREE.Vector3();
+const _UP = new THREE.Vector3(0, 1, 0);
+
+function updateFly(dt) {
+  const boost = (keys['ShiftLeft'] || keys['ShiftRight']) ? 3.5 : 1;
+  const spd = 24 * boost * dt;
+
+  _move.set(0, 0, 0);
+  camera.getWorldDirection(_fwd);
+  _right.crossVectors(_fwd, _UP).normalize();
+
+  if (keys['KeyW'] || keys['ArrowUp'])    _move.add(_fwd);
+  if (keys['KeyS'] || keys['ArrowDown'])  _move.sub(_fwd);
+  if (keys['KeyD'] || keys['ArrowRight']) _move.add(_right);
+  if (keys['KeyA'] || keys['ArrowLeft'])  _move.sub(_right);
+  if (keys['KeyR'] || keys['Space'])      _move.y += 1;
+  if (keys['KeyF'] || keys['KeyC'])       _move.y -= 1;
+
+  if (_move.lengthSq() > 0) {
+    _move.normalize().multiplyScalar(spd);
+    camera.position.add(_move);
+    controls.target.add(_move);
+    zoomTween = null;
+  }
 }
+
+const _wp = new THREE.Vector3();
+const _sunDir = new THREE.Vector3();
+
+function updateFollow(dt) {
+  if (focusBody) {
+    focusBody.group.updateMatrixWorld(true);
+    focusBody.group.getWorldPosition(_wp);
+
+    const k = 1 - Math.pow(0.0015, dt);
+    const delta = _wp.clone().sub(controls.target).multiplyScalar(k);
+    controls.target.add(delta);
+    camera.position.add(delta);
+
+    const r = focusBody.radiusScene;
+    const camDist = camera.position.distanceTo(_wp);
+    const scale = r * 1.55;
+
+    selectionRing.position.copy(_wp);
+    selectionRing.scale.setScalar(scale);
+    selectionRing.lookAt(camera.position);
+
+    selectionRing2.position.copy(_wp);
+    selectionRing2.scale.setScalar(scale);
+    selectionRing2.lookAt(camera.position);
+
+    const fade = THREE.MathUtils.clamp(1.0 - (camDist - scale * 3) / (scale * 30), 0, 1);
+    selectionRing.material.opacity = 0.85 * fade;
+    selectionRing2.material.opacity = 0.30 * fade;
+  }
+
+  if (zoomTween) {
+    zoomTween.t += dt;
+    const k = Math.min(1, zoomTween.t / zoomTween.dur);
+    const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const dist = THREE.MathUtils.lerp(zoomTween.from, zoomTween.to, e);
+
+    const off = camera.position.clone().sub(controls.target);
+    if (off.lengthSq() > 1e-8) {
+      off.setLength(dist);
+      camera.position.copy(controls.target).add(off);
+    }
+    if (k >= 1) zoomTween = null;
+  }
+}
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let downXY = { x: 0, y: 0 };
+let multiTouch = false;
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  downXY.x = e.clientX;
+  downXY.y = e.clientY;
+  zoomTween = null;
+  multiTouch = false;
+});
+
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (multiTouch) return;
+  if (Math.hypot(e.clientX - downXY.x, e.clientY - downXY.y) > 6) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  pointer.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(pointer, camera);
+
+  const meshes = bodies.map(b => b.mesh).filter(Boolean);
+  const hits = raycaster.intersectObjects(meshes, false);
+
+  if (hits.length > 0) {
+    const mesh = hits[0].object;
+    if (mesh.userData.body) {
+      selectBody(mesh.userData.body.name);
+      return;
+    }
+  }
+  deselect();
+});
+
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 1) multiTouch = true;
+}, { passive: true });
+
+renderer.domElement.addEventListener('wheel', () => { zoomTween = null; }, { passive: true });
+
+/* ─── adaptive quality controller ─── */
+let frameTimes = [];
+let qualityAutoDisabled = false;
+let currentAutoLevel = 0;
+
+function adaptQuality() {
+  if (qualityOverride || qualityAutoDisabled) return;
+  const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+  const fps = 1000 / avg;
+
+  if (fps < 24 && currentAutoLevel > -2) {
+    currentAutoLevel--;
+    if (currentAutoLevel === -1) {
+      if (bloomPass) bloomPass.enabled = false;
+      renderer.setPixelRatio(Math.min(dpr, Math.max(0.75, Q.dpr - 0.25)));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    } else if (currentAutoLevel === -2) {
+      adaptiveSubsteps = Math.max(3, Q.substeps - 2);
+      renderer.setPixelRatio(Math.min(dpr, Math.max(0.65, Q.dpr - 0.5)));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    frameTimes = [];
+  } else if (fps > 55 && currentAutoLevel < 0) {
+    currentAutoLevel++;
+    if (currentAutoLevel === -1) {
+      adaptiveSubsteps = Q.substeps;
+    } else if (currentAutoLevel === 0) {
+      renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+      if (bloomPass) bloomPass.enabled = Q.bloom;
+    }
+    frameTimes = [];
+  }
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(dpr, Q.dpr));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+  if (bloomPass) bloomPass.resolution.set(
+    Math.max(64, window.innerWidth * Q.bloomRes),
+    Math.max(64, window.innerHeight * Q.bloomRes)
+  );
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    paused = true;
+    btnPause.classList.add('paused');
+    updateTimeReadout();
+  }
+});
+
+let frameCounter = 0;
+let fpsAccum = 0;
+let fpsDisplay = 60;
+
+function updateStatus(dt) {
+  frameCounter++;
+  fpsAccum += dt;
+  if (fpsAccum >= 0.5) {
+    fpsDisplay = frameCounter / fpsAccum;
+    frameCounter = 0;
+    fpsAccum = 0;
+  }
+
+  let energy = 0;
+  for (let i = 0; i < bodies.length; i++) {
+    const b = bodies[i];
+    energy += 0.5 * b.mass * b.vel.lengthSq();
+    for (let j = i + 1; j < bodies.length; j++) {
+      const bj = bodies[j];
+      const r = b.pos.distanceTo(bj.pos);
+      if (r > 0) energy -= G * b.mass * bj.mass / r;
+    }
+  }
+
+  const tierClass = TIER;
+  statusEl.innerHTML =
+    `<span class="tier">${tierLabel[tierClass]}</span><br>` +
+    `<b>${toFa(bodies.length)}</b> جسم<br>` +
+    `<b>${toFa(fpsDisplay.toFixed(0))}</b> فریم بر ثانیه<br>` +
+    `انرژی <b>${toFa(energy.toExponential(3))}</b>`;
+}
+
+let trailTick = 0;
+
+function updateTrails() {
+  trailTick++;
+  if (trailTick % 4 !== 0) return;
+
+  for (const [body, t] of orbitTrails) {
+    const g = body.group.position;
+    const i = t.head * 3;
+    t.positions[i] = g.x;
+    t.positions[i + 1] = g.y;
+    t.positions[i + 2] = g.z;
+
+    t.head = (t.head + 1) % t.maxPoints;
+    if (t.count < t.maxPoints) t.count++;
+
+    const geom = t.line.geometry;
+    geom.attributes.position.needsUpdate = true;
+    geom.setDrawRange(0, t.count);
+  }
+}
+
+const clock = new THREE.Clock();
+let firstFrame = true;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const dtMs = dt * 1000;
+
+  frameTimes.push(dtMs);
+  if (frameTimes.length > 45) frameTimes.shift();
+  if (frameTimes.length === 45) adaptQuality();
+
+  const dtDays = paused ? 0 : dt * timeScale * DAYS_PER_SECOND_AT_1X;
+
+  if (dtDays > 0) {
+    stepPhysics(dtDays);
+  }
+
+  for (const b of bodies) {
+    b.setScenePosition();
+    b.updateSpin(dtDays);
+  }
+
+  updateFloatingOrigin();
+
+  // Update sun world position uniform (used by atmosphere shaders)
+  const _sunB = bodyByName['Sun'];
+  if (_sunB) {
+    sunPosUniform.value.set(
+      sceneRoot.position.x + _sunB.pos.x * AU_TO_SCENE,
+      sceneRoot.position.y + _sunB.pos.y * AU_TO_SCENE,
+      sceneRoot.position.z + _sunB.pos.z * AU_TO_SCENE
+    );
+    // Update sun direction for each Earth's night-lights shader
+    for (const b of bodies) {
+      if (b.texKey === 'earth' && b.mesh && b.mesh.material.userData.shader) {
+        _sunDir.subVectors(_sunB.pos, b.pos).normalize();
+        b.mesh.material.userData.shader.uniforms.sunDirWorld.value.copy(_sunDir);
+      }
+    }
+  }
+
+  // Tidal-lock the Moon so its near side faces Earth
+  const _moonB = bodyByName['Moon'];
+  const _earthB = bodyByName['Earth'];
+  if (_moonB && _moonB.mesh && _earthB) {
+    const dx = _earthB.pos.x - _moonB.pos.x;
+    const dz = _earthB.pos.z - _moonB.pos.z;
+    _moonB.mesh.rotation.y = Math.atan2(dx, dz);
+  }
+
+  updateAsteroidBelt(dtDays);
+
+  updateFly(dt);
+  updateFollow(dt);
+  controls.update();
+
+  if (dtDays > 0) updateTrails();
+
+  updateStatus(dt);
+
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
+
+  if (firstFrame) {
+    firstFrame = false;
+    requestAnimationFrame(() => {
+      const el = document.getElementById('loading');
+      if (el) el.classList.add('hide');
+      setTimeout(() => el && el.remove(), 1000);
+    });
+  }
+}
+
+/* ─── boot ─── */
+buildAssetsAsync().then(() => {
+  initBodies();
+  for (const b of bodies) b.setScenePosition();
+  buildTrails();
+  buildAsteroidBelt();
+  buildChips();
+  buildSpawnPresets();
+
+  qualityToggle.textContent = qualityOverride
+    ? `کیفیت: ${qualityOverride}`
+    : `کیفیت: خودکار · ${tierLabel[TIER]}`;
+
+  qualityToggle.addEventListener('click', () => {
+    const cycle = ['minimal', 'low', 'medium', 'high'];
+    const cur = qualityOverride || TIER;
+    const idx = cycle.indexOf(cur);
+    const next = cycle[(idx + 1) % cycle.length];
+    if (next === TIER) {
+      qualityOverride = null;
+      qualityAutoDisabled = false;
+      document.getElementById('qualityToggle').textContent = `کیفیت: خودکار · ${tierLabel[TIER]}`;
+      applyQualityPreset(TIER);
+    } else {
+      applyQualityPreset(next);
+      qualityAutoDisabled = true;
+    }
+  });
+
+  animate();
+});
 </script>
 </body>
 </html>
