@@ -1,110 +1,2530 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>روزاریو - زادگاه مسی</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#060914">
+<title>🖥️ مانیتورینگ و عیب‌یابی عملکرد ویندوز — نسخه نهایی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root {
+  --font-ui: 'Vazirmatn', Tahoma, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+
+  --cyan: #22d3ee;
+  --cyan-deep: #0891b2;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --green: #10b981;
+  --orange: #f59e0b;
+  --red: #ef4444;
+
+  --bg: #060914;
+  --bg-2: #0a0f21;
+  --card: rgba(20, 26, 46, 0.62);
+  --card-solid: #141a2e;
+  --card-hover: rgba(28, 36, 62, 0.85);
+  --border: rgba(34, 211, 238, 0.18);
+  --border-strong: rgba(34, 211, 238, 0.4);
+  --text: #e8ecff;
+  --text-2: #b8c2e0;
+  --dim: #7c88a8;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(34, 211, 238, 0.18);
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 0.2s;
+  --dur: 0.35s;
+  --dur-slow: 0.6s;
+
+  --hue-shift: 0deg;
+}
+
+html[data-theme="light"] {
+  --bg: #f5f7fc;
+  --bg-2: #eef2fa;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-solid: #ffffff;
+  --card-hover: rgba(255, 255, 255, 0.92);
+  --border: rgba(8, 145, 178, 0.22);
+  --border-strong: rgba(8, 145, 178, 0.5);
+  --text: #0f172a;
+  --text-2: #334155;
+  --dim: #64748b;
+  --shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+  --shadow-glow: 0 0 40px rgba(8, 145, 178, 0.12);
+  --cyan: #0891b2;
+  --purple: #7c3aed;
+  --pink: #db2777;
+  --green: #059669;
+  --orange: #d97706;
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+::selection { background: rgba(34, 211, 238, 0.35); color: var(--text); }
+
+@media (hover: none), (max-width: 768px) {
+  html, body { cursor: auto; }
+}
+
+/* ============================================================
+   CUSTOM CURSOR
+============================================================ */
+.cursor-dot, .cursor-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  top: 0; left: 0;
+  mix-blend-mode: screen;
+}
+html[data-theme="light"] .cursor-dot,
+html[data-theme="light"] .cursor-ring { mix-blend-mode: multiply; }
+
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan), 0 0 22px var(--cyan);
+}
+.cursor-ring {
+  width: 34px; height: 34px;
+  border: 1.5px solid rgba(34, 211, 238, 0.55);
+  transition: width var(--dur-fast) var(--ease),
+              height var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              background var(--dur-fast) var(--ease);
+}
+.cursor-ring.hover {
+  width: 54px; height: 54px;
+  border-color: var(--pink);
+  background: rgba(236, 72, 153, 0.1);
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.4);
+}
+@media (hover: none), (max-width: 768px) {
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ============================================================
+   BACKGROUND LAYERS
+============================================================ */
+#particleCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+}
+html[data-theme="light"] #particleCanvas { opacity: 0.3; }
+
+.aurora {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0.5;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+html[data-theme="light"] .aurora { opacity: 0.35; }
+
+.aurora-1 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(34,211,238,0.55), transparent 70%);
+  top: -120px; right: -120px;
+  animation: auroraFloat1 20s ease-in-out infinite;
+}
+.aurora-2 {
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, rgba(168,85,247,0.5), transparent 70%);
+  bottom: -180px; left: -180px;
+  animation: auroraFloat2 24s ease-in-out infinite;
+}
+.aurora-3 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(236,72,153,0.45), transparent 70%);
+  top: 55%; left: 55%;
+  animation: auroraFloat3 28s ease-in-out infinite;
+}
+
+@keyframes auroraFloat1 {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-90px, 70px) scale(1.18); }
+}
+@keyframes auroraFloat2 {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(110px, -90px) scale(0.85); }
+}
+@keyframes auroraFloat3 {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); }
+  33% { transform: translate(-42%,-58%) scale(1.12); }
+  66% { transform: translate(-58%,-42%) scale(0.92); }
+}
+
+/* subtle grain overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+   PROGRESS BAR
+============================================================ */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink), var(--cyan));
+  background-size: 300% 100%;
+  transition: width var(--dur-slow) var(--ease);
+  z-index: 1000;
+  box-shadow: 0 0 18px var(--cyan), 0 0 36px rgba(34,211,238,0.4);
+  animation: progressShine 3s linear infinite;
+}
+@keyframes progressShine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ============================================================
+   SLIDE ENGINE
+============================================================ */
+.slides-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  z-index: 10;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 60px 70px 140px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  transition: opacity var(--dur-slow) var(--ease),
+              transform var(--dur-slow) var(--ease);
+  overflow-y: auto;
+  overflow-x: hidden;
+  will-change: opacity, transform;
+  scrollbar-gutter: stable;
+}
+
+.slide.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.slide.exit-left { transform: translateX(-40px) scale(0.985); }
+.slide.exit-right { transform: translateX(40px) scale(0.985); }
+
+.slide::-webkit-scrollbar { width: 8px; }
+.slide::-webkit-scrollbar-track { background: transparent; }
+.slide::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--cyan), var(--purple));
+  border-radius: 4px;
+  border: 2px solid var(--bg);
+}
+
+/* ============================================================
+   SLIDE TITLE
+============================================================ */
+.slide-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  margin-bottom: 30px;
+  display: inline-block;
+  padding-bottom: 14px;
+  position: relative;
+  background: linear-gradient(90deg, var(--text), var(--cyan), var(--text));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShine 5s linear infinite;
+  letter-spacing: -0.5px;
+}
+.slide-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0; right: 0;
+  height: 3px; width: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple), transparent);
+  box-shadow: 0 0 12px var(--cyan);
+  border-radius: 2px;
+  transform-origin: right;
+  animation: lineGrow var(--dur-slow) var(--ease) forwards;
+}
+@keyframes lineGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes titleShine {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ============================================================
+   STAGGER
+============================================================ */
+.slide.active .stagger {
+  animation: staggerIn var(--dur-slow) var(--ease-out-back) forwards;
+  opacity: 0;
+}
+.slide.active .stagger:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .stagger:nth-child(2) { animation-delay: 0.11s; }
+.slide.active .stagger:nth-child(3) { animation-delay: 0.17s; }
+.slide.active .stagger:nth-child(4) { animation-delay: 0.23s; }
+.slide.active .stagger:nth-child(5) { animation-delay: 0.29s; }
+.slide.active .stagger:nth-child(6) { animation-delay: 0.35s; }
+.slide.active .stagger:nth-child(7) { animation-delay: 0.41s; }
+.slide.active .stagger:nth-child(8) { animation-delay: 0.47s; }
+.slide.active .stagger:nth-child(9) { animation-delay: 0.53s; }
+.slide.active .stagger:nth-child(10) { animation-delay: 0.59s; }
+
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================
+   TITLE SLIDE
+============================================================ */
+.title-slide {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+.title-slide .icon {
+  font-size: 5.5rem;
+  margin-bottom: 22px;
+  display: inline-block;
+  animation: iconFloat 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 32px rgba(34,211,238,0.55));
+}
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-18px) rotate(4deg); }
+}
+.title-slide h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.55;
+  background: linear-gradient(135deg, #22d3ee, #a855f7, #ec4899, #22d3ee);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
+  animation: gradientShift 8s ease infinite;
+  filter: drop-shadow(0 0 30px rgba(34,211,238,0.28));
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.title-slide .subtitle {
+  font-size: 1rem;
+  color: var(--cyan);
+  margin-bottom: 46px;
+  letter-spacing: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-shadow: 0 0 20px rgba(34,211,238,0.5);
+  animation: letterSpacing 4s ease-in-out infinite;
+}
+@keyframes letterSpacing {
+  0%, 100% { letter-spacing: 10px; }
+  50% { letter-spacing: 14px; }
+}
+.title-slide .meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.meta-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px 26px;
+  border-radius: var(--radius);
+  min-width: 170px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease-out-back);
+  position: relative;
+  overflow: hidden;
+}
+.meta-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(34,211,238,0.14), transparent);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+.meta-item:hover {
+  border-color: var(--cyan);
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 20px 40px rgba(34,211,238,0.22), var(--shadow-glow);
+}
+.meta-item:hover::before { opacity: 1; }
+.meta-item .label {
+  font-size: 0.72rem;
+  color: var(--dim);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  position: relative;
+}
+.meta-item .value {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 700;
+  position: relative;
+}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+.cards.cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.cards.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.card {
+  background: var(--card);
+  padding: 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color var(--dur) var(--ease),
+              box-shadow var(--dur) var(--ease),
+              transform var(--dur) var(--ease);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.12), transparent);
+  transition: left 0.9s var(--ease);
+  pointer-events: none;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(34,211,238,0.5), transparent, rgba(168,85,247,0.5), transparent);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+  animation: borderRotate 5s linear infinite;
+  pointer-events: none;
+}
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+.card:hover {
+  border-color: transparent;
+  box-shadow: 0 22px 50px rgba(34,211,238,0.16), var(--shadow-glow);
+}
+.card:hover::before { left: 100%; }
+.card:hover::after { opacity: 1; }
+.card .card-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-out-back);
+}
+.card:hover .card-icon {
+  transform: scale(1.28) rotate(-8deg);
+  filter: drop-shadow(0 0 14px var(--cyan));
+}
+.card h3 {
+  color: var(--cyan);
+  font-size: 1.08rem;
+  margin-bottom: 8px;
+  font-weight: 800;
+}
+.card p {
+  color: var(--dim);
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+.card code {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-size: 0.85em;
+}
+
+/* ============================================================
+   CONTENT LIST
+============================================================ */
+ul.content-list {
+  list-style: none;
+  font-size: 1.1rem;
+  line-height: 1.9;
+}
+ul.content-list li {
+  margin-bottom: 10px;
+  padding-right: 30px;
+  position: relative;
+  transition: all var(--dur) var(--ease);
+}
+ul.content-list li::before {
+  content: "▸";
+  position: absolute;
+  right: 0;
+  color: var(--cyan);
+  font-weight: bold;
+  font-size: 1.25rem;
+  transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
+  text-shadow: 0 0 8px var(--cyan);
+}
+ul.content-list li:hover {
+  color: var(--cyan);
+  padding-right: 40px;
+}
+ul.content-list li:hover::before {
+  transform: scale(1.4) rotate(90deg);
+  color: var(--pink);
+  text-shadow: 0 0 14px var(--pink);
+}
+ul.content-list li strong { color: var(--cyan); font-weight: 800; }
+ul.content-list ul { font-size: 0.95rem; margin-top: 6px; }
+
+/* ============================================================
+   HIGHLIGHT BOX
+============================================================ */
+.highlight-box {
+  background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(168,85,247,0.08));
+  border-right: 4px solid var(--cyan);
+  padding: 18px 24px;
+  border-radius: var(--radius-sm);
+  margin: 20px 0;
+  font-size: 1.02rem;
+  line-height: 1.85;
+  position: relative;
+  overflow: hidden;
+  animation: highlightGlow 3.5s ease-in-out infinite;
+}
+.highlight-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.09), transparent);
+  animation: highlightSweep 5s ease-in-out infinite;
+}
+@keyframes highlightSweep {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+@keyframes highlightGlow {
+  0%, 100% { box-shadow: 0 0 14px rgba(34,211,238,0.08); }
+  50% { box-shadow: 0 0 32px rgba(34,211,238,0.24); }
+}
+.highlight-box strong { color: var(--cyan); font-weight: 800; }
+.highlight-box.warn { border-right-color: var(--orange); background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(236,72,153,0.06)); }
+.highlight-box.warn strong { color: var(--orange); }
+.highlight-box.danger { border-right-color: var(--red); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(236,72,153,0.06)); }
+.highlight-box.danger strong { color: var(--red); }
+
+/* ============================================================
+   TABLES
+============================================================ */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 18px;
+  font-size: 0.96rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+th {
+  background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(168,85,247,0.15));
+  color: var(--cyan);
+  padding: 14px 18px;
+  text-align: right;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
+}
+td {
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(34,211,238,0.06);
+  transition: background var(--dur-fast) var(--ease);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background var(--dur-fast) var(--ease); }
+tbody tr:hover td { background: rgba(34,211,238,0.07); }
+td code, th code {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-size: 0.88em;
+  background: rgba(34,211,238,0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* ============================================================
+   BADGES
+============================================================ */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid;
+  transition: all var(--dur-fast) var(--ease-out-back);
+  white-space: nowrap;
+}
+.badge:hover {
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 0 16px currentColor;
+}
+.badge-info { color: var(--green); border-color: var(--green); background: rgba(16,185,129,0.1); }
+.badge-warn { color: var(--orange); border-color: var(--orange); background: rgba(245,158,11,0.1); }
+.badge-error { color: var(--pink); border-color: var(--pink); background: rgba(236,72,153,0.1); }
+.badge-critical { color: var(--purple); border-color: var(--purple); background: rgba(168,85,247,0.1); }
+.badge-cyan { color: var(--cyan); border-color: var(--cyan); background: rgba(34,211,238,0.1); }
+
+/* ============================================================
+   CODE BLOCK
+============================================================ */
+.code-block {
+  background: #03050c;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 28px 22px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.75;
+  direction: ltr;
+  text-align: left;
+  overflow-x: auto;
+  color: #a5c8ff;
+  margin-top: 14px;
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(34,211,238,0.06), 0 0 20px rgba(34,211,238,0.04);
+  transition: box-shadow var(--dur) var(--ease);
+}
+html[data-theme="light"] .code-block {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+.code-block:hover {
+  box-shadow: inset 0 0 30px rgba(34,211,238,0.1), 0 0 30px rgba(34,211,238,0.12);
+}
+.code-block::before {
+  content: "● ● ●";
+  position: absolute;
+  top: 9px; left: 14px;
+  font-size: 0.62rem;
+  color: var(--pink);
+  letter-spacing: 4px;
+  opacity: 0.65;
+}
+.code-block .comment { color: #5c6b8a; font-style: italic; }
+.code-block .cmd { color: var(--orange); font-weight: 700; }
+.code-block .str { color: var(--green); }
+.code-block .kwd { color: var(--purple); font-weight: 600; }
+.code-block .num { color: var(--pink); }
+.code-block .fn { color: var(--cyan); }
+.code-block .punc { color: #94a3b8; }
+.code-block .var { color: #c4b5fd; }
+
+/* ============================================================
+   METRIC CARDS + SVG GAUGES
+============================================================ */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.metric {
+  background: var(--card);
+  padding: 20px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease-out-back);
+}
+.metric::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent);
+  animation: metricLine 3.5s linear infinite;
+}
+@keyframes metricLine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.metric:hover {
+  border-color: var(--cyan);
+  transform: scale(1.05) translateY(-4px);
+  box-shadow: 0 20px 40px rgba(34,211,238,0.2), var(--shadow-glow);
+}
+.metric .metric-name {
+  font-size: 0.82rem;
+  color: var(--dim);
+  margin-bottom: 10px;
+  direction: ltr;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+}
+.metric .metric-value {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--green);
+  margin-bottom: 5px;
+  text-shadow: 0 0 14px rgba(16,185,129,0.45);
+  transition: transform var(--dur) var(--ease-out-back);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  direction: ltr;
+}
+.metric:hover .metric-value { transform: scale(1.1); }
+.metric .metric-note {
+  font-size: 0.78rem;
+  color: var(--dim);
+}
+
+/* SVG radial gauge */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease-out-back);
+}
+.gauge-wrap:hover {
+  border-color: var(--cyan);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+.gauge {
+  width: 130px;
+  height: 130px;
+  position: relative;
+}
+.gauge svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.gauge .track {
+  fill: none;
+  stroke: rgba(34,211,238,0.08);
+  stroke-width: 8;
+}
+.gauge .fill {
+  fill: none;
+  stroke: url(#gaugeGrad);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 264;
+  transition: stroke-dashoffset 1.4s var(--ease);
+  filter: drop-shadow(0 0 6px rgba(34,211,238,0.5));
+}
+.gauge-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--text);
+  text-shadow: 0 0 12px rgba(34,211,238,0.4);
+}
+.gauge-value small {
+  font-size: 0.7rem;
+  color: var(--dim);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.gauge-label {
+  font-size: 0.8rem;
+  color: var(--dim);
+  text-align: center;
+  font-family: var(--font-mono);
+  direction: ltr;
+}
+
+/* ============================================================
+   CHARTS
+============================================================ */
+.chart-container {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+  height: 320px;
+  backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease);
+  position: relative;
+}
+.chart-container:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 28px rgba(34,211,238,0.12);
+}
+.chart-title {
+  color: var(--cyan);
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(34,211,238,0.3);
+  font-family: var(--font-mono);
+  direction: ltr;
+}
+
+/* ============================================================
+   FLOWCHART
+============================================================ */
+.flowchart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.flow-node {
+  background: var(--card);
+  border: 2px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  padding: 13px 30px;
+  font-size: 0.98rem;
+  text-align: center;
+  min-width: 320px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease-out-back);
+}
+.flow-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.18), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.9s var(--ease);
+}
+.flow-node:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 26px rgba(34,211,238,0.35);
+  border-color: var(--pink);
+}
+.flow-node:hover::before { transform: translateX(100%); }
+.flow-node.start { border-color: var(--green); box-shadow: 0 0 18px rgba(16,185,129,0.18); }
+.flow-node.end { border-color: var(--purple); box-shadow: 0 0 18px rgba(168,85,247,0.18); }
+.flow-node.warn { border-color: var(--orange); }
+
+.flow-arrow {
+  color: var(--cyan);
+  font-size: 1.4rem;
+  animation: arrowPulse 2s ease-in-out infinite;
+  text-shadow: 0 0 10px var(--cyan);
+}
+@keyframes arrowPulse {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(5px); opacity: 0.5; }
+}
+.flow-branches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 920px;
+}
+.flow-branch {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 0.88rem;
+  backdrop-filter: blur(14px);
+  transition: all var(--dur) var(--ease-out-back);
+}
+.flow-branch:hover {
+  border-color: var(--cyan);
+  transform: translateY(-5px) scale(1.04);
+  box-shadow: 0 12px 25px rgba(34,211,238,0.22);
+}
+.flow-branch .branch-title {
+  color: var(--cyan);
+  font-weight: 800;
+  margin-bottom: 6px;
+  font-size: 0.98rem;
+}
+
+/* ============================================================
+   TWO COLUMN
+============================================================ */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  margin-top: 16px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+.nav {
+  position: fixed;
+  bottom: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(6, 9, 20, 0.85);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  z-index: 999;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5), var(--shadow-glow);
+}
+html[data-theme="light"] .nav {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 40px rgba(15,23,42,0.12), var(--shadow-glow);
+}
+.nav button {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  border: none;
+  color: #060914;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 900;
+  transition: all var(--dur-fast) var(--ease-out-back);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+}
+.nav button:hover:not(:disabled) {
+  transform: scale(1.12);
+  box-shadow: 0 0 22px rgba(34,211,238,0.65);
+}
+.nav button:active:not(:disabled) { transform: scale(0.9); }
+.nav button:disabled { opacity: 0.22; cursor: not-allowed; }
+.nav .counter {
+  color: var(--cyan);
+  font-size: 0.88rem;
+  padding: 0 8px;
+  font-weight: 800;
+  min-width: 68px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.nav .nav-title {
+  color: var(--dim);
+  font-size: 0.78rem;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 8px;
+  border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  margin: 0 4px;
+}
+
+/* ============================================================
+   THUMBNAILS
+============================================================ */
+.thumbnails {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  padding: 8px 14px;
+  background: rgba(6, 9, 20, 0.78);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  z-index: 998;
+  backdrop-filter: blur(22px);
+  max-width: 92vw;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+html[data-theme="light"] .thumbnails { background: rgba(255,255,255,0.8); }
+.thumbnails::-webkit-scrollbar { display: none; }
+.thumb {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: rgba(124, 136, 168, 0.35);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease-out-back);
+  flex-shrink: 0;
+  border: none;
+  padding: 0;
+}
+.thumb:hover {
+  background: var(--cyan);
+  transform: scale(1.4);
+}
+.thumb.active {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  width: 24px;
+  border-radius: 6px;
+  box-shadow: 0 0 14px var(--cyan);
+}
+
+/* ============================================================
+   HINT / KBD
+============================================================ */
+.hint {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  color: var(--dim);
+  font-size: 0.74rem;
+  background: rgba(6,9,20,0.85);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  z-index: 999;
+  font-family: var(--font-ui);
+  backdrop-filter: blur(12px);
+  transition: opacity var(--dur-slow) var(--ease);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 92vw;
+}
+html[data-theme="light"] .hint { background: rgba(255,255,255,0.85); }
+.hint.fade { opacity: 0; pointer-events: none; }
+.hint kbd {
+  background: rgba(34,211,238,0.14);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin: 0 1px;
+}
+.hint .sep { color: var(--border-strong); }
+
+/* ============================================================
+   THEME TOGGLE
+============================================================ */
+.theme-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(6,9,20,0.85);
+  color: var(--cyan);
+  font-size: 1.15rem;
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dur) var(--ease-out-back);
+  backdrop-filter: blur(12px);
+}
+html[data-theme="light"] .theme-btn { background: rgba(255,255,255,0.85); }
+.theme-btn:hover {
+  transform: rotate(180deg) scale(1.1);
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ============================================================
+   RIPPLE + CONFETTI
+============================================================ */
+.ripple {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,211,238,0.55), transparent 70%);
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%) scale(0);
+  animation: rippleAnim 0.8s ease-out forwards;
+}
+@keyframes rippleAnim {
+  to { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.confetti {
+  position: fixed;
+  width: 9px; height: 9px;
+  z-index: 99999;
+  pointer-events: none;
+  animation: confettiFall 3s ease-in forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================================
+   GRID OVERVIEW
+============================================================ */
+.grid-overview .slides-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 84px 40px 100px;
+  overflow-y: auto;
+  height: 100vh;
+}
+.grid-overview .slide {
+  position: relative !important;
+  display: flex !important;
+  opacity: 1 !important;
+  transform: none !important;
+  inset: auto !important;
+  height: 210px;
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--dur) var(--ease);
+}
+.grid-overview .slide:hover {
+  border-color: var(--cyan);
+  transform: scale(1.04) !important;
+  box-shadow: 0 15px 35px rgba(34,211,238,0.3);
+  z-index: 100;
+}
+.grid-overview .slide .slide-title { font-size: 1rem; margin-bottom: 8px; }
+.grid-overview .slide > * { pointer-events: none; transform: scale(0.82); transform-origin: top right; }
+.grid-overview .slide * { font-size: 0.72em; }
+.grid-overview .nav,
+.grid-overview .thumbnails,
+.grid-overview .hint { opacity: 0.35; pointer-events: none; }
+
+/* ============================================================
+   SWIPE HINT
+============================================================ */
+.swipe-hint {
+  position: fixed;
+  bottom: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--dim);
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+  pointer-events: none;
+  z-index: 999;
+}
+.swipe-hint.show { opacity: 0.7; }
+
+/* ============================================================
+   PILL ROW
+============================================================ */
+.pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ============================================================
+   STEP LIST
+============================================================ */
+.steps {
+  counter-reset: step;
+  list-style: none;
+  margin-top: 16px;
+}
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 14px 60px 14px 16px;
+  margin-bottom: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(12px);
+  transition: all var(--dur) var(--ease);
+  line-height: 1.7;
+  font-size: 0.96rem;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: #060914;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  box-shadow: 0 0 14px rgba(34,211,238,0.35);
+}
+.steps li:hover {
+  border-color: var(--cyan);
+  transform: translateX(-6px);
+  box-shadow: 0 10px 25px rgba(34,211,238,0.15);
+}
+.steps li strong { color: var(--cyan); }
+
+/* ============================================================
+   KPI STATS
+============================================================ */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: all var(--dur) var(--ease-out-back);
+}
+.kpi:hover {
+  transform: translateY(-4px);
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-glow);
+}
+.kpi .kpi-num {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--cyan);
+  direction: ltr;
+  text-shadow: 0 0 14px rgba(34,211,238,0.4);
+}
+.kpi .kpi-lbl {
+  font-size: 0.8rem;
+  color: var(--dim);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 900px) {
+  .slide { padding: 40px 22px 150px; }
+  .slide-title { font-size: 1.5rem; margin-bottom: 20px; }
+  .title-slide h1 { font-size: 1.85rem; }
+  .flow-branches { grid-template-columns: repeat(2, 1fr); }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .nav { bottom: 66px; padding: 6px 12px; gap: 6px; }
+  .nav .nav-title { display: none; }
+  .nav button { width: 36px; height: 36px; font-size: 0.95rem; }
+  .hint { display: none; }
+  .grid-overview .slides-container { grid-template-columns: repeat(2, 1fr); padding: 70px 20px 90px; }
+  .chart-container { height: 260px; }
+  .gauge { width: 110px; height: 110px; }
+  .swipe-hint { display: none; }
+}
+
+@media (max-width: 480px) {
+  .title-slide .meta { gap: 8px; }
+  .meta-item { padding: 12px 18px; min-width: 140px; }
+  .meta-item .value { font-size: 0.9rem; }
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================================
+   PRINT
+============================================================ */
+@media print {
+  body { overflow: visible; background: #fff; color: #000; cursor: auto; }
+  .cursor-dot, .cursor-ring, #particleCanvas, .aurora,
+  .nav, .hint, .progress-bar, .thumbnails, .theme-btn,
+  .swipe-hint, body::after { display: none !important; }
+  .slide {
+    position: relative;
+    display: flex !important;
+    opacity: 1 !important;
+    transform: none !important;
+    page-break-after: always;
+    height: 100vh;
+    padding: 30px;
+  }
+  .slide-title { -webkit-text-fill-color: #000; color: #000; }
+  .card, table, .metric, .flow-node, .code-block {
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+    color: #000 !important;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora, .icon, .slide-title, .cursor-ring { animation: none !important; }
+}
+</style>
 </head>
 <body>
 
-  
-    <header>
-      
-        <h1 id="top">روزاریو، زادگاه لیونل مسی</h1>
-        <p>معرفی یکی از مهم‌ترین شهرهای کشور آرژانتین</p>
-    </header>
+<!-- SVG DEFS for gauges -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="55%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+</svg>
 
-  
-    <nav>
-        <a href="#about">درباره روزاریو</a> |
-        <a href="#attractions">جاذبه‌ها</a> |
-        <a href="#food">غذاهای محلی</a> |
-        <a href="#links">لینک‌های مفید</a>
-    </nav>
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
+<!-- BACKGROUND -->
+<canvas id="particleCanvas"></canvas>
+<div class="aurora aurora-1"></div>
+<div class="aurora aurora-2"></div>
+<div class="aurora aurora-3"></div>
 
-    <main>
+<div class="progress-bar" id="progressBar"></div>
 
- 
-        <section id="about">
-            <h2>درباره روزاریو</h2>
-            <p>
-                روزاریو یکی از شهرهای بزرگ و مهم آرژانتین است که در کنار رودخانه پارانا قرار دارد. 
-                این شهر به دلیل تاریخ غنی، معماری زیبا و فضاهای سبز فراوان، یکی از مقاصد مهم 
-                گردشگری در این کشور به شمار می‌رود.
-            </p>
-            <p>
-                روزاریو در سراسر جهان بیشتر به خاطر زادگاه لیونل مسی، ستاره فوتبال جهان، شناخته می‌شود. 
-                مسی دوران کودکی خود را در همین شهر گذراند و فوتبال را از باشگاه نیولز اولد بویز آغاز کرد. 
-                همچنین یادمان پرچم در این شهر، یکی از مهم‌ترین نمادهای ملی آرژانتین است.
-            </p>
-        </section>
+<button class="theme-btn" id="themeBtn" title="تغییر تم (T)" aria-label="تغییر تم">🌙</button>
 
-  
-        <section>
-            <h2>نمایی از شهر</h2>
-            <img src="images/rosario.jpg" alt="نمایی از شهر روزاریو" width="600">
-        </section>
+<div class="hint" id="hint">
+  <kbd>←</kbd><kbd>→</kbd> حرکت <span class="sep">|</span>
+  <kbd>F</kbd> تمام‌صفحه <span class="sep">|</span>
+  <kbd>G</kbd> نمای کلی <span class="sep">|</span>
+  <kbd>T</kbd> تم <span class="sep">|</span>
+  <kbd>Home</kbd><kbd>End</kbd> اول/آخر
+</div>
 
-       
-        <section id="attractions">
-            <h2>جاذبه‌های گردشگری</h2>
-            <ul>
-                <li>یادمان پرچم (Monumento a la Bandera)</li>
-                <li>رودخانه پارانا</li>
-                <li>ورزشگاه نیولز اولد بویز</li>
-                <li>موزه شهر روزاریو</li>
-                <li>پارک‌های سرسبز و ساحلی</li>
-            </ul>
-        </section>
+<div class="swipe-hint" id="swipeHint">← برای حرکت بکشید →</div>
 
-      
-        <section id="food">
-            <h2>غذاهای محلی و فرهنگ</h2>
-            <ol>
-                <li>آسادو (گوشت کبابی سنتی آرژانتینی)</li>
-                <li>امپانادا (پیراشکی گوشتی)</li>
-                <li>ماته (نوشیدنی سنتی گیاهی)</li>
-            </ol>
-        </section>
+<div class="slides-container" id="slidesContainer">
 
-    
-        <section>
-            <h2>آب و هوای روزاریو</h2>
-            <p>
-                روزاریو دارای آب و هوای معتدل و مرطوب است. تابستان‌های آن گرم و زمستان‌ها معمولاً ملایم است. 
-                وجود رودخانه پارانا باعث شده است که رطوبت در این شهر نسبتاً بالا باشد و طبیعت اطراف آن 
-                همیشه سرسبز و زیبا باشد.
-            </p>
-            <br>
-            <p>
-                این شهر همچنین به عنوان یکی از قطب‌های مهم اقتصادی و فرهنگی در آرژانتین شناخته می‌شود 
-                و دارای دانشگاه‌های معتبر و مراکز هنری متعددی است.
-            </p>
-        </section>
+  <!-- ============================================================ -->
+  <!-- SLIDE 1 — TITLE -->
+  <!-- ============================================================ -->
+  <div class="slide title-slide active" data-title="عنوان">
+    <div class="icon stagger">🖥️</div>
+    <h1 class="stagger" id="mainTitle">مانیتورینگ و عیب‌یابی<br>عملکرد ویندوز</h1>
+    <p class="subtitle stagger">PERFORMANCE MONITORING</p>
+    <div class="meta stagger">
+      <div class="meta-item"><div class="label">ارائه‌دهنده</div><div class="value">[نام شما]</div></div>
+      <div class="meta-item"><div class="label">شماره دانشجویی</div><div class="value">[شماره]</div></div>
+      <div class="meta-item"><div class="label">استاد</div><div class="value">[نام استاد]</div></div>
+      <div class="meta-item"><div class="label">تاریخ</div><div class="value">[تاریخ]</div></div>
+    </div>
+  </div>
 
-     
-        <section id="links">
-            <h2>لینک‌های مفید</h2>
-            <p>
-                برای اطلاعات بیشتر دربارهٔ روزاریو می‌توانید به
-              
-                <a href="https://fa.wikipedia.org/wiki/روزاریو" target="_blank" title="مراجعه به سایت دانشنامه آزاد ویکی‌پدیا">
-                    صفحهٔ ویکی‌پدیای روزاریو
-                </a>
-                مراجعه کنید.
-            </p>
-        </section>
+  <!-- ============================================================ -->
+  <!-- SLIDE 2 — TOC -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="فهرست مطالب">
+    <h2 class="slide-title stagger">📋 فهرست مطالب</h2>
+    <div class="cards">
+      <div class="card stagger"><div class="card-icon">🎯</div><h3>مقدمه</h3><p>اهمیت مانیتورینگ و رویکردهای آن</p></div>
+      <div class="card stagger"><div class="card-icon">🔍</div><h3>گلوگاه</h3><p>Bottleneck و چهار منبع اصلی</p></div>
+      <div class="card stagger"><div class="card-icon">🛠️</div><h3>ابزارها</h3><p>Task Manager تا Sysinternals</p></div>
+      <div class="card stagger"><div class="card-icon">📊</div><h3>شاخص‌ها</h3><p>Counterها و آستانه‌های بحرانی</p></div>
+      <div class="card stagger"><div class="card-icon">⚙️</div><h3>عیب‌یابی منابع</h3><p>CPU، RAM، Disk، Network</p></div>
+      <div class="card stagger"><div class="card-icon">📋</div><h3>Event Viewer</h3><p>ریشه‌یابی خطا و رویدادها</p></div>
+      <div class="card stagger"><div class="card-icon">🔀</div><h3>سناریوی عملی</h3><p>عیب‌یابی مرحله‌ای در عمل</p></div>
+      <div class="card stagger"><div class="card-icon">🚀</div><h3>ابزار پیشرفته</h3><p>Sysinternals و PowerShell</p></div>
+      <div class="card stagger"><div class="card-icon">🧪</div><h3>مطالعه موردی</h3><p>سه سناریوی واقعی</p></div>
+      <div class="card stagger"><div class="card-icon">📚</div><h3>مرجع سریع</h3><p>جدول کامل Counterها</p></div>
+    </div>
+  </div>
 
-    </main>
+  <!-- ============================================================ -->
+  <!-- SLIDE 3 — WHY -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="چرا مانیتورینگ">
+    <h2 class="slide-title stagger">🎯 چرا مانیتورینگ مهم است؟</h2>
+    <ul class="content-list">
+      <li class="stagger"><strong>مانیتورینگ</strong> = اندازه‌گیری مداوم مصرف منابع سیستم</li>
+      <li class="stagger">دو رویکرد اصلی:
+        <ul style="margin-right:25px; margin-top:8px; font-size:1rem;">
+          <li style="color:var(--orange);">واکنشی (Reactive) — بعد از شکایت کاربر</li>
+          <li style="color:var(--green);">پیش‌گیرانه (Proactive) — قبل از بروز مشکل</li>
+        </ul>
+      </li>
+      <li class="stagger">سه هدف اصلی:
+        <ul style="margin-right:25px; margin-top:8px; font-size:1rem;">
+          <li>🔧 عیب‌یابی (Troubleshooting)</li>
+          <li>📊 ظرفیت‌سنجی (Capacity Planning)</li>
+          <li>🔮 پیش‌بینی خرابی قبل از وقوع</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="kpi-row stagger" style="margin-top:22px;">
+      <div class="kpi"><div class="kpi-num">80%</div><div class="kpi-lbl">آستانه هشدار CPU</div></div>
+      <div class="kpi"><div class="kpi-num">&lt;10%</div><div class="kpi-lbl">RAM آزاد بحرانی</div></div>
+      <div class="kpi"><div class="kpi-num">25ms</div><div class="kpi-lbl">تأخیر دیسک HDD</div></div>
+      <div class="kpi"><div class="kpi-num">2×</div><div class="kpi-lbl">صف دیسک بحرانی</div></div>
+    </div>
+    <div class="highlight-box stagger">
+      💡 مدیر حرفه‌ای رویکرد <strong>پیش‌گیرانه</strong> را انتخاب می‌کند — هزینه پیشگیری همیشه کمتر از هزینه خرابی است.
+    </div>
+  </div>
 
+  <!-- ============================================================ -->
+  <!-- SLIDE 4 — BOTTLENECK -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="گلوگاه">
+    <h2 class="slide-title stagger">🔍 مفهوم گلوگاه (Bottleneck)</h2>
+    <div class="highlight-box stagger">
+      <strong>تعریف:</strong> وقتی یک منبع به ظرفیت می‌رسد و کل سیستم را کند می‌کند، حتی اگر بقیه منابع آزاد باشند.
+    </div>
+    <div class="cards">
+      <div class="card stagger"><div class="card-icon">🧠</div><h3>CPU</h3><p>پردازنده — اجرای دستورات، محاسبات</p></div>
+      <div class="card stagger"><div class="card-icon">💾</div><h3>Memory</h3><p>حافظه — داده‌های فعال در دسترس</p></div>
+      <div class="card stagger"><div class="card-icon">💽</div><h3>Disk</h3><p>ذخیره‌سازی — خواندن/نوشتن پایدار</p></div>
+      <div class="card stagger"><div class="card-icon">🌐</div><h3>Network</h3><p>ارتباطات — انتقال داده بین سیستم‌ها</p></div>
+    </div>
+    <div class="highlight-box warn stagger" style="margin-top:20px;">
+      ⚠️ <strong>قانون طلایی:</strong> همیشه همه چهار منبع را با هم بررسی کن — یک منبع تنها هرگز تصویر کامل نمی‌دهد.
+    </div>
+  </div>
 
-    <footer>
-        <p>شنتیا یادگاری.</p>
-        <p>
-            <a href="#top">بازگشت به بالای صفحه</a>
-        </p>
-    </footer>
+  <!-- ============================================================ -->
+  <!-- SLIDE 5 — TOOLS -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="ابزارها">
+    <h2 class="slide-title stagger">🛠️ ابزارهای مانیتورینگ ویندوز</h2>
+    <table class="stagger">
+      <thead><tr><th>ابزار</th><th>کاربرد اصلی</th><th>سطح</th></tr></thead>
+      <tbody>
+        <tr><td>Task Manager</td><td>نگاه سریع به مصرف منابع</td><td><span class="badge badge-info">مبتدی</span></td></tr>
+        <tr><td>Resource Monitor</td><td>جزئیات دقیق هر پروسه</td><td><span class="badge badge-warn">متوسط</span></td></tr>
+        <tr><td>Performance Monitor</td><td>تحلیل تاریخی شاخص‌ها</td><td><span class="badge badge-error">پیشرفته</span></td></tr>
+        <tr><td>Event Viewer</td><td>بررسی خطاها و رویدادها</td><td><span class="badge badge-warn">متوسط</span></td></tr>
+        <tr><td>Reliability Monitor</td><td>تاریخچه پایداری سیستم</td><td><span class="badge badge-warn">متوسط</span></td></tr>
+        <tr><td>Sysinternals Suite</td><td>تحلیل عمیق پروسه و سیستم</td><td><span class="badge badge-error">پیشرفته</span></td></tr>
+        <tr><td>PowerShell Cmdlets</td><td>خودکارسازی مانیتورینگ</td><td><span class="badge badge-critical">حرفه‌ای</span></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box stagger">
+      💡 برای هر کار، ابزار مناسب انتخاب کن — Task Manager برای نگاه سریع، perfmon برای تحلیل تاریخی، Sysinternals برای ریشه‌یابی.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 6 — TASK MANAGER -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="Task Manager">
+    <h2 class="slide-title stagger">📊 Task Manager</h2>
+    <div class="two-col">
+      <div>
+        <div class="code-block stagger">
+<span class="cmd">Ctrl</span> + <span class="cmd">Shift</span> + <span class="cmd">Esc</span>
+        </div>
+        <h3 class="stagger" style="color:var(--green); margin-top:20px; margin-bottom:10px;">✅ مزیت‌ها</h3>
+        <ul class="content-list stagger" style="font-size:0.95rem;">
+          <li>سریع‌ترین راه تشخیص اولیه</li>
+          <li>نمودار زنده و بلادرنگ</li>
+          <li>دسترسی بدون نصب</li>
+        </ul>
+        <h3 class="stagger" style="color:var(--pink); margin-top:20px; margin-bottom:10px;">⚠️ محدودیت‌ها</h3>
+        <ul class="content-list stagger" style="font-size:0.95rem;">
+          <li>جزئیات دقیق فایل/پروسه را نمی‌دهد</li>
+          <li>تاریخچه ندارد</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="stagger" style="color:var(--cyan); margin-bottom:12px;">تب‌های مهم</h3>
+        <ul class="content-list" style="font-size:1rem;">
+          <li class="stagger"><strong>Processes:</strong> مصرف هر برنامه + ستون GPU</li>
+          <li class="stagger"><strong>Performance:</strong> نمودار زنده + خلاصه</li>
+          <li class="stagger"><strong>App History:</strong> مصرف تاریخی برنامه‌ها</li>
+          <li class="stagger"><strong>Startup:</strong> برنامه‌های بوت + تأثیر</li>
+          <li class="stagger"><strong>Users:</strong> مصرف هر کاربر</li>
+          <li class="stagger"><strong>Details:</strong> جزئیات کامل پروسه</li>
+          <li class="stagger"><strong>Services:</strong> سرویس‌های ویندوز</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 7 — RESOURCE MONITOR -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="Resource Monitor">
+    <h2 class="slide-title stagger">🔬 Resource Monitor</h2>
+    <div class="code-block stagger">
+<span class="cmd">Win</span> + <span class="cmd">R</span> → <span class="str">resmon</span>
+    </div>
+    <div class="cards" style="margin-top:20px;">
+      <div class="card stagger"><div class="card-icon">🧠</div><h3>CPU</h3><p>مصرف هر پروسه + Wait Chain + Services</p></div>
+      <div class="card stagger"><div class="card-icon">💾</div><h3>Memory</h3><p>Hard Faults — خطاهای سخت + Commit</p></div>
+      <div class="card stagger"><div class="card-icon">💽</div><h3>Disk</h3><p>فایل در حال خواندن/نوشتن + Queue</p></div>
+      <div class="card stagger"><div class="card-icon">🌐</div><h3>Network</h3><p>ارتباط با آدرس‌های شبکه + TCP Connections</p></div>
+    </div>
+    <div class="highlight-box stagger">
+      💡 <strong>Hard Faults</strong> = خواندن از Page File — نشانه کمبود RAM. اگر مجموعش مداوم بالای ۱۰۰ باشد، RAM کم است.
+    </div>
+    <div class="highlight-box warn stagger">
+      🔎 <strong>Wait Chain:</strong> کدام پروسه منتظر کدام پروسه است — برای عیب‌یابی قفل‌شدگی عالی است.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 8 — PERFMON -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="Performance Monitor">
+    <h2 class="slide-title stagger">📈 Performance Monitor</h2>
+    <div class="code-block stagger">
+<span class="cmd">Win</span> + <span class="cmd">R</span> → <span class="str">perfmon</span>
+    </div>
+    <div class="cards" style="margin-top:22px;">
+      <div class="card stagger"><div class="card-icon">📌</div><h3>Counter</h3><p>شاخص اندازه‌گیری‌شده — مثلاً <code>% Processor Time</code></p></div>
+      <div class="card stagger"><div class="card-icon">📦</div><h3>Data Collector Set</h3><p>مجموعه Counterها در یک فایل لاگ (BLG/CSV)</p></div>
+      <div class="card stagger"><div class="card-icon">⏱️</div><h3>Sample Interval</h3><p>هر ۱۵ ثانیه برای مانیتورینگ طولانی، هر ۱ ثانیه برای تحلیل دقیق</p></div>
+    </div>
+    <div class="highlight-box stagger" style="margin-top:22px;">
+      ⭐ تنها ابزاری که مشکل <strong>گذشته</strong> را تحلیل می‌کند — لاگ بگیر، بعداً تحلیل کن.
+    </div>
+    <div class="code-block stagger">
+<span class="comment"># ساخت Data Collector Set از خط فرمان</span>
+<span class="cmd">logman</span> create counter <span class="str">"PerfLog"</span> -c <span class="str">"\Processor(_Total)\% Processor Time"</span> <span class="str">"\Memory\Available MBytes"</span> -si <span class="num">15</span> -f bincirc -max <span class="num">500</span>
+<span class="cmd">logman</span> start <span class="str">"PerfLog"</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 9 — CPU -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="عیب‌یابی CPU">
+    <h2 class="slide-title stagger">🧠 عیب‌یابی CPU</h2>
+    <div class="two-col">
+      <div>
+        <div class="gauge-wrap stagger">
+          <div class="gauge">
+            <svg viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="42"></circle>
+              <circle class="fill" id="cpuGaugeFill" cx="50" cy="50" r="42"></circle>
+            </svg>
+            <div class="gauge-value"><span id="cpuGaugeVal">0%</span><small>CPU Usage</small></div>
+          </div>
+          <div class="gauge-label">\Processor(_Total)\% Processor Time</div>
+        </div>
+        <h3 class="stagger" style="color:var(--pink); margin-top:18px; margin-bottom:10px;">علل رایج:</h3>
+        <ul class="content-list" style="font-size:0.95rem;">
+          <li class="stagger">Loop بی‌پایان در یک پروسه</li>
+          <li class="stagger">بدافزار ماینینگ</li>
+          <li class="stagger">درایور قدیمی یا ناسازگار</li>
+          <li class="stagger">Process Queue Length بالای ۲×Core</li>
+        </ul>
+      </div>
+      <div>
+        <div class="chart-container stagger">
+          <div class="chart-title">CPU Usage — 24h</div>
+          <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="highlight-box warn stagger">
+          ⚠️ <strong>آستانه:</strong> بالای ۸۰٪ به‌مدت بیش از ۵ دقیقه = گلوگاه CPU.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 10 — RAM -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="عیب‌یابی RAM">
+    <h2 class="slide-title stagger">💾 عیب‌یابی حافظه (RAM)</h2>
+    <div class="two-col">
+      <div>
+        <div class="gauge-wrap stagger">
+          <div class="gauge">
+            <svg viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="42"></circle>
+              <circle class="fill" id="ramGaugeFill" cx="50" cy="50" r="42"></circle>
+            </svg>
+            <div class="gauge-value"><span id="ramGaugeVal">0%</span><small>RAM Used</small></div>
+          </div>
+          <div class="gauge-label">\Memory\% Committed Bytes In Use</div>
+        </div>
+        <h3 class="stagger" style="color:var(--orange); margin-top:18px; margin-bottom:10px;">علائم کمبود:</h3>
+        <ul class="content-list" style="font-size:0.95rem;">
+          <li class="stagger">کندی جابه‌جایی بین برنامه‌ها</li>
+          <li class="stagger">صدای زیاد دیسک (Page File)</li>
+          <li class="stagger">مصرف ناگهانی دیسک</li>
+          <li class="stagger">Hard Faults مداوم بالای ۱۰۰</li>
+        </ul>
+      </div>
+      <div>
+        <div class="chart-container stagger">
+          <div class="chart-title">RAM Distribution</div>
+          <canvas id="ramChart"></canvas>
+        </div>
+        <div class="highlight-box warn stagger">
+          ⚠️ <strong>آستانه:</strong> Available MBytes زیر ۱۰٪ کل RAM = فشار حافظه. Pages/sec بالای ۱۰۰۰ = Page File سنگین.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 11 — DISK -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="عیب‌یابی دیسک">
+    <h2 class="slide-title stagger">💽 عیب‌یابی دیسک</h2>
+    <div class="metric-grid">
+      <div class="metric stagger"><div class="metric-name">Avg. Disk sec/Read</div><div class="metric-value" data-count="25" data-prefix="&lt;" data-suffix="ms">&lt;0ms</div><div class="metric-note">تأخیر خواندن</div></div>
+      <div class="metric stagger"><div class="metric-name">Avg. Disk sec/Write</div><div class="metric-value" data-count="25" data-prefix="&lt;" data-suffix="ms">&lt;0ms</div><div class="metric-note">تأخیر نوشتن</div></div>
+      <div class="metric stagger"><div class="metric-name">Current Disk Queue</div><div class="metric-value" data-count="2" data-prefix="&lt;" data-suffix="×">&lt;0×</div><div class="metric-note">صف درخواست</div></div>
+      <div class="metric stagger"><div class="metric-name">% Disk Time</div><div class="metric-value" data-count="80" data-prefix="&lt;" data-suffix="%">&lt;0%</div><div class="metric-note">مشغول بودن</div></div>
+    </div>
+    <h3 class="stagger" style="color:var(--pink); margin-top:20px; margin-bottom:12px;">علل رایج کندی:</h3>
+    <div class="cards">
+      <div class="card stagger"><div class="card-icon">💿</div><p>HDD قدیمی — ارتقا به SSD</p></div>
+      <div class="card stagger"><div class="card-icon">📦</div><p>دیسک پر — بالای ۹۰٪</p></div>
+      <div class="card stagger"><div class="card-icon">🦠</div><p>بدافزار — رمزنگاری/اسکن</p></div>
+      <div class="card stagger"><div class="card-icon">🛡️</div><p>Antivirus Scan در پس‌زمینه</p></div>
+    </div>
+    <div class="highlight-box stagger">
+      💡 برای SSD: تأخیر بالای ۱۰ms غیرعادی است. برای HDD: بالای ۲۵ms غیرعادی است.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 12 — NETWORK -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="عیب‌یابی شبکه">
+    <h2 class="slide-title stagger">🌐 عیب‌یابی شبکه</h2>
+    <div class="metric-grid">
+      <div class="metric stagger"><div class="metric-name">Bytes Total/sec</div><div class="metric-value">—</div><div class="metric-note">نرخ انتقال</div></div>
+      <div class="metric stagger"><div class="metric-name">Output Queue</div><div class="metric-value">≈0</div><div class="metric-note">صف ارسال</div></div>
+      <div class="metric stagger"><div class="metric-name">Packets Errors</div><div class="metric-value">≈0</div><div class="metric-note">خطای بسته</div></div>
+      <div class="metric stagger"><div class="metric-name">Discard Rate</div><div class="metric-value">≈0</div><div class="metric-note">دور ریختن</div></div>
+    </div>
+    <ul class="content-list" style="margin-top:20px;">
+      <li class="stagger">کندی در باز کردن سایت یا اشتراک فایل</li>
+      <li class="stagger">قطعی‌های مکرر و Ping بالا</li>
+      <li class="stagger">افت نرخ انتقال نسبت به پهنای باند لینک</li>
+    </ul>
+    <div class="code-block stagger">
+<span class="comment"># تشخیص سریع مشکل شبکه</span>
+<span class="cmd">ping</span> -n <span class="num">10</span> <span class="str">8.8.8.8</span>
+<span class="cmd">tracert</span> <span class="str">8.8.8.8</span>
+<span class="cmd">netstat</span> -ano
+<span class="cmd">Get-NetAdapterStatistics</span>
+    </div>
+    <div class="highlight-box stagger">
+      💡 ابزار: Resource Monitor (تب Network) + <code>ping</code> و <code>tracert</code> و <code>Pathping</code>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 13 — EVENT VIEWER -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="Event Viewer">
+    <h2 class="slide-title stagger">📋 Event Viewer</h2>
+    <div class="code-block stagger">
+<span class="cmd">Win</span> + <span class="cmd">R</span> → <span class="str">eventvwr.msc</span>
+    </div>
+    <div class="two-col" style="margin-top:20px;">
+      <div>
+        <h3 class="stagger" style="color:var(--cyan); margin-bottom:12px;">لاگ‌های مهم</h3>
+        <ul class="content-list" style="font-size:1rem;">
+          <li class="stagger"><strong>System:</strong> خطاهای سخت‌افزاری و درایور</li>
+          <li class="stagger"><strong>Application:</strong> خطاهای برنامه‌ها</li>
+          <li class="stagger"><strong>Security:</strong> رویدادهای امنیتی</li>
+          <li class="stagger"><strong>Setup:</strong> نصب و آپدیت</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="stagger" style="color:var(--cyan); margin-bottom:12px;">سطوح رویداد</h3>
+        <div class="pill-row stagger">
+          <span class="badge badge-info">🟢 Information</span>
+          <span class="badge badge-warn">🟡 Warning</span>
+          <span class="badge badge-error">🔴 Error</span>
+          <span class="badge badge-critical">⚫ Critical</span>
+        </div>
+      </div>
+    </div>
+    <table class="stagger" style="margin-top:18px;">
+      <thead><tr><th>Event ID</th><th>معنی</th><th>لاگ</th></tr></thead>
+      <tbody>
+        <tr><td><code>41</code></td><td>Kernel-Power — خاموشی ناگهانی</td><td>System</td></tr>
+        <tr><td><code>6008</code></td><td>Unexpected shutdown</td><td>System</td></tr>
+        <tr><td><code>1001</code></td><td>BugCheck (BSOD)</td><td>System</td></tr>
+        <tr><td><code>7000 / 7001</code></td><td>خطای سرویس</td><td>System</td></tr>
+        <tr><td><code>55</code></td><td>خرابی ساختار NTFS</td><td>System</td></tr>
+        <tr><td><code>129</code></td><td>Storport Reset — خطای دیسک</td><td>System</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box stagger">
+      💡 وقتی Performance Monitor مشکل را نشان داد، Event Viewer می‌گوید <strong>چرا</strong>.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 14 — SCENARIO -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="سناریوی عملی">
+    <h2 class="slide-title stagger">🔀 سناریوی عملی عیب‌یابی</h2>
+    <div class="flowchart">
+      <div class="flow-node start stagger">👤 کاربر: «سیستم من کند شده»</div>
+      <div class="flow-arrow stagger">↓</div>
+      <div class="flow-node stagger">۱️⃣ Task Manager → کدام منبع ۱۰۰٪ است؟</div>
+      <div class="flow-arrow stagger">↓</div>
+      <div class="flow-branches stagger">
+        <div class="flow-branch"><div class="branch-title">🧠 CPU</div>Resource Monitor<br>پروسه مقصر + Wait Chain</div>
+        <div class="flow-branch"><div class="branch-title">💾 RAM</div>Hard Faults<br>Page File + Commit</div>
+        <div class="flow-branch"><div class="branch-title">💽 Disk</div>Resource Monitor<br>فایل مقصر + Queue</div>
+        <div class="flow-branch"><div class="branch-title">🌐 Network</div>ping + tracert<br>تأخیر + Packet Loss</div>
+      </div>
+      <div class="flow-arrow stagger">↓</div>
+      <div class="flow-node warn stagger">۲️⃣ Event Viewer → بررسی خطا در بازه زمانی مشکل</div>
+      <div class="flow-arrow stagger">↓</div>
+      <div class="flow-node stagger">۳️⃣ اقدام: بستن / آپدیت / ارتقا / تمیزکاری</div>
+      <div class="flow-arrow stagger">↓</div>
+      <div class="flow-node end stagger">۴️⃣ تأیید با perfmon + ثبت گزارش نهایی</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 15 — ADVANCED TOOLS -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="ابزار پیشرفته">
+    <h2 class="slide-title stagger">🚀 ابزارهای پیشرفته</h2>
+    <div class="cards">
+      <div class="card stagger"><div class="card-icon">📊</div><h3>Reliability Monitor</h3><p><code>perfmon /rel</code><br>تاریخچه پایداری سیستم</p></div>
+      <div class="card stagger"><div class="card-icon">🔍</div><h3>Process Explorer</h3><p>Sysinternals — Task Manager پیشرفته</p></div>
+      <div class="card stagger"><div class="card-icon">📡</div><h3>Process Monitor</h3><p>رصد فایل، رجیستری و شبکه</p></div>
+      <div class="card stagger"><div class="card-icon">⚙️</div><h3>Autoruns</h3><p>مدیریت کامل Startup</p></div>
+      <div class="card stagger"><div class="card-icon">🧠</div><h3>RAMMap</h3><p>تحلیل دقیق مصرف فیزیکی RAM</p></div>
+      <div class="card stagger"><div class="card-icon">🔌</div><h3>TCPView</h3><p>اتصالات شبکه زنده</p></div>
+    </div>
+    <div class="code-block stagger" style="margin-top:20px;">
+<span class="comment"># PowerShell Monitoring Toolkit</span>
+<span class="cmd">Get-Process</span> | <span class="fn">Sort-Object</span> CPU -Descending | <span class="fn">Select-Object</span> -First <span class="num">10</span> Name, CPU, WS
+<span class="cmd">Get-Counter</span> <span class="str">'\Processor(_Total)\% Processor Time'</span> -SampleInterval <span class="num">1</span> -MaxSamples <span class="num">60</span>
+<span class="cmd">Get-CimInstance</span> Win32_OperatingSystem | <span class="fn">Select-Object</span> FreePhysicalMemory, TotalVisibleMemorySize
+<span class="cmd">Get-EventLog</span> -LogName System -EntryType Error -Newest <span class="num">5</span>
+<span class="cmd">Get-NetAdapterStatistics</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 16 — CASE STUDIES -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="مطالعه موردی">
+    <h2 class="slide-title stagger">🧪 سه مطالعه موردی واقعی</h2>
+    <div class="steps">
+      <li class="stagger"><strong>مورد ۱ — کندی صبحگاهی:</strong> هر روز صبح سیستم ۱۰ دقیقه کند است. <em>تشخیص:</em> Task Scheduler یک اسکریپت پشتیبان‌گیری سنگین در ساعت ۸ صبح اجرا می‌کند. <em>راه‌حل:</em> تغییر زمان به ۳ بامداد.</li>
+      <li class="stagger"><strong>مورد ۲ — دیسک ۱۰۰٪ بدون دلیل:</strong> هیچ فایلی در حال انتقال نیست ولی Disk Time روی ۱۰۰٪ قفل است. <em>تشخیص:</em> سرویس Windows Search در حال ایندکس مجدد است. <em>راه‌حل:</em> محدود کردن محدوده ایندکس یا غیرفعال‌سازی موقت.</li>
+      <li class="stagger"><strong>مورد ۳ — RAM تمام‌شده با برنامه‌های کم:</strong> فقط مرورگر باز است ولی RAM پر است. <em>تشخیص:</em> یک extension مخرب در مرورگر در حال مصرف حافظه است. <em>راه‌حل:</em> حذف extension + اسکن کامل.</li>
+      <li class="stagger"><strong>درس مشترک:</strong> همیشه از داده پشتیبانی کن — <em>قبل</em> از هر اقدامی، لاگ perfmon و خروجی Task Manager را ذخیره کن.</li>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 17 — CHEAT SHEET -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="مرجع سریع">
+    <h2 class="slide-title stagger">📚 مرجع سریع Counterها</h2>
+    <table class="stagger">
+      <thead><tr><th>Counter</th><th>آستانه</th><th>معنی</th></tr></thead>
+      <tbody>
+        <tr><td><code>\Processor(_Total)\% Processor Time</code></td><td>&gt; 80%</td><td>گلوگاه CPU</td></tr>
+        <tr><td><code>\System\Processor Queue Length</code></td><td>&gt; 2×Core</td><td>صف پردازنده</td></tr>
+        <tr><td><code>\Memory\Available MBytes</code></td><td>&lt; 10%</td><td>RAM کم</td></tr>
+        <tr><td><code>\Memory\Pages/sec</code></td><td>&gt; 1000</td><td>Page File فعال</td></tr>
+        <tr><td><code>\PhysicalDisk(_Total)\Avg. Disk sec/Read</code></td><td>&gt; 25ms HDD / 10ms SSD</td><td>تأخیر دیسک</td></tr>
+        <tr><td><code>\PhysicalDisk(_Total)\Current Disk Queue Length</code></td><td>&gt; 2×Spindle</td><td>صف دیسک</td></tr>
+        <tr><td><code>\Network Interface(*)\Output Queue Length</code></td><td>&gt; 2</td><td>ازدحام شبکه</td></tr>
+        <tr><td><code>\System\Context Switches/sec</code></td><td>بالا و غیرعادی</td><td>Thrashing</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box stagger">
+      💡 <strong>قانون ۳ لایه:</strong> Task Manager (نگاه) → Resource Monitor (جزئیات) → perfmon (تحلیل تاریخی).
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 18 — SUMMARY -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="جمع‌بندی">
+    <h2 class="slide-title stagger">✅ جمع‌بندی</h2>
+    <div class="cards">
+      <div class="card stagger"><div class="card-icon">🎯</div><h3>پیشگیری</h3><p>قبل از درمان — رویکرد Proactive</p></div>
+      <div class="card stagger"><div class="card-icon">🔍</div><h3>۴ منبع با هم</h3><p>CPU، RAM، Disk، Network</p></div>
+      <div class="card stagger"><div class="card-icon">🛠️</div><h3>ابزار مناسب</h3><p>در جای مناسب استفاده کن</p></div>
+      <div class="card stagger"><div class="card-icon">📋</div><h3>فرایند مرحله‌ای</h3><p>نه حدس زدن — داده محور</p></div>
+    </div>
+    <div class="highlight-box stagger" style="margin-top:30px; text-align:center; font-size:1.25rem;">
+      🙏 <strong>با تشکر از توجه شما</strong><br>
+      <span style="font-size:0.95rem; color:var(--dim);">آماده پاسخ به سوالات هستم</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 19 — SOURCES -->
+  <!-- ============================================================ -->
+  <div class="slide" data-title="منابع">
+    <h2 class="slide-title stagger">📚 منابع</h2>
+    <ul class="content-list" style="font-size:1.05rem;">
+      <li class="stagger">Microsoft Learn — Performance Monitoring</li>
+      <li class="stagger">Microsoft Docs — Performance Monitor (perfmon)</li>
+      <li class="stagger">Microsoft Docs — Resource Monitor</li>
+      <li class="stagger">Microsoft Docs — Event Viewer</li>
+      <li class="stagger">Microsoft Sysinternals Suite</li>
+      <li class="stagger">Windows Server Administration References</li>
+      <li class="stagger">Windows Performance Analysis (WPA / WPR)</li>
+    </ul>
+    <div class="highlight-box stagger" style="margin-top:40px; text-align:center; font-size:1.3rem;">
+      🙏 <strong>پایان ارائه</strong>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn" title="قبلی" aria-label="قبلی">→</button>
+  <span class="nav-title" id="navTitle">عنوان</span>
+  <span class="counter" id="counter">1 / 19</span>
+  <button id="nextBtn" title="بعدی" aria-label="بعدی">←</button>
+</div>
+
+<div class="thumbnails" id="thumbnails"></div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const State = {
+  current: 0,
+  total: 0,
+  theme: localStorage.getItem('perfdeck-theme') || 'dark',
+  charts: { cpu: null, ram: null },
+  particles: { list: [], raf: null, paused: false },
+  reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+};
+
+/* ============================================================
+   DOM REFS
+============================================================ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+const dom = {
+  slides: null,
+  counter: $('#counter'),
+  progressBar: $('#progressBar'),
+  prevBtn: $('#prevBtn'),
+  nextBtn: $('#nextBtn'),
+  thumbnails: $('#thumbnails'),
+  navTitle: $('#navTitle'),
+  themeBtn: $('#themeBtn'),
+  hint: $('#hint'),
+  swipeHint: $('#swipeHint'),
+  cursorDot: $('#cursorDot'),
+  cursorRing: $('#cursorRing'),
+  canvas: $('#particleCanvas'),
+};
+
+/* ============================================================
+   THEME
+============================================================ */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  dom.themeBtn.textContent = t === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('perfdeck-theme', t);
+  State.theme = t;
+  if (State.charts.cpu) { State.charts.cpu.destroy(); State.charts.cpu = null; initCpuChart(); }
+  if (State.charts.ram) { State.charts.ram.destroy(); State.charts.ram = null; initRamChart(); }
+}
+function toggleTheme() {
+  applyTheme(State.theme === 'dark' ? 'light' : 'dark');
+}
+dom.themeBtn.addEventListener('click', toggleTheme);
+
+/* ============================================================
+   CUSTOM CURSOR
+============================================================ */
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+let hasMoved = false;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  hasMoved = true;
+  if (dom.cursorDot) {
+    dom.cursorDot.style.left = mouseX + 'px';
+    dom.cursorDot.style.top = mouseY + 'px';
+  }
+}, { passive: true });
+
+function animateRing() {
+  if (dom.cursorRing && hasMoved) {
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+    dom.cursorRing.style.left = ringX + 'px';
+    dom.cursorRing.style.top = ringY + 'px';
+  }
+  requestAnimationFrame(animateRing);
+}
+if (!State.reduceMotion) animateRing();
+
+function bindHoverCursor() {
+  $$('button, .card, .meta-item, .metric, .flow-node, .flow-branch, .badge, table, .thumb, .gauge-wrap, .steps li, .kpi')
+    .forEach(el => {
+      el.addEventListener('mouseenter', () => dom.cursorRing && dom.cursorRing.classList.add('hover'));
+      el.addEventListener('mouseleave', () => dom.cursorRing && dom.cursorRing.classList.remove('hover'));
+    });
+}
+bindHoverCursor();
+
+/* ============================================================
+   CLICK RIPPLE
+============================================================ */
+document.addEventListener('click', (e) => {
+  if (State.reduceMotion) return;
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  const size = 60;
+  ripple.style.left = e.clientX + 'px';
+  ripple.style.top = e.clientY + 'px';
+  ripple.style.width = size + 'px';
+  ripple.style.height = size + 'px';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 800);
+});
+
+/* ============================================================
+   PARTICLES (DPR-aware, paused when hidden)
+============================================================ */
+const P = {
+  ctx: null,
+  dpr: Math.min(window.devicePixelRatio || 1, 2),
+  w: 0, h: 0,
+  mouse: { x: null, y: null, radius: 150 },
+};
+
+function resizeCanvas() {
+  if (!dom.canvas) return;
+  const dpr = P.dpr;
+  dom.canvas.width = window.innerWidth * dpr;
+  dom.canvas.height = window.innerHeight * dpr;
+  dom.canvas.style.width = window.innerWidth + 'px';
+  dom.canvas.style.height = window.innerHeight + 'px';
+  P.w = window.innerWidth;
+  P.h = window.innerHeight;
+  P.ctx = dom.canvas.getContext('2d');
+  P.ctx.scale(dpr, dpr);
+  initParticles();
+}
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * P.w;
+    this.y = Math.random() * P.h;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = (Math.random() - 0.5) * 0.4;
+    this.r = Math.random() * 2 + 1;
+    const colors = ['34,211,238', '168,85,247', '236,72,153', '16,185,129'];
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > P.w) this.vx *= -1;
+    if (this.y < 0 || this.y > P.h) this.vy *= -1;
+    if (P.mouse.x !== null) {
+      const dx = this.x - P.mouse.x;
+      const dy = this.y - P.mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < P.mouse.radius && dist > 0) {
+        const force = (P.mouse.radius - dist) / P.mouse.radius;
+        this.x += (dx / dist) * force * 2.4;
+        this.y += (dy / dist) * force * 2.4;
+      }
+    }
+  }
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.color}, 0.8)`;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = `rgba(${this.color}, 0.6)`;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function initParticles() {
+  State.particles.list = [];
+  if (State.reduceMotion) return;
+  const count = Math.min(90, Math.floor((P.w * P.h) / 18000));
+  for (let i = 0; i < count; i++) State.particles.list.push(new Particle());
+}
+
+function drawConnections(ctx) {
+  const list = State.particles.list;
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const dx = list[i].x - list[j].x;
+      const dy = list[i].y - list[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 130) {
+        const opacity = (1 - dist / 130) * 0.32;
+        ctx.beginPath();
+        ctx.moveTo(list[i].x, list[i].y);
+        ctx.lineTo(list[j].x, list[j].y);
+        ctx.strokeStyle = `rgba(34,211,238,${opacity})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animateParticles() {
+  if (State.particles.paused) return;
+  const ctx = P.ctx;
+  if (!ctx) return;
+  ctx.clearRect(0, 0, P.w, P.h);
+  State.particles.list.forEach(p => { p.update(); p.draw(ctx); });
+  drawConnections(ctx);
+  State.particles.raf = requestAnimationFrame(animateParticles);
+}
+
+if (dom.canvas) {
+  resizeCanvas();
+  if (!State.reduceMotion) animateParticles();
+  window.addEventListener('resize', resizeCanvas);
+  document.addEventListener('mousemove', (e) => {
+    P.mouse.x = e.clientX;
+    P.mouse.y = e.clientY;
+  }, { passive: true });
+  document.addEventListener('mouseleave', () => { P.mouse.x = null; P.mouse.y = null; });
+  document.addEventListener('visibilitychange', () => {
+    State.particles.paused = document.hidden;
+    if (!document.hidden && !State.reduceMotion) animateParticles();
+  });
+}
+
+/* ============================================================
+   SLIDE ENGINE
+============================================================ */
+const slides = $$('.slide');
+State.total = slides.length;
+dom.slides = slides;
+
+// thumbnails
+slides.forEach((s, i) => {
+  const t = document.createElement('button');
+  t.className = 'thumb' + (i === 0 ? ' active' : '');
+  t.title = `اسلاید ${i + 1} — ${s.dataset.title || ''}`;
+  t.setAttribute('aria-label', `اسلاید ${i + 1}`);
+  t.addEventListener('click', () => showSlide(i));
+  dom.thumbnails.appendChild(t);
+});
+const thumbEls = $$('.thumb', dom.thumbnails);
+
+function showSlide(n, dir = 0) {
+  const total = State.total;
+  const next = ((n % total) + total) % total;
+  if (next === State.current && dir === 0) return;
+
+  const prevEl = slides[State.current];
+  const nextEl = slides[next];
+
+  prevEl.classList.remove('active');
+  if (dir > 0) prevEl.classList.add('exit-left');
+  if (dir < 0) prevEl.classList.add('exit-right');
+  setTimeout(() => {
+    prevEl.classList.remove('exit-left', 'exit-right');
+  }, 600);
+
+  State.current = next;
+  nextEl.classList.add('active');
+  nextEl.scrollTop = 0;
+
+  dom.counter.textContent = `${next + 1} / ${total}`;
+  dom.progressBar.style.width = `${((next + 1) / total) * 100}%`;
+  dom.prevBtn.disabled = next === 0;
+  dom.nextBtn.disabled = next === total - 1;
+  dom.navTitle.textContent = nextEl.dataset.title || '';
+  thumbEls.forEach((t, i) => t.classList.toggle('active', i === next));
+
+  // Reset stagger by re-inserting class
+  nextEl.classList.remove('restart');
+  void nextEl.offsetWidth;
+
+  // Counters
+  setTimeout(() => animateCounters(nextEl), 220);
+
+  // Gauges
+  if (nextEl.querySelector('#cpuGaugeFill')) animateGauge('cpuGaugeFill', 'cpuGaugeVal', 82);
+  if (nextEl.querySelector('#ramGaugeFill')) animateGauge('ramGaugeFill', 'ramGaugeVal', 68);
+
+  // Charts
+  if (nextEl.querySelector('#cpuChart')) initCpuChart();
+  if (nextEl.querySelector('#ramChart')) initRamChart();
+
+  // Persist
+  try { localStorage.setItem('perfdeck-slide', String(next)); } catch (e) {}
+}
+
+function changeSlide(dir) { showSlide(State.current + dir, dir); }
+
+/* ============================================================
+   GAUGE ANIMATION
+============================================================ */
+function animateGauge(fillId, valId, percent) {
+  const fill = document.getElementById(fillId);
+  const val = document.getElementById(valId);
+  if (!fill || !val) return;
+  const circ = 2 * Math.PI * 42; // ~263.89
+  const offset = circ - (circ * percent / 100);
+  fill.style.strokeDasharray = circ;
+  fill.style.strokeDashoffset = circ;
+  requestAnimationFrame(() => {
+    fill.style.strokeDashoffset = offset;
+  });
+  let start = performance.now();
+  const dur = 1400;
+  function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    val.textContent = Math.round(eased * percent) + '%';
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ============================================================
+   COUNTERS
+============================================================ */
+function animateCounters(slideEl) {
+  const counters = slideEl.querySelectorAll('.metric-value[data-count]');
+  counters.forEach(el => {
+    const target = parseInt(el.dataset.count, 10);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const duration = 1200;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * target);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = prefix + target + suffix;
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+/* ============================================================
+   CHART.JS
+============================================================ */
+if (window.Chart) {
+  Chart.defaults.color = '#7c88a8';
+  Chart.defaults.font.family = 'Vazirmatn, Tahoma, sans-serif';
+  Chart.defaults.font.size = 11;
+}
+
+function chartColors() {
+  const isDark = State.theme === 'dark';
+  return {
+    grid: isDark ? 'rgba(34,211,238,0.08)' : 'rgba(8,145,178,0.1)',
+    text: isDark ? '#7c88a8' : '#64748b',
+    bg: isDark ? '#060914' : '#ffffff',
+  };
+}
+
+function initCpuChart() {
+  if (State.charts.cpu) { State.charts.cpu.destroy(); State.charts.cpu = null; }
+  const canvas = document.getElementById('cpuChart');
+  if (!canvas || !window.Chart) return;
+  const ctx = canvas.getContext('2d');
+  const colors = chartColors();
+  const grad = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, 'rgba(34,211,238,0.85)');
+  grad.addColorStop(1, 'rgba(168,85,247,0.15)');
+
+  State.charts.cpu = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['00', '03', '06', '09', '12', '15', '18', '21'],
+      datasets: [{
+        label: 'CPU %',
+        data: [15, 12, 25, 45, 78, 65, 82, 40],
+        backgroundColor: (c) => {
+          const v = c.raw;
+          if (v > 75) return 'rgba(236,72,153,0.85)';
+          if (v > 50) return 'rgba(245,158,11,0.85)';
+          return 'rgba(34,211,238,0.85)';
+        },
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutCubic' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: colors.bg,
+          borderColor: 'rgba(34,211,238,0.3)',
+          borderWidth: 1,
+          titleColor: colors.text,
+          bodyColor: '#e8ecff',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: (c) => ` ${c.parsed.y}%` }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          grid: { color: colors.grid },
+          ticks: { color: colors.text, callback: (v) => v + '%' }
+        },
+        x: { grid: { display: false }, ticks: { color: colors.text } }
+      }
+    }
+  });
+}
+
+function initRamChart() {
+  if (State.charts.ram) { State.charts.ram.destroy(); State.charts.ram = null; }
+  const canvas = document.getElementById('ramChart');
+  if (!canvas || !window.Chart) return;
+  const ctx = canvas.getContext('2d');
+  const colors = chartColors();
+
+  State.charts.ram = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['استفاده‌شده', 'آزاد', 'Cache'],
+      datasets: [{
+        data: [65, 20, 15],
+        backgroundColor: [
+          'rgba(236,72,153,0.85)',
+          'rgba(16,185,129,0.85)',
+          'rgba(34,211,238,0.85)'
+        ],
+        borderColor: colors.bg,
+        borderWidth: 3,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      animation: { duration: 1000, easing: 'easeOutCubic' },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 12,
+            font: { size: 11, family: 'Vazirmatn, Tahoma, sans-serif' },
+            color: colors.text,
+            usePointStyle: true,
+            boxWidth: 8
+          }
+        },
+        tooltip: {
+          backgroundColor: colors.bg,
+          borderColor: 'rgba(34,211,238,0.3)',
+          borderWidth: 1,
+          titleColor: colors.text,
+          bodyColor: '#e8ecff',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: (c) => ` ${c.label}: ${c.parsed}%` }
+        }
+      }
+    }
+  });
+}
+
+/* ============================================================
+   KEYBOARD
+============================================================ */
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+  // Konami
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      triggerConfetti();
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
+
+  // Ignore inside input
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea') return;
+
+  if (['ArrowLeft', 'ArrowUp', ' ', 'PageDown'].includes(e.key)) {
+    e.preventDefault();
+    if (!e.repeat) changeSlide(1);
+  } else if (['ArrowRight', 'ArrowDown', 'PageUp'].includes(e.key)) {
+    e.preventDefault();
+    if (!e.repeat) changeSlide(-1);
+  } else if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+  } else if (e.key === 'g' || e.key === 'G') {
+    e.preventDefault();
+    document.body.classList.toggle('grid-overview');
+  } else if (e.key === 't' || e.key === 'T') {
+    e.preventDefault();
+    toggleTheme();
+  } else if (e.key === 'Escape') {
+    if (document.body.classList.contains('grid-overview')) {
+      document.body.classList.remove('grid-overview');
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(0);
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    showSlide(State.total - 1);
+  }
+});
+
+/* ============================================================
+   GRID OVERVIEW — click to jump
+============================================================ */
+slides.forEach((s, i) => {
+  s.addEventListener('click', () => {
+    if (document.body.classList.contains('grid-overview')) {
+      showSlide(i);
+      document.body.classList.remove('grid-overview');
+    }
+  });
+});
+
+/* ============================================================
+   CONFETTI
+============================================================ */
+function triggerConfetti() {
+  const colors = ['#22d3ee', '#a855f7', '#ec4899', '#10b981', '#f59e0b'];
+  for (let i = 0; i < 110; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.top = '-20px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 0.6 + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    c.style.width = c.style.height = (6 + Math.random() * 8) + 'px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+}
+
+/* ============================================================
+   SWIPE (touch)
+============================================================ */
+let touchStartX = 0, touchStartY = 0, touchActive = false;
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchActive = true;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (!touchActive) return;
+  touchActive = false;
+  const t = e.changedTouches[0];
+  if (!t) return;
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+  // RTL: swipe right-to-left (dx<0) → forward
+  if (dx < 0) changeSlide(1);
+  else changeSlide(-1);
+}, { passive: true });
+
+/* ============================================================
+   HINT FADE
+============================================================ */
+setTimeout(() => {
+  dom.hint.classList.add('fade');
+}, 7000);
+
+/* ============================================================
+   BOOT
+============================================================ */
+(function boot() {
+  // Theme
+  applyTheme(State.theme);
+
+  // Restore slide
+  let start = 0;
+  try {
+    const saved = parseInt(localStorage.getItem('perfdeck-slide'), 10);
+    if (!isNaN(saved) && saved >= 0 && saved < State.total) start = saved;
+  } catch (e) {}
+
+  // Initial render
+  slides.forEach((s, i) => s.classList.toggle('active', i === start));
+  State.current = start;
+  dom.counter.textContent = `${start + 1} / State.total`;
+  dom.counter.textContent = `${start + 1} / ${State.total}`;
+  dom.progressBar.style.width = `${((start + 1) / State.total) * 100}%`;
+  dom.prevBtn.disabled = start === 0;
+  dom.nextBtn.disabled = start === State.total - 1;
+  dom.navTitle.textContent = slides[start].dataset.title || '';
+  thumbEls.forEach((t, i) => t.classList.toggle('active', i === start));
+
+  // Counters + gauges for start slide
+  setTimeout(() => {
+    animateCounters(slides[start]);
+    if (slides[start].querySelector('#cpuGaugeFill')) animateGauge('cpuGaugeFill', 'cpuGaugeVal', 82);
+    if (slides[start].querySelector('#ramGaugeFill')) animateGauge('ramGaugeFill', 'ramGaugeVal', 68);
+    if (slides[start].querySelector('#cpuChart')) initCpuChart();
+    if (slides[start].querySelector('#ramChart')) initRamChart();
+  }, 260);
+
+  // Swipe hint on mobile
+  if (window.matchMedia('(hover: none)').matches) {
+    dom.swipeHint.classList.add('show');
+    setTimeout(() => dom.swipeHint.classList.remove('show'), 5000);
+  }
+
+  // Warm hover binding for late-rendered nodes
+  bindHoverCursor();
+})();
+</script>
 
 </body>
 </html>
